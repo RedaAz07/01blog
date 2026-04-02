@@ -20,8 +20,9 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 public class comment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- You need this line!
+    @Column(name = "id", nullable = false)
     private Long id;
     @Column(name = "content", nullable = false)
     private String content;

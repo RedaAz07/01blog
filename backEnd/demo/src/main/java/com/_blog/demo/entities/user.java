@@ -8,6 +8,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -54,5 +57,16 @@ public class user {
 
     @OneToMany(mappedBy = "reported_user_id")
     private List<report> reportsReceived;
+    @ManyToMany
+    @JoinTable(name = "user_follows", joinColumns = @JoinColumn(name = "follower_id"), inverseJoinColumns = @JoinColumn(name = "followed_id"))
+    private List<user> following;
 
+    @ManyToMany(mappedBy = "following")
+    private List<user> followers;
+
+    @OneToMany(mappedBy = "sender_id")
+    private List<notification> sentNotifications;
+
+    @OneToMany(mappedBy = "receiver_id")
+    private List<notification> receivedNotifications;
 }
