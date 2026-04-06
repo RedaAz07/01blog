@@ -42,10 +42,8 @@ public class post {
     private user user_id;
     @OneToMany(mappedBy = "post_id")
     private List<comment> comments;
-
     @OneToMany(mappedBy = "post_id")
     private List<like> likes;
-
     @OneToMany(mappedBy = "reported_post_id")
     private List<report> reportsReceived;
 

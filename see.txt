@@ -1,0 +1,5 @@
+docker compose run --build
+
+ docker exec -it postgresdb psql -U bloguser -d blog_db
+ \dt => to see tables 
+ 
