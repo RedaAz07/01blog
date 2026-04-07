@@ -3,6 +3,7 @@ package com._blog.demo.entities;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,26 +48,27 @@ public class user {
     @OneToMany(mappedBy = "user_id")
     private List<post> posts;
 
-    @OneToMany(mappedBy = "user_id")
+    @OneToMany(mappedBy = "user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
-    @OneToMany(mappedBy = "user_id")
+    @OneToMany(mappedBy = "user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
 
-    @OneToMany(mappedBy = "reporter_id")
+    @OneToMany(mappedBy = "reporter_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsMade;
 
-    @OneToMany(mappedBy = "reported_user_id")
+    @OneToMany(mappedBy = "reported_user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
     @ManyToMany
-    @JoinTable(name = "user_follows", joinColumns = @JoinColumn(name = "follower_id"), inverseJoinColumns = @JoinColumn(name = "followed_id"))
+    @JoinTable(name = "user_follows" , joinColumns = @JoinColumn(name = "follower_id" ), inverseJoinColumns = @JoinColumn(name = "followed_id"))
     private List<user> following;
+
 
     @ManyToMany(mappedBy = "following")
     private List<user> followers;
 
-    @OneToMany(mappedBy = "sender_id")
+    @OneToMany(mappedBy = "sender_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<notification> sentNotifications;
 
-    @OneToMany(mappedBy = "receiver_id")
+    @OneToMany(mappedBy = "receiver_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<notification> receivedNotifications;
 }

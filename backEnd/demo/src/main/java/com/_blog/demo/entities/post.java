@@ -3,6 +3,7 @@ package com._blog.demo.entities;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,11 +41,14 @@ public class post {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private user user_id;
-    @OneToMany(mappedBy = "post_id")
+    @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
-    @OneToMany(mappedBy = "post_id")
+    @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
-    @OneToMany(mappedBy = "reported_post_id")
+    @OneToMany(mappedBy = "reported_post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
+    
+    @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<notification> post_id;
 
 }
