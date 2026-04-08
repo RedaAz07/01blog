@@ -1,6 +1,5 @@
 package com._blog.demo.entities;
 
-import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -40,7 +39,7 @@ public class user {
     @Column(name = "lastName", nullable = false)
     private String lastName;
     @Column(name = "birthDate", nullable = false)
-    private Date birthDate;
+    private String   birthDate;
     @Column(name = "profilePictureUrl")
     private String profilePictureUrl;
     @Column(name = "status", nullable = false)

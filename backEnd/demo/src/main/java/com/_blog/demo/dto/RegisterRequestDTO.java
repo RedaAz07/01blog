@@ -1,9 +1,5 @@
 package com._blog.demo.dto;
 
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,9 +26,7 @@ public class RegisterRequestDTO {
     @Size(min = 8, max = 20, message = "lastName must be at least 8 characters")
     private String lastName;
     @NotBlank
-    @DateTimeFormat
-    private Date birthDate;
-
+    private String birthDate;
     private String profilePictureUrl;
 
 }

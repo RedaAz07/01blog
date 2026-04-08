@@ -12,19 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  app:
-    build: .
-    container_name: 01blog
-    ports:
-      - "8080:8080"
-    environment:
-      # Notice the jdbc:postgresql:// instead of mysql://
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/blog_db
-      - SPRING_DATASOURCE_USERNAME=bloguser
-      - SPRING_DATASOURCE_PASSWORD=blogpassword
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-    depends_on:
-      - postgresdb
+ 
 
 volumes:
   postgres_data:

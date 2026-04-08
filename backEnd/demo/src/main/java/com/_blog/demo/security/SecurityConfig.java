@@ -2,6 +2,7 @@ package com._blog.demo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,8 +36,8 @@ public class SecurityConfig {
             // 3. The VIP List: Who is allowed in?
           .authorizeHttpRequests(auth -> auth
                 // Public routes (Login/Register)
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                
+                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/error").permitAll()
                 // 🛑 THE NEW LINE: Lock down the Admin section!
                 // This means any URL starting with /api/admin/ is totally blocked unless you are an ADMIN.
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
