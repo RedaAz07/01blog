@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // 1. Look at the HTTP Header to see if they brought a wristband
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
+        final  String username;
 
         // 2. If there is no header, or it doesn't start with "Bearer ", reject them!
         // (We let the filter continue so the SecurityConfig can block them or allow them if it's a public route like /login)
@@ -47,32 +47,36 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 3. Extract the wristband string (Remove the "Bearer " part which is 7 characters)
         jwt = authHeader.substring(7);
-        
         // 4. Ask the JwtUtil machine to read the name on the wristband
-        username = jwtUtil.extractUsername(jwt);
+        try {
+
+            username = jwtUtil.extractUsername(jwt);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+    
+                // Go to the database and fetch the actual user details
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+    
+                // 6. Ask the JwtUtil machine if the wristband is valid and not expired
+                if (jwtUtil.isTokenValid(jwt, userDetails)) {
+    
+                    // 7. If valid, formally introduce the user to Spring Security so they are allowed inside!
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    
+                    // Update the security context (The Bouncer opens the door)
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("JWT ERROR: Token is invalid or expired - " + e.getMessage());
+        }
 
         // 5. If we found a name, AND the user isn't already logged in right now...
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            
-            // Go to the database and fetch the actual user details
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            // 6. Ask the JwtUtil machine if the wristband is valid and not expired
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
-                
-                // 7. If valid, formally introduce the user to Spring Security so they are allowed inside!
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                
-                // Update the security context (The Bouncer opens the door)
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        }
-        
         // Move on to the next filter or the Controller
         filterChain.doFilter(request, response);
     }

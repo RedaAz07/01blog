@@ -1,10 +1,13 @@
 package com._blog.demo.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service; // The DTO we talked about!
 
 import com._blog.demo.dto.RegisterRequestDTO;
+import com._blog.demo.dto.userDTO;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
 
@@ -17,6 +20,21 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder; // <-- 1. Inject the encoder
 
+    @Autowired
+    public List<userDTO> findAllUsers() {
+        List<user> users = userRepository.findAll();
+        return users.stream().map(user -> {
+            userDTO dto = new userDTO();
+            dto.setUsername(user.getUsername());
+            dto.setEmail(user.getEmail());
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
+            dto.setBirthDate(user.getBirthDate());
+            dto.setProfilePictureUrl(user.getProfilePictureUrl());
+            return dto;
+        }).toList();
+    }
+
     public String registerNewUser(RegisterRequestDTO request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already taken!");
@@ -25,18 +43,15 @@ public class UserService {
         user newUser = new user();
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
-        // 🛑 ADD THESE THREE LINES!
         newUser.setFirstName(request.getFirstName());
         newUser.setLastName(request.getLastName());
         newUser.setBirthDate(request.getBirthDate());
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
 
-        
-        // 2. Scramble the password before saving!
-        newUser.setPassword(passwordEncoder.encode(request.getPassword())); 
-        
-        newUser.setRole("USER"); 
-        newUser.setStatus(true); 
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        newUser.setRole("USER");
+        newUser.setStatus(true);
 
         userRepository.save(newUser);
         return "User registered successfully!";

@@ -2,7 +2,6 @@ package com._blog.demo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -24,41 +25,33 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-    @Bean
+ @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Disable CSRF (Cross-Site Request Forgery)
             .csrf(csrf -> csrf.disable())
-            
-            // 2. Set Session Management to STATELESS
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             
-            // 3. The VIP List: Who is allowed in?
-          .authorizeHttpRequests(auth -> auth
-                // Public routes (Login/Register)
-                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized (Bad or Missing Token)");
+                })
+            )
+
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/error").permitAll()
-                // 🛑 THE NEW LINE: Lock down the Admin section!
-                // This means any URL starting with /api/admin/ is totally blocked unless you are an ADMIN.
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                
-                // EVERY other request requires a normal logged-in user
                 .anyRequest().authenticated()
             )
-            
-            // 4. Put our custom JWT filter IN FRONT OF the default password filter
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 5. The Password Encoder (Hashes passwords so they aren't plain text in the DB)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // 6. The Authentication Manager (The boss that actually checks if the password is correct)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
