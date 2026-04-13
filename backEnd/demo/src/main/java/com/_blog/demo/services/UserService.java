@@ -18,7 +18,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // <-- 1. Inject the encoder
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public List<userDTO> findAllUsers() {
@@ -39,20 +39,25 @@ public class UserService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already taken!");
         }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already in use!");
+        }
 
         user newUser = new user();
-        newUser.setUsername(request.getUsername());
-        newUser.setEmail(request.getEmail());
-        newUser.setFirstName(request.getFirstName());
-        newUser.setLastName(request.getLastName());
-        newUser.setBirthDate(request.getBirthDate());
+        try {
+            newUser.setUsername(request.getUsername());
+            newUser.setEmail(request.getEmail());
+            newUser.setFirstName(request.getFirstName());
+            newUser.setLastName(request.getLastName());
+            newUser.setBirthDate(request.getBirthDate());
+            newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            newUser.setBirthDate(request.getBirthDate());
+        } catch (Exception e) {
+            throw new RuntimeException("all fields are required!");
+        }
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
-
-        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-
         newUser.setRole("USER");
         newUser.setStatus(true);
-
         userRepository.save(newUser);
         return "User registered successfully!";
     }

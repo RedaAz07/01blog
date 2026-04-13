@@ -1,7 +1,11 @@
 package com._blog.demo.dto;
 
+import java.util.Date;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,13 +24,14 @@ public class RegisterRequestDTO {
     @Size(min = 8, max = 20, message = "Password must be at least 8 characters")
     private String password;
     @NotBlank
-    @Size(min = 8, max = 20, message = "firstName must be at least 8 characters")
+    @Size(min = 4, max = 20, message = "firstName must be at least 4 characters")
     private String firstName;
     @NotBlank
-    @Size(min = 8, max = 20, message = "lastName must be at least 8 characters")
+    @Size(min = 4, max = 20, message = "lastName must be at least 4 characters")
     private String lastName;
-    @NotBlank
-    private String birthDate;
+    @NotNull(message = "Date is required")
+    @Past(message = "Birth date must be in the past")
+    private Date birthDate;
     private String profilePictureUrl;
 
 }

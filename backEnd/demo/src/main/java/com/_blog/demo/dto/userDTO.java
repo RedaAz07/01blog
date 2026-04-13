@@ -1,5 +1,7 @@
 package com._blog.demo.dto;
 
+import java.util.Date;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +12,6 @@ public class userDTO {
     String email;
     String firstName;
     String lastName;
-    String birthDate;
+    Date birthDate;
     String profilePictureUrl;
 }

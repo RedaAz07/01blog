@@ -16,6 +16,8 @@ import com._blog.demo.security.CustomUserDetailsService;
 import com._blog.demo.security.JwtUtil;
 import com._blog.demo.services.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -34,7 +36,7 @@ public class AuthController {
 
     // 1. REGISTER ENDPOINT
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO request) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
         String response = userService.registerNewUser(request);
         return ResponseEntity.ok(response);
     }
