@@ -27,7 +27,7 @@ public class FileTypeValidator implements ConstraintValidator<ValidFileType, Mul
         
         // Grab the actual MIME type of the uploaded file
         String contentType = file.getContentType();
-        
+        System.out.println("DEBUG - Postman sent MIME type: [" + contentType + "]");
         // Check if it matches our allowed list
         return Arrays.asList(allowedTypes).contains(contentType);
     }

@@ -12,6 +12,7 @@ public class ResponePost {
     private String title;
     private String content;
     private String mediaUrl;
+    private String description;
     private String authorUsername;
 
     // Getters and Setters
