@@ -1,12 +1,16 @@
 package com._blog.demo.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.post.PostRequestDTO;
+import com._blog.demo.dto.post.ResponePost;
 import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.postRepository;
-
+@Service
 public class PostService {
 
     @Autowired
@@ -32,5 +36,17 @@ public class PostService {
         newPost.setUser_id(author);
         postRepository.save(newPost);
         return "Post created successfully!";
+    }
+
+    public List<ResponePost> findAllPosts() {
+        List<post> posts = postRepository.findAll();
+        return posts.stream().map(post -> {
+            ResponePost response = new ResponePost();
+            response.setTitle(post.getTitle());
+            response.setContent(post.getContent());
+            response.setMediaUrl(post.getMedia());
+            response.setAuthorUsername(post.getUser_id().getUsername());
+            return response;
+        }).toList();
     }
 }

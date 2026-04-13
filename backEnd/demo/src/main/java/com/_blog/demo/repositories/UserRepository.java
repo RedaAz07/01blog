@@ -15,10 +15,13 @@ public interface UserRepository extends JpaRepository<user, Long> {
     // If you need custom searches, you just name the method correctly:
     Optional<user> findByUsername(String username);
 
+  
+
     Optional<user> findByEmail(String email);
 
     List<user> findAll();
 
     boolean existsByUsername(String username);
+
     boolean existsByEmail(String email);
 }
