@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,7 @@ class PostController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createPost(@Valid @ModelAttribute PostRequestDTO request, Principal principal) {
-        String username = principal.getName(); 
+        String username = principal.getName();
         String result = PostService.createPost(request, username);
 
         return ResponseEntity.ok(result);
@@ -56,4 +57,11 @@ class PostController {
         String result = PostService.deletePost(request, username);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDTO> getMethodName(@PathVariable Long id) {
+        PostResponseDTO post = PostService.findPostById(id);
+            return ResponseEntity.ok(post);
+    }
+
 }

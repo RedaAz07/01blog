@@ -87,7 +87,6 @@ public class PostService {
         updatedPost.setMediaUrl(existingPost.getMedia());
         updatedPost.setTimestamp(existingPost.getTimestamp().toString());
         updatedPost.setAuthorUsername(existingPost.getUser_id().getUsername());
-
         return updatedPost;
     }
 
@@ -101,5 +100,20 @@ public class PostService {
 
         postRepository.delete(existingPost);
         return "Post deleted successfully!";
+    }
+
+    public PostResponseDTO findPostById(Long id) {
+        post existingPost = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        PostResponseDTO response = new PostResponseDTO();
+        response.setId(existingPost.getId());
+        response.setTitle(existingPost.getTitle());
+        response.setContent(existingPost.getContent());
+        response.setDescription(existingPost.getDescription());
+        response.setMediaUrl(existingPost.getMedia());
+        response.setTimestamp(existingPost.getTimestamp().toString());
+        response.setAuthorUsername(existingPost.getUser_id().getUsername());
+        return response;
     }
 }
