@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 public class CommentController {
 
     @Autowired
-    private CommentService CommentService;
+    private CommentService CommentService;  
 
     @PostMapping("/create")
     public ResponseEntity<CommentResponseDTO> postMethodName(@Valid @RequestBody CommentRequestDTO request, Principal principal) {

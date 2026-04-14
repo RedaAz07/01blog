@@ -3,10 +3,9 @@ package com._blog.demo.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com._blog.demo.entities.post;
+import com._blog.demo.entities.like;
 
 @Repository
-public interface postRepository extends JpaRepository<post, Long> {
-
+public interface likeRepository extends JpaRepository<like, Long> {
 
 }

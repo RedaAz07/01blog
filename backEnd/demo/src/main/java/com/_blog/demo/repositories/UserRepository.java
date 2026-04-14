@@ -1,6 +1,5 @@
 package com._blog.demo.repositories;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,7 +18,6 @@ public interface UserRepository extends JpaRepository<user, Long> {
 
     Optional<user> findByEmail(String email);
 
-    List<user> findAll();
 
     boolean existsByUsername(String username);
 

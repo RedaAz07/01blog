@@ -4,7 +4,6 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com._blog.demo.dto.comment.CommentRequestDTO;
 import com._blog.demo.dto.comment.CommentResponseDTO;
@@ -12,16 +11,20 @@ import com._blog.demo.entities.comment;
 import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
+import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.postRepository;
+
 @Service
 public class CommentService {
 
     @Autowired
-    private static UserRepository UserRepository;
+    private UserRepository UserRepository;
     @Autowired
-    private static postRepository postRepository;
+    private postRepository postRepository;
+    @Autowired
+    private commentRepository commentRepository;
 
-    public CommentResponseDTO createComment(@RequestBody CommentRequestDTO request, String username) {
+    public CommentResponseDTO createComment(CommentRequestDTO request, String username) {
         user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         post post = postRepository.findById(request.getPostId()).orElseThrow(() -> new RuntimeException("Post not found"));
         comment newComment = new comment();
@@ -29,11 +32,13 @@ public class CommentService {
         newComment.setUser_id(auth);
         newComment.setPost_id(post);
         newComment.setTimestamp(new Date());
-
+        comment savedComment = commentRepository.save(newComment);
         CommentResponseDTO response = new CommentResponseDTO();
-        response.setId(request.getPostId());
-        response.setContent(request.getContent());
-        response.setAuthorUsername(username);
+        response.setId(savedComment.getId());
+        response.setTimestamp(savedComment.getTimestamp());
+        response.setContent(savedComment.getContent());
+        response.setAuthorUsername(savedComment.getUser_id().getUsername());
         return response;
     }
+    
 }
