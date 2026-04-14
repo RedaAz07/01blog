@@ -24,9 +24,9 @@ public class like {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private user user_id;
+    private user user;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private post post_id;
+    private post post;
 }

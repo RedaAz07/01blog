@@ -50,7 +50,7 @@ public class user {
 
     @OneToMany(mappedBy = "user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
-    @OneToMany(mappedBy = "user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
 
     @OneToMany(mappedBy = "reporter_id" , cascade = CascadeType.ALL, orphanRemoval = true)
