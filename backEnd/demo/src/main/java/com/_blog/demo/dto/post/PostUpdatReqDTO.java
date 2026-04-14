@@ -6,11 +6,16 @@ import com._blog.demo.validators.ValidFileType;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class PostRequestDTO {
+
+public class PostUpdatReqDTO {
+
+    @NonNull
+    private Long id;
     @Size(min = 5, max = 100, message = "Title must be between 5 and 100 characters")
     private String title;
     private String content;
@@ -19,4 +24,5 @@ public class PostRequestDTO {
     @ValidFileType(allowedTypes = {"image/jpeg", "image/png", "video/mp4", "video/webm"},
             message = "Bro, you can only upload JPG, PNG, MP4, or WEBM files!")
     private MultipartFile mediaFile;
+
 }

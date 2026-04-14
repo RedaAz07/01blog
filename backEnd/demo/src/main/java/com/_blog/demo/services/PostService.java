@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com._blog.demo.dto.post.PostDeleteReqDTO;
 import com._blog.demo.dto.post.PostRequestDTO;
-import com._blog.demo.dto.post.ResponePost;
+import com._blog.demo.dto.post.PostResponseDTO;
+import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
@@ -43,17 +45,61 @@ public class PostService {
         return "Post created successfully!";
     }
 
-    public List<ResponePost> findAllPosts() {
+    public List<PostResponseDTO> findAllPosts() {
         List<post> posts = postRepository.findAll();
         return posts.stream().map(post -> {
-            ResponePost response = new ResponePost();
+            PostResponseDTO response = new PostResponseDTO();
             response.setId(post.getId());
             response.setTitle(post.getTitle());
             response.setContent(post.getContent());
             response.setDescription(post.getDescription());
             response.setMediaUrl(post.getMedia());
+            response.setTimestamp(post.getTimestamp().toString());
             response.setAuthorUsername(post.getUser_id().getUsername());
             return response;
         }).toList();
+    }
+
+    public PostResponseDTO updatePost(PostUpdatReqDTO request, String author) {
+        user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        post existingPost = postRepository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        if (!existingPost.getUser_id().getId().equals(auth.getId())) {
+            throw new RuntimeException("You are not authorized to update this post");
+        }
+
+        existingPost.setTitle(request.getTitle());
+        existingPost.setContent(request.getContent());
+        existingPost.setDescription(request.getDescription());
+
+        if (request.getMediaFile() != null && !request.getMediaFile().isEmpty()) {
+            FileStorageService fileStorageService = new FileStorageService();
+            String savedFileUrl = fileStorageService.saveFile(request.getMediaFile());
+            existingPost.setMedia(savedFileUrl);
+        }
+
+        postRepository.save(existingPost);
+        PostResponseDTO updatedPost = new PostResponseDTO();
+        updatedPost.setId(existingPost.getId());
+        updatedPost.setTitle(existingPost.getTitle());
+        updatedPost.setContent(existingPost.getContent());
+        updatedPost.setDescription(existingPost.getDescription());
+        updatedPost.setMediaUrl(existingPost.getMedia());
+        updatedPost.setTimestamp(existingPost.getTimestamp().toString());
+        updatedPost.setAuthorUsername(existingPost.getUser_id().getUsername());
+
+        return updatedPost;
+    }
+
+    public String deletePost(PostDeleteReqDTO request, String author) {
+        user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        post existingPost = postRepository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        if (!existingPost.getUser_id().getId().equals(auth.getId())) {
+            throw new RuntimeException("You are not authorized to delete this post");
+        }
+
+        postRepository.delete(existingPost);
+        return "Post deleted successfully!";
     }
 }

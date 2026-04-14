@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 
-public class ResponePost {
+public class PostResponseDTO {
 
     private Long id;
     private String title;
@@ -14,6 +14,6 @@ public class ResponePost {
     private String mediaUrl;
     private String description;
     private String authorUsername;
+    private String timestamp;
 
-    // Getters and Setters
 }
