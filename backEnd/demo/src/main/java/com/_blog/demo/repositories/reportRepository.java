@@ -9,6 +9,7 @@ import com._blog.demo.entities.user;
 @Repository
 public interface  reportRepository extends  JpaRepository<report, Long> {
 
-boolean existsByReporterAndReported(user reporter, user reported);
+//boolean existsByReporterAndReported(user reporter, user reported);
+boolean existsByReporterAndReportedAndReportedPostIsNull(user reporter, user reported);
 boolean existsByReporterAndReportedAndReportedPost(user reporter, user reported, post reportedPostId);
 }
