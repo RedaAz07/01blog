@@ -36,15 +36,15 @@ public class notification {
     // The person who made the post
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
-    private user sender_id;
+    private user sender;
 
     // The specific follower receiving this copy of the notification
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
-    private user receiver_id;
+    private user receiver;
 
     // THE MISSING PIECE: Which post is this notification about?
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private post post_id;
+    private post post;
 }

@@ -48,7 +48,7 @@ public class post {
     @OneToMany(mappedBy = "reportedPost" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
     
-    @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<notification> post_id;
+    @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<notification> notifications;
 
 }

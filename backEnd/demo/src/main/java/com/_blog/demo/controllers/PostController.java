@@ -31,7 +31,7 @@ class PostController {
     public ResponseEntity<String> createPost(@Valid @ModelAttribute PostRequestDTO request, Principal principal) {
         String username = principal.getName();
         String result = PostService.createPost(request, username);
-
+     
         return ResponseEntity.ok(result);
     }
 
@@ -61,7 +61,7 @@ class PostController {
     @GetMapping("/{id}")
     public ResponseEntity<PostResponseDTO> getMethodName(@PathVariable Long id) {
         PostResponseDTO post = PostService.findPostById(id);
-            return ResponseEntity.ok(post);
+        return ResponseEntity.ok(post);
     }
 
 }

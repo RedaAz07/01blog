@@ -66,9 +66,9 @@ public class user {
     @ManyToMany(mappedBy = "following")
     private List<user> followers;
 
-    @OneToMany(mappedBy = "sender_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sender" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<notification> sentNotifications;
 
-    @OneToMany(mappedBy = "receiver_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "receiver" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<notification> receivedNotifications;
 }
