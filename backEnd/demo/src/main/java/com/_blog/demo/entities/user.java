@@ -53,10 +53,10 @@ public class user {
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
 
-    @OneToMany(mappedBy = "reporter_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reporter" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsMade;
 
-    @OneToMany(mappedBy = "reported_user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reported" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
     @ManyToMany
     @JoinTable(name = "user_follows" , joinColumns = @JoinColumn(name = "follower_id" ), inverseJoinColumns = @JoinColumn(name = "followed_id"))

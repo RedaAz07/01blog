@@ -33,10 +33,10 @@ public class report {
     @JoinColumn(name = "reporter_id", nullable = false)
     private user reporter;
     @ManyToOne
-    @JoinColumn(name = "reported_user_id", nullable = true)
+    @JoinColumn(name = "reported_user_id", nullable = false)
     private user reported;
     @ManyToOne
     @JoinColumn(name = "reported_post_id", nullable = true)
-    private post reported_post;
+    private post reportedPost;
 
 }

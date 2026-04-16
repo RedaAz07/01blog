@@ -45,7 +45,7 @@ public class post {
     private List<comment> comments;
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
-    @OneToMany(mappedBy = "reported_post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reportedPost" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
     
     @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)

@@ -2,6 +2,7 @@ package com._blog.demo.controllers;
 
 import java.security.Principal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,14 +15,16 @@ import com._blog.demo.services.ReportService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/api/reports")
 public class ReportController {
 
-    @PostMapping("/")
-    public  ResponseEntity<String> postMethodName(@Valid @RequestBody ReportRequestDTO entity, Principal principal) {
-        String username = principal.getName();
-        
+    @Autowired
+    private ReportService ReportService;
 
+    @PostMapping("/")
+
+    public ResponseEntity<String> postMethodName(@Valid @RequestBody ReportRequestDTO entity, Principal principal) {
+        String username = principal.getName();
         String response = ReportService.createReport(entity, username);
 
         return ResponseEntity.ok(response);
