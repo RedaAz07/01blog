@@ -31,12 +31,12 @@ public class report {
     private Date timestamp;
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
-    private user reporter_id;
+    private user reporter;
     @ManyToOne
     @JoinColumn(name = "reported_user_id", nullable = true)
-    private user reported_user_id;
+    private user reported;
     @ManyToOne
     @JoinColumn(name = "reported_post_id", nullable = true)
-    private post reported_post_id;
+    private post reported_post;
 
 }

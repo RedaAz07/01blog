@@ -14,6 +14,7 @@ import com._blog.demo.services.LikeService;
 
 import jakarta.validation.Valid;
 
+
 @RestController
 @RequestMapping("/api/like") // The base URL for all like stuff
 public class LikeController {
@@ -28,5 +29,7 @@ public class LikeController {
         String res = LikeService.likeReq(likeRequest, username);
         return ResponseEntity.ok(res);
     }
+  
+    
 
 }
