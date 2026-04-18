@@ -111,7 +111,7 @@ public class PostService {
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
         post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        if (!existingPost.getUser_id().getId().equals(auth.getId())) {
+        if (!existingPost.getUser_id().getId().equals(auth.getId()) && !existingPost.getUser_id().getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
 

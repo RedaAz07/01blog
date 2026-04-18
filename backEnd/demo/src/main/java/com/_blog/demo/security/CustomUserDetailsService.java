@@ -25,12 +25,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 🛑 THE NEW LOGIC: Take the role from your database, and add "ROLE_" to the front of it.
         // If myUser.getRole() is "ADMIN", this creates "ROLE_ADMIN".
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + myUser.getRole().toUpperCase());
 
         return new org.springframework.security.core.userdetails.User(
                 myUser.getUsername(),
                 myUser.getPassword(),
-                Collections.singletonList(authority) // Hand the role to Spring Security!
+                Collections.singletonList(new SimpleGrantedAuthority(myUser.getRole())) // Hand the role to Spring Security!
         );
     }
 }
