@@ -61,4 +61,17 @@ public class UserService {
         userRepository.save(newUser);
         return "User registered successfully!";
     }
+
+    public userDTO getCurrentUser(String username) {
+        user user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        userDTO dto = new userDTO();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setBirthDate(user.getBirthDate());
+        dto.setProfilePictureUrl(user.getProfilePictureUrl());
+        return dto;
+    }
 }

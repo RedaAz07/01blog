@@ -1,6 +1,6 @@
 package com._blog.demo.dto.notification;
 
-import com._blog.demo.entities.post;
+import com._blog.demo.dto.post.PostResponseDTO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ public class NotificationResponseDTO {
 
     boolean isRead;
     String senderUsername;
-    post post;
+    PostResponseDTO post;
     String timestamp;
 
 }

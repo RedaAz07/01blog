@@ -18,6 +18,7 @@ import com._blog.demo.dto.post.PostDeleteReqDTO;
 import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
+import com._blog.demo.services.NotificationService;
 import com._blog.demo.services.PostService;
 
 import jakarta.validation.Valid;
@@ -27,11 +28,15 @@ import jakarta.validation.Valid;
 
 class PostController {
 
+    @Autowired
+    private NotificationService NotificationService;
+
     @PostMapping("/create")
-    public ResponseEntity<String> createPost(@Valid @ModelAttribute PostRequestDTO request, Principal principal) {
+    public ResponseEntity<PostResponseDTO> createPost(@Valid @ModelAttribute PostRequestDTO request, Principal principal) {
         String username = principal.getName();
-        String result = PostService.createPost(request, username);
-     
+        PostResponseDTO result = PostService.createPost(request, username);
+
+        NotificationService.createNotification(username, result);
         return ResponseEntity.ok(result);
     }
 

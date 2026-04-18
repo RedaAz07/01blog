@@ -24,7 +24,7 @@ public class PostService {
     @Autowired
     private UserRepository UserRepository;
 
-    public String createPost(PostRequestDTO request, String author) {
+    public PostResponseDTO createPost(PostRequestDTO request, String author) {
 
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -41,8 +41,17 @@ public class PostService {
             newPost.setMedia(savedFileUrl);
         }
 
-        postRepository.save(newPost);
-        return "Post created successfully!";
+        post savedPost = postRepository.save(newPost);
+
+        PostResponseDTO response = new PostResponseDTO();
+        response.setId(savedPost.getId());
+        response.setTitle(savedPost.getTitle());
+        response.setContent(savedPost.getContent());
+        response.setDescription(savedPost.getDescription());
+        response.setMediaUrl(savedPost.getMedia());
+        response.setTimestamp(savedPost.getTimestamp().toString());
+        response.setAuthorUsername(savedPost.getUser_id().getUsername());
+        return response;
     }
 
     public List<PostResponseDTO> findAllPosts() {
