@@ -32,14 +32,15 @@ public class FollowController {
     }
 
     @GetMapping("/following/{username}")
-    public ResponseEntity<List<FollowResponseDTO>> getFollowing(@PathVariable String username) {
-
-        List<FollowResponseDTO> following = followService.getFollowing(username);
+    public ResponseEntity<List<FollowResponseDTO>> getFollowing(@PathVariable String username, Principal principal) {
+String myUsername = principal.getName();
+        List<FollowResponseDTO> following = followService.getFollowing(username , myUsername);
         return ResponseEntity.ok(following);
     }
       @GetMapping("/followers/{username}")
-    public ResponseEntity<List<FollowResponseDTO>> getFollowers(@PathVariable String username) {
-        List<FollowResponseDTO> followers = followService.getFollowers(username);
+    public ResponseEntity<List<FollowResponseDTO>> getFollowers(@PathVariable String username, Principal principal) {
+        String myUsername = principal.getName();
+        List<FollowResponseDTO> followers = followService.getFollowers(username , myUsername);
         return ResponseEntity.ok(followers);
     }
     

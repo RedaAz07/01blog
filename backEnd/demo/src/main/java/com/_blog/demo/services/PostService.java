@@ -1,9 +1,12 @@
 package com._blog.demo.services;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.post.PostDeleteReqDTO;
@@ -14,7 +17,6 @@ import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.postRepository;
-
 @Service
 public class PostService {
 
@@ -54,19 +56,25 @@ public class PostService {
         return response;
     }
 
-    public List<PostResponseDTO> findAllPosts() {
-        List<post> posts = postRepository.findAll();
-        return posts.stream().map(post -> {
-            PostResponseDTO response = new PostResponseDTO();
-            response.setId(post.getId());
-            response.setTitle(post.getTitle());
-            response.setContent(post.getContent());
-            response.setDescription(post.getDescription());
-            response.setMediaUrl(post.getMedia());
-            response.setTimestamp(post.getTimestamp().toString());
-            response.setAuthorUsername(post.getUser_id().getUsername());
-            return response;
-        }).toList();
+  public Page<PostResponseDTO> getAllPosts(int page, int size) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<post> postPage = postRepository.findAll(pageable);
+
+        return postPage.map(p -> {
+            PostResponseDTO dto = new PostResponseDTO();
+            dto.setId(p.getId());
+            dto.setTitle(p.getTitle());
+            dto.setContent(p.getContent());
+            dto.setDescription(p.getDescription());
+            dto.setMediaUrl(p.getMedia());
+            
+            if (p.getUser_id() != null) {
+                dto.setAuthorUsername(p.getUser_id().getUsername()); 
+            }
+            return dto;
+        });
     }
 
     public PostResponseDTO updatePost(PostUpdatReqDTO request, String author) {

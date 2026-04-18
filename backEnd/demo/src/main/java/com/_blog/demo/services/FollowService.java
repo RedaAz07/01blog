@@ -34,17 +34,18 @@ public class FollowService {
             userRepository.save(me);
             return "You unfollowed " + targetUsername;
         } else {
-            // FOLLOW: Add them to the list
             me.getFollowing().add(targetUser);
             userRepository.save(me);
             return "You are now following " + targetUsername;
         }
     }
 
-    public List<FollowResponseDTO> getFollowing(String username) {
+    public List<FollowResponseDTO> getFollowing(String username, String myUsername) {
         user user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+        if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
+            throw new RuntimeException("You can only see the following list of users you follow");
+        }
 
         List<user> following = user.getFollowing();
         return following.stream()
@@ -57,9 +58,12 @@ public class FollowService {
                 .toList();
     }
 
-    public List<FollowResponseDTO> getFollowers(String username) {
+    public List<FollowResponseDTO> getFollowers(String username, String myUsername) {
         user user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
+            throw new RuntimeException("You can only see the followers list of users you follow");
+        }
         List<user> followers = user.getFollowers();
         return followers.stream()
                 .map(follower -> {
