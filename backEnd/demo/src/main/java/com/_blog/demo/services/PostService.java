@@ -17,6 +17,7 @@ import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.postRepository;
+
 @Service
 public class PostService {
 
@@ -56,8 +57,8 @@ public class PostService {
         return response;
     }
 
-  public Page<PostResponseDTO> getAllPosts(int page, int size) {
-        
+    public Page<PostResponseDTO> getAllPosts(int page, int size) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         Page<post> postPage = postRepository.findAll(pageable);
@@ -69,9 +70,9 @@ public class PostService {
             dto.setContent(p.getContent());
             dto.setDescription(p.getDescription());
             dto.setMediaUrl(p.getMedia());
-            
+
             if (p.getUser_id() != null) {
-                dto.setAuthorUsername(p.getUser_id().getUsername()); 
+                dto.setAuthorUsername(p.getUser_id().getUsername());
             }
             return dto;
         });
@@ -111,7 +112,8 @@ public class PostService {
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
         post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        if (!existingPost.getUser_id().getId().equals(auth.getId()) && !existingPost.getUser_id().getRole().equals("ROLE_ADMIN")) {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><"+auth.getRole());
+        if (!existingPost.getUser_id().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
 

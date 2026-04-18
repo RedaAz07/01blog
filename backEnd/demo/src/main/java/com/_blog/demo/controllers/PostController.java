@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,7 +61,7 @@ class PostController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deletePost(@Valid @ModelAttribute PostDeleteReqDTO request, Principal principal) {
+    public ResponseEntity<String> deletePost(@Valid @RequestBody PostDeleteReqDTO request, Principal principal) {
         String username = principal.getName();
         String result = PostService.deletePost(request, username);
         return ResponseEntity.ok(result);
