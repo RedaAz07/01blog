@@ -23,7 +23,6 @@ public class AdminService {
     @Autowired
     private commentRepository commentRepository;
 
-
     @Autowired
     private reportRepository reportRepository;
     @Autowired
@@ -104,7 +103,7 @@ public class AdminService {
         user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Post not found"));
 
         if (user.getRole().equals("ROLE_ADMIN")) {
-            return "Bro are u crazy ";
+            throw new RuntimeException("Bro are u crazy ");
         }
         if (user.isStatus()) {
 
@@ -123,7 +122,7 @@ public class AdminService {
 
         user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         if (user.getRole().equals("ROLE_ADMIN")) {
-            return "Bro are u crazy ";
+            throw new RuntimeException("Bro are u crazy ");
         }
         userRepository.delete(user);
         return "User Deleted seccefully";
