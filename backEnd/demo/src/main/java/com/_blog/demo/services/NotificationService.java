@@ -27,18 +27,22 @@ public class NotificationService {
         user userId = UserRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
         List<NotificationResponseDTO> notifications = userId.getReceivedNotifications().stream().filter(notification -> !notification.isRead()).map(notification -> {
-            PostResponseDTO post = new PostResponseDTO();
-            post.setId(notification.getPost().getId());
-            post.setTitle(notification.getPost().getTitle());
-            post.setContent(notification.getPost().getContent());
-            post.setDescription(notification.getPost().getDescription());
-            post.setMediaUrl(notification.getPost().getMedia());
-            post.setTimestamp(notification.getPost().getTimestamp().toString());
-            post.setAuthorUsername(notification.getPost().getUser_id().getUsername());
+            PostResponseDTO postDto = new PostResponseDTO(
+                    notification.getPost().getId(),
+                    notification.getPost().getTitle(),
+                    notification.getPost().getContent(),
+                    notification.getPost().getMedia(),
+                    notification.getPost().getDescription(),
+                    notification.getPost().getUser_id() != null ? notification.getPost().getUser_id().getUsername() : "Unknown",
+                    notification.getPost().getTimestamp() != null ? notification.getPost().getTimestamp().toString() : null,
+                    postRepository.likedByUserAndPost(userId, notification.getPost()),
+                    postRepository.countCommentsByPost(notification.getPost()),
+                    postRepository.countLikesByPost(notification.getPost())
+            );
             NotificationResponseDTO dto = new NotificationResponseDTO();
             dto.setRead(notification.isRead());
             dto.setSenderUsername(notification.getSender().getUsername());
-            dto.setPost(post);
+            dto.setPost(postDto);
             dto.setTimestamp(notification.getTimestamp().toString());
             return dto;
         }).toList();
@@ -50,7 +54,7 @@ public class NotificationService {
     private postRepository postRepository;
 
     public void createNotification(String senderUsername, PostResponseDTO post) {
-        post currPost = postRepository.findById(post.getId()).orElseThrow(() -> new RuntimeException("Post not found with id: " + post.getId()));
+        post currPost = postRepository.findById(post.id()).orElseThrow(() -> new RuntimeException("Post not found with id: " + post.id()));
 
         user sender = UserRepository.findByUsername(senderUsername)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + senderUsername));

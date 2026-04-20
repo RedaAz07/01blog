@@ -32,49 +32,56 @@ public class PostService {
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
 
         post newPost = new post();
-        newPost.setTitle(request.getTitle());
-        newPost.setContent(request.getContent());
-        newPost.setDescription(request.getDescription());
+        newPost.setTitle(request.title());
+        newPost.setContent(request.content());
+        newPost.setDescription(request.description());
         newPost.setStatus(true);
         newPost.setUser_id(auth);
         newPost.setTimestamp(new Date());
-        if (request.getMediaFile() != null && !request.getMediaFile().isEmpty()) {
+        if (request.mediaFile() != null && !request.mediaFile().isEmpty()) {
             FileStorageService fileStorageService = new FileStorageService();
-            String savedFileUrl = fileStorageService.saveFile(request.getMediaFile());
+            String savedFileUrl = fileStorageService.saveFile(request.mediaFile());
             newPost.setMedia(savedFileUrl);
         }
 
         post savedPost = postRepository.save(newPost);
 
-        PostResponseDTO response = new PostResponseDTO();
-        response.setId(savedPost.getId());
-        response.setTitle(savedPost.getTitle());
-        response.setContent(savedPost.getContent());
-        response.setDescription(savedPost.getDescription());
-        response.setMediaUrl(savedPost.getMedia());
-        response.setTimestamp(savedPost.getTimestamp().toString());
-        response.setAuthorUsername(savedPost.getUser_id().getUsername());
-        return response;
+        PostResponseDTO postDto = new PostResponseDTO(
+                savedPost.getId(),
+                savedPost.getTitle(),
+                savedPost.getContent(),
+                savedPost.getMedia(),
+                savedPost.getDescription(),
+                savedPost.getUser_id() != null ? savedPost.getUser_id().getUsername() : "Unknown",
+                savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
+                postRepository.likedByUserAndPost(auth, savedPost),
+                postRepository.countCommentsByPost(savedPost),
+                postRepository.countLikesByPost(savedPost)
+        );
+        return postDto;
     }
 
-    public Page<PostResponseDTO> getAllPosts(int page, int size) {
+    public Page<PostResponseDTO> getAllPosts(int page, int size, String username) {
+        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         Page<post> postPage = postRepository.findAll(pageable);
 
         return postPage.map(p -> {
-            PostResponseDTO dto = new PostResponseDTO();
-            dto.setId(p.getId());
-            dto.setTitle(p.getTitle());
-            dto.setContent(p.getContent());
-            dto.setDescription(p.getDescription());
-            dto.setMediaUrl(p.getMedia());
-
-            if (p.getUser_id() != null) {
-                dto.setAuthorUsername(p.getUser_id().getUsername());
-            }
-            return dto;
+            PostResponseDTO postDto = new PostResponseDTO(
+                    p.getId(),
+                    p.getTitle(),
+                    p.getContent(),
+                    p.getMedia(),
+                    p.getDescription(),
+                    p.getUser_id() != null ? p.getUser_id().getUsername() : "Unknown",
+                    p.getTimestamp() != null ? p.getTimestamp().toString() : null,
+                    postRepository.likedByUserAndPost(auth, p),
+                    postRepository.countCommentsByPost(p),
+                    postRepository.countLikesByPost(p)
+            );
+            return postDto;
         });
     }
 
@@ -97,14 +104,18 @@ public class PostService {
         }
 
         postRepository.save(existingPost);
-        PostResponseDTO updatedPost = new PostResponseDTO();
-        updatedPost.setId(existingPost.getId());
-        updatedPost.setTitle(existingPost.getTitle());
-        updatedPost.setContent(existingPost.getContent());
-        updatedPost.setDescription(existingPost.getDescription());
-        updatedPost.setMediaUrl(existingPost.getMedia());
-        updatedPost.setTimestamp(existingPost.getTimestamp().toString());
-        updatedPost.setAuthorUsername(existingPost.getUser_id().getUsername());
+        PostResponseDTO updatedPost = new PostResponseDTO(
+                existingPost.getId(),
+                existingPost.getTitle(),
+                existingPost.getContent(),
+                existingPost.getMedia(),
+                existingPost.getDescription(),
+                existingPost.getUser_id() != null ? existingPost.getUser_id().getUsername() : "Unknown",
+                existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
+                postRepository.likedByUserAndPost(auth, existingPost),
+                postRepository.countCommentsByPost(existingPost),
+                postRepository.countLikesByPost(existingPost)
+        );
         return updatedPost;
     }
 
@@ -112,7 +123,7 @@ public class PostService {
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
         post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><"+auth.getRole());
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><" + auth.getRole());
         if (!existingPost.getUser_id().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
@@ -121,18 +132,24 @@ public class PostService {
         return "Post deleted successfully!";
     }
 
-    public PostResponseDTO findPostById(Long id) {
+    public PostResponseDTO findPostById(Long id, String username) {
+        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));  
         post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        PostResponseDTO response = new PostResponseDTO();
-        response.setId(existingPost.getId());
-        response.setTitle(existingPost.getTitle());
-        response.setContent(existingPost.getContent());
-        response.setDescription(existingPost.getDescription());
-        response.setMediaUrl(existingPost.getMedia());
-        response.setTimestamp(existingPost.getTimestamp().toString());
-        response.setAuthorUsername(existingPost.getUser_id().getUsername());
+        PostResponseDTO response = new PostResponseDTO(
+                existingPost.getId(),
+                existingPost.getTitle(),
+                existingPost.getContent(),
+                existingPost.getMedia(),
+                existingPost.getDescription(),
+                existingPost.getUser_id() != null ? existingPost.getUser_id().getUsername()
+                : "Unknown",
+                existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
+                postRepository.likedByUserAndPost(auth, existingPost),
+                postRepository.countCommentsByPost(existingPost),
+                postRepository.countLikesByPost(existingPost)
+        );
         return response;
     }
 }

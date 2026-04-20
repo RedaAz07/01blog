@@ -25,21 +25,23 @@ public class AdminService {
     @Autowired
     private postRepository postRepository;
 
-    public List<ReportResponseDTO> getPostReports() {
+    public List<ReportResponseDTO> getPostReports(String username) {
+        user auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         return reportRepository.findByReportedPostIsNotNull()
                 .stream()
-                .map(this::mapToReportDTO) // Points to the helper method below
+                .map(report -> mapToReportDTO(report, auth))
                 .toList();
     }
 
-    public List<ReportResponseDTO> getUserReports() {
+    public List<ReportResponseDTO> getUserReports(String username) {
+        user auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         return reportRepository.findByReportedPostIsNull()
                 .stream()
-                .map(this::mapToReportDTO)
+                .map(report -> mapToReportDTO(report, auth))
                 .toList();
     }
 
-    private ReportResponseDTO mapToReportDTO(report report) {
+    private ReportResponseDTO mapToReportDTO(report report, user auth) {
         ReportResponseDTO dto = new ReportResponseDTO();
         dto.setId(report.getId());
         dto.setReason(report.getReason());
@@ -51,7 +53,7 @@ public class AdminService {
 
         // Safely check for null before mapping the post! (Fixes the crash)
         if (report.getReportedPost() != null) {
-            dto.setReportedPost(mapToPostDTO(report.getReportedPost()));
+            dto.setReportedPost(mapToPostDTO(report.getReportedPost(), auth));
         }
 
         return dto;
@@ -70,27 +72,34 @@ public class AdminService {
         return dto;
     }
 
-    private PostResponseDTO mapToPostDTO(post p) {
-        if (p == null) {
+    private PostResponseDTO mapToPostDTO(post p , user auth) {
+         if (p == null) {
             return null;
         }
-        PostResponseDTO dto = new PostResponseDTO();
-        dto.setId(p.getId());
-        dto.setTitle(p.getTitle());
-        dto.setContent(p.getContent());
-        dto.setDescription(p.getDescription());
-        dto.setMediaUrl(p.getMedia());
-
-        if (p.getUser_id() != null) {
-            dto.setAuthorUsername(p.getUser_id().getUsername());
-        }
+     
+        PostResponseDTO dto = new PostResponseDTO(
+                p.getId(),
+                p.getTitle(),
+                p.getContent(),
+                p.getMedia(),
+                p.getDescription(),
+                p.getUser_id() != null ? p.getUser_id().getUsername() : "Unknown",
+                p.getTimestamp() != null ? p.getTimestamp().toString() : null,
+                  postRepository.likedByUserAndPost(auth, p),
+                postRepository.countCommentsByPost(p),
+                postRepository.countLikesByPost(p)
+        );
         return dto;
     }
 
     public String banUser(String username) {
         user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Post not found"));
 
+        if (user.getRole().equals("ROLE_ADMIN")) {
+            return "Bro are u crazy ";
+        }
         if (user.isStatus()) {
+
             user.setStatus(false);
             userRepository.save(user);
             return "User Banned seccefully";
@@ -103,7 +112,11 @@ public class AdminService {
     }
 
     public String deleteUser(String username) {
+        
         user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getRole().equals("ROLE_ADMIN")) {
+            return "Bro are u crazy ";
+        }
         userRepository.delete(user);
         return "User Deleted seccefully";
     }

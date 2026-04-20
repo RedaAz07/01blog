@@ -47,9 +47,10 @@ class PostController {
    @GetMapping("/all")
     public ResponseEntity<org.springframework.data.domain.Page<PostResponseDTO>> getAllPosts(
             @RequestParam(defaultValue = "0") int page, 
-            @RequestParam(defaultValue = "10") int size  
+            @RequestParam(defaultValue = "10") int size  , Principal principal
     ) {
-        org.springframework.data.domain.Page<PostResponseDTO> posts = PostService.getAllPosts(page, size);
+        String username = principal.getName();
+        org.springframework.data.domain.Page<PostResponseDTO> posts = PostService.getAllPosts(page, size, username);
         return ResponseEntity.ok(posts);
     }
 
@@ -68,8 +69,9 @@ class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDTO> getMethodName(@PathVariable Long id) {
-        PostResponseDTO post = PostService.findPostById(id);
+    public ResponseEntity<PostResponseDTO> getMethodName(@PathVariable Long id, Principal principal) {
+        String username = principal.getName();
+        PostResponseDTO post = PostService.findPostById(id, username);
         return ResponseEntity.ok(post);
     }
 

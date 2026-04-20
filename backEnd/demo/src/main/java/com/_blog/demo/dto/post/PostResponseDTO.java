@@ -1,19 +1,14 @@
 package com._blog.demo.dto.post;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-
-public class PostResponseDTO {
-
-    private Long id;
-    private String title;
-    private String content;
-    private String mediaUrl;
-    private String description;
-    private String authorUsername;
-    private String timestamp;
+public record PostResponseDTO(Long id,
+        String title,
+        String content,
+        String mediaUrl,
+        String description,
+        String authorUsername,
+        String timestamp,
+        boolean isLiked,
+        int nbrComments,
+        int nbrLikes) {
 
 }
