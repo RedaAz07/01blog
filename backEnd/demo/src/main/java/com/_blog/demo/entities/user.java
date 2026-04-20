@@ -45,10 +45,10 @@ public class user {
     private String profilePictureUrl;
     @Column(name = "status", nullable = false)
     private boolean status;
-    @OneToMany(mappedBy = "user_id")
+    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<post> posts;
 
-    @OneToMany(mappedBy = "user_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;

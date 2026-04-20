@@ -12,6 +12,8 @@ import com._blog.demo.entities.notification;
 import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
+import com._blog.demo.repositories.commentRepository;
+import com._blog.demo.repositories.likeRepository;
 import com._blog.demo.repositories.notificationRepository;
 import com._blog.demo.repositories.postRepository;
 
@@ -22,6 +24,10 @@ public class NotificationService {
     private UserRepository UserRepository;
     @Autowired
     private notificationRepository notificationRepository;
+    @Autowired
+    private likeRepository likeRepository;
+    @Autowired
+    private commentRepository commentRepository;
 
     public List<NotificationResponseDTO> getNotifications(String username) {
         user userId = UserRepository.findByUsername(username)
@@ -33,11 +39,11 @@ public class NotificationService {
                     notification.getPost().getContent(),
                     notification.getPost().getMedia(),
                     notification.getPost().getDescription(),
-                    notification.getPost().getUser_id() != null ? notification.getPost().getUser_id().getUsername() : "Unknown",
+                    notification.getPost().getUser() != null ? notification.getPost().getUser().getUsername() : "Unknown",
                     notification.getPost().getTimestamp() != null ? notification.getPost().getTimestamp().toString() : null,
-                    postRepository.likedByUserAndPost(userId, notification.getPost()),
-                    postRepository.countCommentsByPost(notification.getPost()),
-                    postRepository.countLikesByPost(notification.getPost())
+                    likeRepository.existsByUserAndPost(userId, notification.getPost()),
+                    commentRepository.countByPost(notification.getPost()),
+                    likeRepository.countByPost(notification.getPost())
             );
             NotificationResponseDTO dto = new NotificationResponseDTO();
             dto.setRead(notification.isRead());

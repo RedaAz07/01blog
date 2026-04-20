@@ -12,6 +12,8 @@ import com._blog.demo.entities.post;
 import com._blog.demo.entities.report;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
+import com._blog.demo.repositories.commentRepository;
+import com._blog.demo.repositories.likeRepository;
 import com._blog.demo.repositories.postRepository;
 import com._blog.demo.repositories.reportRepository;
 
@@ -19,11 +21,17 @@ import com._blog.demo.repositories.reportRepository;
 public class AdminService {
 
     @Autowired
+    private commentRepository commentRepository;
+
+
+    @Autowired
     private reportRepository reportRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private postRepository postRepository;
+    @Autowired
+    private likeRepository likeRepository;
 
     public List<ReportResponseDTO> getPostReports(String username) {
         user auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
@@ -72,22 +80,22 @@ public class AdminService {
         return dto;
     }
 
-    private PostResponseDTO mapToPostDTO(post p , user auth) {
-         if (p == null) {
+    private PostResponseDTO mapToPostDTO(post p, user auth) {
+        if (p == null) {
             return null;
         }
-     
+
         PostResponseDTO dto = new PostResponseDTO(
                 p.getId(),
                 p.getTitle(),
                 p.getContent(),
                 p.getMedia(),
                 p.getDescription(),
-                p.getUser_id() != null ? p.getUser_id().getUsername() : "Unknown",
+                p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                 p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                  postRepository.likedByUserAndPost(auth, p),
-                postRepository.countCommentsByPost(p),
-                postRepository.countLikesByPost(p)
+                likeRepository.existsByUserAndPost(auth, p),
+                commentRepository.countByPost(p),
+                likeRepository.countByPost(p)
         );
         return dto;
     }
@@ -112,7 +120,7 @@ public class AdminService {
     }
 
     public String deleteUser(String username) {
-        
+
         user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         if (user.getRole().equals("ROLE_ADMIN")) {
             return "Bro are u crazy ";

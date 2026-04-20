@@ -40,8 +40,8 @@ public class post {
     private boolean status;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private user user_id;
-    @OneToMany(mappedBy = "post_id" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private user user;
+    @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;

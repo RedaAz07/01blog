@@ -35,10 +35,10 @@ public class ReportService {
         if (entity.getReportedPost() != null) {
             reportedPost = postRepository.findById(entity.getReportedPost()).orElseThrow(() -> new RuntimeException("Reported post not found"));
         }
-        if (reportedPost != null && reportedPost.getUser_id().getId().equals(reporter.getId())) {
+        if (reportedPost != null && reportedPost.getUser().getId().equals(reporter.getId())) {
             throw new RuntimeException("You cannot report your own post");
         }
-        if (reportedPost != null && !reportedPost.getUser_id().getId().equals(reportedUser.getId())) {
+        if (reportedPost != null && !reportedPost.getUser().getId().equals(reportedUser.getId())) {
             throw new RuntimeException("the reported post does not belong to the reported user");
         }
         if (reportedPost == null && reportRepository.existsByReporterAndReportedAndReportedPostIsNull(reporter, reportedUser)) {

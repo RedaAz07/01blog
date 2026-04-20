@@ -1,5 +1,6 @@
 package com._blog.demo.controllers;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +24,14 @@ public class AdminController {
 
     @GetMapping("/reports/posts")
 
-    public ResponseEntity<List<ReportResponseDTO>> getPostReported() {
-        List<ReportResponseDTO> reports = AdminService.getPostReports(); // Assuming you have a service to fetch reports based on the parameter
+    public ResponseEntity<List<ReportResponseDTO>> getPostReported(Principal    principal) {
+        List<ReportResponseDTO> reports = AdminService.getPostReports(principal.getName()); // Assuming you have a service to fetch reports based on the parameter
         return ResponseEntity.ok(reports);
     }
 
     @GetMapping("/reports/users")
-    public ResponseEntity<List<ReportResponseDTO>> getUserReported() {
-        List<ReportResponseDTO> reports = AdminService.getUserReports(); // Assuming you have a service to fetch reports based on the parameter
+    public ResponseEntity<List<ReportResponseDTO>> getUserReported(Principal    principal) {
+        List<ReportResponseDTO> reports = AdminService.getUserReports(principal.getName()); // Assuming you have a service to fetch reports based on the parameter
         return ResponseEntity.ok(reports);
     }
 

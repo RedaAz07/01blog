@@ -16,6 +16,8 @@ import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.entities.post;
 import com._blog.demo.entities.user;
 import com._blog.demo.repositories.UserRepository;
+import com._blog.demo.repositories.commentRepository;
+import com._blog.demo.repositories.likeRepository;
 import com._blog.demo.repositories.postRepository;
 
 @Service
@@ -25,7 +27,12 @@ public class PostService {
     private postRepository postRepository;
 
     @Autowired
+    private likeRepository likeRepository;
+    @Autowired
     private UserRepository UserRepository;
+
+    @Autowired
+    private commentRepository commentRepository;
 
     public PostResponseDTO createPost(PostRequestDTO request, String author) {
 
@@ -36,7 +43,7 @@ public class PostService {
         newPost.setContent(request.content());
         newPost.setDescription(request.description());
         newPost.setStatus(true);
-        newPost.setUser_id(auth);
+        newPost.setUser(auth);
         newPost.setTimestamp(new Date());
         if (request.mediaFile() != null && !request.mediaFile().isEmpty()) {
             FileStorageService fileStorageService = new FileStorageService();
@@ -52,11 +59,11 @@ public class PostService {
                 savedPost.getContent(),
                 savedPost.getMedia(),
                 savedPost.getDescription(),
-                savedPost.getUser_id() != null ? savedPost.getUser_id().getUsername() : "Unknown",
+                savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
-                postRepository.likedByUserAndPost(auth, savedPost),
-                postRepository.countCommentsByPost(savedPost),
-                postRepository.countLikesByPost(savedPost)
+                likeRepository.existsByUserAndPost(auth, savedPost),
+                commentRepository.countByPost(savedPost),
+                likeRepository.countByPost(savedPost)
         );
         return postDto;
     }
@@ -75,11 +82,11 @@ public class PostService {
                     p.getContent(),
                     p.getMedia(),
                     p.getDescription(),
-                    p.getUser_id() != null ? p.getUser_id().getUsername() : "Unknown",
+                    p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                    postRepository.likedByUserAndPost(auth, p),
-                    postRepository.countCommentsByPost(p),
-                    postRepository.countLikesByPost(p)
+                    likeRepository.existsByUserAndPost(auth, p),
+                    commentRepository.countByPost(p),
+                    likeRepository.countByPost(p)
             );
             return postDto;
         });
@@ -89,7 +96,7 @@ public class PostService {
         user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
         post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        if (!existingPost.getUser_id().getId().equals(auth.getId())) {
+        if (!existingPost.getUser().getId().equals(auth.getId())) {
             throw new RuntimeException("You are not authorized to update this post");
         }
 
@@ -110,11 +117,11 @@ public class PostService {
                 existingPost.getContent(),
                 existingPost.getMedia(),
                 existingPost.getDescription(),
-                existingPost.getUser_id() != null ? existingPost.getUser_id().getUsername() : "Unknown",
+                existingPost.getUser() != null ? existingPost.getUser().getUsername() : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
-                postRepository.likedByUserAndPost(auth, existingPost),
-                postRepository.countCommentsByPost(existingPost),
-                postRepository.countLikesByPost(existingPost)
+                likeRepository.existsByUserAndPost(auth, existingPost),
+                commentRepository.countByPost(existingPost),
+                likeRepository.countByPost(existingPost)
         );
         return updatedPost;
     }
@@ -124,7 +131,7 @@ public class PostService {
         post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><" + auth.getRole());
-        if (!existingPost.getUser_id().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
+        if (!existingPost.getUser().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
 
@@ -133,7 +140,7 @@ public class PostService {
     }
 
     public PostResponseDTO findPostById(Long id, String username) {
-        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));  
+        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
@@ -143,12 +150,12 @@ public class PostService {
                 existingPost.getContent(),
                 existingPost.getMedia(),
                 existingPost.getDescription(),
-                existingPost.getUser_id() != null ? existingPost.getUser_id().getUsername()
+                existingPost.getUser() != null ? existingPost.getUser().getUsername()
                 : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
-                postRepository.likedByUserAndPost(auth, existingPost),
-                postRepository.countCommentsByPost(existingPost),
-                postRepository.countLikesByPost(existingPost)
+                likeRepository.existsByUserAndPost(auth, existingPost),
+                commentRepository.countByPost(existingPost),
+                likeRepository.countByPost(existingPost)
         );
         return response;
     }

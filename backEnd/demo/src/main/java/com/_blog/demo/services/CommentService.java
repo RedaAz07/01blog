@@ -29,15 +29,15 @@ public class CommentService {
         post post = postRepository.findById(request.getPostId()).orElseThrow(() -> new RuntimeException("Post not found"));
         comment newComment = new comment();
         newComment.setContent(request.getContent());
-        newComment.setUser_id(auth);
-        newComment.setPost_id(post);
+        newComment.setUser(auth);
+        newComment.setPost(post);
         newComment.setTimestamp(new Date());
         comment savedComment = commentRepository.save(newComment);
         CommentResponseDTO response = new CommentResponseDTO();
         response.setId(savedComment.getId());
         response.setTimestamp(savedComment.getTimestamp());
         response.setContent(savedComment.getContent());
-        response.setAuthorUsername(savedComment.getUser_id().getUsername());
+        response.setAuthorUsername(savedComment.getUser().getUsername());
         return response;
     }
     
