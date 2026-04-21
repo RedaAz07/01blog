@@ -23,13 +23,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         user myUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 🛑 THE NEW LOGIC: Take the role from your database, and add "ROLE_" to the front of it.
-        // If myUser.getRole() is "ADMIN", this creates "ROLE_ADMIN".
-
         return new org.springframework.security.core.userdetails.User(
                 myUser.getUsername(),
                 myUser.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(myUser.getRole())) // Hand the role to Spring Security!
+                myUser.isStatus(), // <-- 1. enabled: We pass your database status right here!
+                true, // <-- 2. accountNonExpired
+                true, // <-- 3. credentialsNonExpired
+                true, // <-- 4. accountNonLocked
+                Collections.singletonList(new SimpleGrantedAuthority(myUser.getRole()))
         );
     }
 }

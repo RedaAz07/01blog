@@ -9,8 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // This tells Spring Boot: 
-        // "If someone types /uploads/... in their browser, go look inside the physical 'uploads/' folder on my computer!"
+      
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");
     }
