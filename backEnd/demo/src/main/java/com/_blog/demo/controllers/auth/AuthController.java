@@ -61,7 +61,7 @@ public class AuthController {
         // C. Print a brand new JWT wristband for them
         final String jwt = jwtUtil.generateToken(userDetails);
         user user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.isStatus()) {
+        if (!user.isStatus()) {
             throw new RuntimeException("your account is blocked");
         }
 
