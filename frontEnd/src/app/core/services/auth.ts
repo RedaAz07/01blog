@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface AuthResponseDTO {
-  jwt: string;
+  token: string;
 }
 
 @Injectable({
@@ -27,7 +27,7 @@ export class AuthService {
     return this.http.post<AuthResponseDTO>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap((response) => {
-          localStorage.setItem('jwt_token', response.jwt); // No more SSR checks!
+          localStorage.setItem('jwt_token', response.token); // No more SSR checks!
           this.loggedInSubject.next(true); 
         })
       );

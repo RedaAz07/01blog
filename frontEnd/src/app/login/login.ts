@@ -5,18 +5,21 @@ import { Router } from '@angular/router';
 import { AuthService } from '../core/services/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+import { MatIconModule } from '@angular/material/icon'; 
+
 @Component({
   selector: 'app-login',
-  standalone: true, // Make sure you have this if you are using 'imports: []'
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true, 
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule], 
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
   
   loginForm!: FormGroup; 
-
   errorMessage: string = ''; 
+  
+  showPassword: boolean = false; 
   
   snackbar = inject(MatSnackBar);
 
@@ -36,11 +39,12 @@ export class Login {
       return;
     }
 
-    const credentials = this.loginForm.value; // (Spelling fix: credentials)
+    const credentials = this.loginForm.value;
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        this.router.navigate(['/']);
+        localStorage.setItem('jwt_token', response.token); 
+        this.router.navigate(['/home']);
         this.snackbar.open('Login successful!', 'Close', { duration: 3000 });
       },
       error: (err) => {
