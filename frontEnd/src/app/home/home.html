@@ -1,1 +1,11 @@
 <p>home works!</p>
+<div class="navbar" *ngIf="authService.currentUser$ | async as user">
+  
+  <h2>Welcome back, {{ user.firstName }} {{ user.lastName }}!</h2>
+  
+  <div class="avatar">
+     {{ user.username | uppercase }}
+
+  </div>
+
+</div>

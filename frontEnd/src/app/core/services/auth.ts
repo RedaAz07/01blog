@@ -17,6 +17,14 @@ export interface registerReqDTO {
   lastName: string;
   birthDate: Date;
 }
+export interface UserProfileDTO {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +33,8 @@ export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
   private loggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.loggedInSubject.asObservable();
-
+  private currentUserSubject = new BehaviorSubject<UserProfileDTO | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -34,6 +43,11 @@ export class AuthService {
     const token = localStorage.getItem('jwt_token');
     if (token) {
       this.loggedInSubject.next(true);
+      this.loadCurrentUser().subscribe({
+        error: () => {
+          this.logout(); 
+        }
+      });
     }
   }
 
@@ -42,6 +56,7 @@ export class AuthService {
       tap((response) => {
         localStorage.setItem('jwt_token', response.token); // No more SSR checks!
         this.loggedInSubject.next(true);
+        this.loadCurrentUser().subscribe();
       }),
     );
   }
@@ -54,5 +69,12 @@ export class AuthService {
 
   register(userData: registerReqDTO): Observable<registerDTO> {
     return this.http.post<registerDTO>(`${this.apiUrl}/register`, userData);
+  }
+  loadCurrentUser(): Observable<UserProfileDTO> {
+    return this.http.get<UserProfileDTO>(`http://localhost:8080/api/users/me`).pipe(
+      tap((user) => {
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 }

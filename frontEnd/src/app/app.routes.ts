@@ -5,6 +5,8 @@ import { Home } from './home/home';
 import { Register } from './register/register';
 
 import { authGuard } from './core/guards/auth-guard';
+import { guestGuard } from './core/guards/guest-guard';
+import { roleGuard } from './core/guards/role-guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
@@ -12,9 +14,25 @@ export const routes: Routes = [
     component: Home, // (Whatever your home component is called)
     canActivate: [authGuard],
   },
-  { path: 'login', component: Login },
-  { path: 'register', component: Register },
+  
+  { path: 'login', component: Login, canActivate: [guestGuard] },
+  { path: 'register', component: Register, canActivate: [guestGuard] },
+ /*  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'ADMIN' },
 
+     children: [
+      { path: 'ban-user', component: BanUserComponent },
+      { path: 'hide-post', component: HidePostComponent },
+      { path: 'delete-user', component: DeleteUserComponent },
+      { path: 'delete-post', component: DeletePostComponent },
+
+      // Optional: A default dashboard if they just type /admin
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AdminDashboardComponent },
+    ], 
+  } */
   { path: 'not-found', component: NotFound },
   { path: '**', redirectTo: 'not-found' },
 ];
