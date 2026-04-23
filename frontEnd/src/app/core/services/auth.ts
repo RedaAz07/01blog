@@ -6,16 +6,30 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 export interface AuthResponseDTO {
   token: string;
 }
+export interface registerDTO {
+  response: string;
+}
+export interface registerReqDTO {
+  username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  birthDate: Date;
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
   private loggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.loggedInSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {
     // Look how simple this is now! Just grab the token.
     const token = localStorage.getItem('jwt_token');
     if (token) {
@@ -24,18 +38,21 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<AuthResponseDTO> {
-    return this.http.post<AuthResponseDTO>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap((response) => {
-          localStorage.setItem('jwt_token', response.token); // No more SSR checks!
-          this.loggedInSubject.next(true); 
-        })
-      );
+    return this.http.post<AuthResponseDTO>(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response) => {
+        localStorage.setItem('jwt_token', response.token); // No more SSR checks!
+        this.loggedInSubject.next(true);
+      }),
+    );
   }
 
   logout(): void {
     localStorage.removeItem('jwt_token'); // Trash it
     this.loggedInSubject.next(false);
     this.router.navigate(['/login']);
+  }
+
+  register(userData: registerReqDTO): Observable<registerDTO> {
+    return this.http.post<registerDTO>(`${this.apiUrl}/register`, userData);
   }
 }

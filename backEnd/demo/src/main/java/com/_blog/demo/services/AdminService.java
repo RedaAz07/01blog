@@ -100,7 +100,7 @@ public class AdminService {
     }
 
     public String banUser(String username) {
-        user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Post not found"));
+        user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("Bro are u crazy ");

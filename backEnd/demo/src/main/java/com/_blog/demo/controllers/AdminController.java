@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.services.AdminService;
 
@@ -36,27 +37,27 @@ public class AdminController {
     }
 
     @PutMapping("/banUser/{username}")
-    public ResponseEntity<String> banUser(@PathVariable String username) {
+    public ResponseEntity<Response> banUser(@PathVariable String username) {
         String res = AdminService.banUser(username);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new Response(res));
     }
 
     
 
     @DeleteMapping("/deleteUser/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+    public ResponseEntity<Response> deleteUser(@PathVariable String username) {
         String res = AdminService.deleteUser(username);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new Response(res));
     }
 
 
 
 
     @PutMapping("/hidePost/{id}")
-    public ResponseEntity<String> banPost(@PathVariable String id) {
+    public ResponseEntity<Response> banPost(@PathVariable String id) {
         
         String res = AdminService.hidePost(id);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new Response(res));
     }
 
 }

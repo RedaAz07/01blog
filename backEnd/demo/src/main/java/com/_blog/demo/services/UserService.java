@@ -57,7 +57,7 @@ public class UserService {
         }
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
         newUser.setRole("USER");
-        newUser.setStatus(false);
+        newUser.setStatus(true );
         userRepository.save(newUser);
         return "User registered successfully!";
     }

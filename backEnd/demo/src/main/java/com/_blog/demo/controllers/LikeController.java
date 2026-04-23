@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.like.LikeRequestDTO;
 import com._blog.demo.services.LikeService;
 
@@ -23,11 +24,11 @@ public class LikeController {
     private LikeService LikeService;
 
     @PostMapping("/")
-    public ResponseEntity<String> like(@Valid @RequestBody LikeRequestDTO likeRequest, Principal principal) {
+    public ResponseEntity<Response> like(@Valid @RequestBody LikeRequestDTO likeRequest, Principal principal) {
 
         String username = principal.getName();
         String res = LikeService.likeReq(likeRequest, username);
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new Response(res));
     }
   
     

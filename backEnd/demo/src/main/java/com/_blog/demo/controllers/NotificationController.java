@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.notification.NotificationResponseDTO;
 import com._blog.demo.services.NotificationService;
 
@@ -30,10 +31,10 @@ public class NotificationController {
     }
 
     @PutMapping("read/{id}")
-    public String markAsRead(@PathVariable String id, @RequestBody String entity, Principal principal) {
+    public ResponseEntity<Response> markAsRead(@PathVariable String id, @RequestBody String entity, Principal principal) {
         String username = principal.getName();
         NotificationService.markAsRead(id, username);
-        return "Notification marked as read";
+        return ResponseEntity.ok(new Response("Notification marked as read"));
     }
 
 }

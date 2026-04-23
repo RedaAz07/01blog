@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -10,13 +10,14 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-login',
   standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule], 
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, RouterModule], 
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
   
-  loginForm!: FormGroup; 
+  loginForm: FormGroup; 
+  
   errorMessage: string = ''; 
   
   showPassword: boolean = false; 

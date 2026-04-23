@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.post.PostDeleteReqDTO;
 import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
@@ -62,10 +63,10 @@ class PostController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deletePost(@Valid @RequestBody PostDeleteReqDTO request, Principal principal) {
+    public ResponseEntity<Response> deletePost(@Valid @RequestBody PostDeleteReqDTO request, Principal principal) {
         String username = principal.getName();
         String result = PostService.deletePost(request, username);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(new Response(result));
     }
 
     @GetMapping("/{id}")

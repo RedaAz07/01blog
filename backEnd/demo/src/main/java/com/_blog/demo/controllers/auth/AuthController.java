@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.RegisterRequestDTO;
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.auth.AuthResponseDTO;
 import com._blog.demo.dto.auth.LoginRequestDTO;
 import com._blog.demo.entities.user;
@@ -41,9 +42,9 @@ public class AuthController {
 
     // 1. REGISTER ENDPOINT
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
+    public ResponseEntity<Response> register(@Valid @RequestBody RegisterRequestDTO request) {
         String response = userService.registerNewUser(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new Response(response));
     }
 
     // 2. LOGIN ENDPOINT
