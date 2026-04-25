@@ -67,6 +67,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
         userDTO dto = new userDTO();
         dto.setUsername(user.getUsername());
+        dto.setRole(user.getRole());
         dto.setEmail(user.getEmail());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());

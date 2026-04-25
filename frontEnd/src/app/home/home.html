@@ -1,11 +1,202 @@
-<p>home works!</p>
-<div class="navbar" *ngIf="authService.currentUser$ | async as user">
-  
-  <h2>Welcome back, {{ user.firstName }} {{ user.lastName }}!</h2>
-  
-  <div class="avatar">
-     {{ user.username | uppercase }}
+<!-- ═══════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
 
+
+<!-- ═══════════════════════════════════════
+     PROFILE SIDEBAR
+════════════════════════════════════════ -->
+<div class="sidebar-overlay" [class.active]="profileSidebarOpen" (click)="closeProfileSidebar()"></div>
+<aside class="profile-sidebar" [class.open]="profileSidebarOpen">
+  <div class="ps-header">
+    <img [src]="currentUser.avatar" class="ps-avatar">
+    <div>
+      <p class="ps-name">{{ currentUser.name }}</p>
+      <p class="ps-handle">@{{ currentUser.username }}</p>
+    </div>
+    <button class="ps-close" (click)="closeProfileSidebar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="ps-stats">
+    <div class="ps-stat">
+      <span class="ps-stat-val">{{ currentUser.posts }}</span>
+      <span class="ps-stat-lbl">Posts</span>
+    </div>
+    <div class="ps-stat">
+      <span class="ps-stat-val">{{ currentUser.followers }}</span>
+      <span class="ps-stat-lbl">Followers</span>
+    </div>
+    <div class="ps-stat">
+      <span class="ps-stat-val">{{ currentUser.following }}</span>
+      <span class="ps-stat-lbl">Following</span>
+    </div>
+  </div>
+  <p class="ps-bio">{{ currentUser.bio }}</p>
+  <a class="ps-profile-btn" href="#">
+    <mat-icon>person</mat-icon> View Full Profile
+  </a>
+</aside>
+
+<!-- ═══════════════════════════════════════
+     MAIN LAYOUT
+════════════════════════════════════════ -->
+<main class="page-layout">
+
+  <!-- ── CENTER COLUMN ── -->
+  <section class="feed-col">
+
+    <!-- Create Post Trigger -->
+    <div class="create-trigger" (click)="openCreatePost()">
+      <img [src]="currentUser.avatar" class="ct-avatar">
+      <div class="ct-input">
+        <span>What's on your mind, {{ currentUser.name.split(' ')[0] }}?</span>
+      </div>
+      <button class="ct-media-btn" (click)="$event.stopPropagation(); openCreatePost()">
+        <mat-icon>add_photo_alternate</mat-icon>
+      </button>
+    </div>
+
+    <!-- Blog Feed -->
+    <article class="blog-card" *ngFor="let post of posts">
+      <div class="blog-card-header">
+        <img [src]="post.authorAvatar" class="blog-avatar">
+        <div class="blog-meta">
+          <span class="blog-author">{{ post.authorName }}</span>
+          <span class="blog-time">{{ post.createdAt | date:'MMM d, y · h:mm a' }}</span>
+        </div>
+        <!-- 3-dot menu -->
+        <button class="more-btn" [matMenuTriggerFor]="postMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #postMenu="matMenu" class="post-menu">
+          <ng-container *ngIf="post.authorId === currentUser.id; else reportTpl">
+            <button mat-menu-item (click)="editPost(post)">
+              <mat-icon>edit</mat-icon> Edit Post
+            </button>
+            <button mat-menu-item class="delete-item" (click)="deletePost(post)">
+              <mat-icon>delete</mat-icon> Delete Post
+            </button>
+          </ng-container>
+          <ng-template #reportTpl>
+            <button mat-menu-item (click)="reportPost(post)">
+              <mat-icon>flag</mat-icon> Report Post
+            </button>
+          </ng-template>
+        </mat-menu>
+      </div>
+
+      <h2 class="blog-title">{{ post.title }}</h2>
+      <p class="blog-desc">{{ post.description }}</p>
+
+      <div class="blog-media" *ngIf="post.mediaUrl">
+        <img [src]="post.mediaUrl" [alt]="post.title" class="blog-img">
+      </div>
+
+      <!-- Actions -->
+      <div class="blog-actions">
+        <button class="action-btn like-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
+          <mat-icon>{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
+          <span>{{ post.likes }}</span>
+        </button>
+
+        <button class="action-btn comment-btn" (click)="toggleComments(post)">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <span>{{ post.comments.length }}</span>
+        </button>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section" *ngIf="post.showComments">
+        <div class="comment" *ngFor="let c of post.comments">
+          <img [src]="c.avatar" class="comment-avatar">
+          <div class="comment-body">
+            <span class="comment-author">{{ c.author }}</span>
+            <p class="comment-text">{{ c.text }}</p>
+          </div>
+        </div>
+
+        <div class="comment-form">
+          <img [src]="currentUser.avatar" class="comment-avatar">
+          <div class="comment-input-wrap">
+            <input type="text" class="comment-input" placeholder="Write a comment…"
+              [(ngModel)]="post.newComment"
+              (keyup.enter)="addComment(post)">
+            <button class="comment-send" (click)="addComment(post)">
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ── RIGHT COLUMN — Suggestions ── -->
+  <aside class="suggestions-col">
+    <div class="suggestions-card">
+      <h3 class="sug-title">
+        <mat-icon>group_add</mat-icon> People to Follow
+      </h3>
+      <div class="sug-user" *ngFor="let u of suggestedUsers">
+        <img [src]="u.avatar" class="sug-avatar">
+        <div class="sug-info">
+          <span class="sug-name">{{ u.name }}</span>
+          <span class="sug-handle">@{{ u.username }}</span>
+        </div>
+        <button class="follow-btn" [class.following]="u.following" (click)="toggleFollow(u)">
+          {{ u.following ? 'Following' : 'Follow' }}
+        </button>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     CREATE / EDIT POST MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" [class.active]="postModalOpen" (click)="closePostModal()"></div>
+<div class="post-modal" [class.open]="postModalOpen">
+  <div class="modal-header">
+    <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
+    <button class="modal-close" (click)="closePostModal()">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
+  <div class="modal-body">
+    <div class="modal-user">
+      <img [src]="currentUser.avatar" class="modal-avatar">
+      <span class="modal-username">{{ currentUser.name }}</span>
+    </div>
+
+    <input type="text" class="modal-input" placeholder="Post title *"
+      [(ngModel)]="postForm.title">
+
+    <textarea class="modal-textarea" rows="5" placeholder="What's on your mind? *"
+      [(ngModel)]="postForm.description"></textarea>
+
+    <!-- Media preview -->
+    <div class="media-preview" *ngIf="postForm.mediaPreview">
+      <img [src]="postForm.mediaPreview" class="media-prev-img">
+      <button class="remove-media" (click)="removeMedia()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-actions-bar">
+      <label class="media-label" for="mediaUpload">
+        <mat-icon>add_photo_alternate</mat-icon> Photo / Video
+        <input type="file" id="mediaUpload" hidden accept="image/*,video/*"
+          (change)="onMediaSelected($event)">
+      </label>
+
+      <button class="submit-post-btn"
+        [disabled]="!postForm.title || !postForm.description"
+        (click)="submitPost()">
+        {{ editingPost ? 'Update' : 'Publish' }}
+      </button>
+    </div>
+  </div>
 </div>
