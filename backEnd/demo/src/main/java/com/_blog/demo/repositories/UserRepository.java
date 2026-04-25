@@ -1,5 +1,6 @@
 package com._blog.demo.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,7 @@ public interface UserRepository extends JpaRepository<user, Long> {
     // If you need custom searches, you just name the method correctly:
     Optional<user> findByUsername(String username);
 
-  
+  List<user> findTop5ByUsernameContainingIgnoreCase(String query);
 
     Optional<user> findByEmail(String email);
 

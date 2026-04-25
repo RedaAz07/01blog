@@ -1,9 +1,12 @@
 package com._blog.demo.services;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.notification.NotificationResponseDTO;
@@ -29,31 +32,19 @@ public class NotificationService {
     @Autowired
     private commentRepository commentRepository;
 
-    public List<NotificationResponseDTO> getNotifications(String username) {
-        user userId = UserRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-        List<NotificationResponseDTO> notifications = userId.getReceivedNotifications().stream().filter(notification -> !notification.isRead()).map(notification -> {
-            PostResponseDTO postDto = new PostResponseDTO(
-                    notification.getPost().getId(),
-                    notification.getPost().getTitle(),
-                    notification.getPost().getContent(),
-                    notification.getPost().getMedia(),
-                    notification.getPost().getDescription(),
-                    notification.getPost().getUser() != null ? notification.getPost().getUser().getUsername() : "Unknown",
-                    notification.getPost().getTimestamp() != null ? notification.getPost().getTimestamp().toString() : null,
-                    likeRepository.existsByUserAndPost(userId, notification.getPost()),
-                    commentRepository.countByPost(notification.getPost()),
-                    likeRepository.countByPost(notification.getPost())
-            );
-            NotificationResponseDTO dto = new NotificationResponseDTO();
-            dto.setRead(notification.isRead());
-            dto.setSenderUsername(notification.getSender().getUsername());
-            dto.setPost(postDto);
-            dto.setTimestamp(notification.getTimestamp().toString());
-            return dto;
-        }).toList();
+    public Page<NotificationResponseDTO> getNotifications(String username, int page, int size) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        return notifications;
+        Page<notification> notifP = notificationRepository.findByReceiverUsername(username, pageable);
+
+        return notifP.map(notif -> new NotificationResponseDTO(
+            notif.getId(),  
+            notif.isRead(),
+                notif.getSender().getUsername(),
+                notif.getPost().getId(),
+                notif.getTimestamp().toString()
+        ));
     }
 
     @Autowired
@@ -65,7 +56,6 @@ public class NotificationService {
         user sender = UserRepository.findByUsername(senderUsername)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + senderUsername));
         for (user follower : sender.getFollowers()) {
-            System.err.println("111111111111111111");
             notification notification = new notification();
             notification.setSender(sender);
             notification.setReceiver(follower);
@@ -91,5 +81,10 @@ public class NotificationService {
         }
         notification.setRead(true);
         notificationRepository.save(notification);
+    }
+
+
+    public void clearNotifications(String username) {
+        notificationRepository.deleteByReceiverUsername(username);
     }
 }

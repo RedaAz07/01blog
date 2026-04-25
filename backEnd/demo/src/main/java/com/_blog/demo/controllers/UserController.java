@@ -12,6 +12,7 @@ import com._blog.demo.dto.userDTO;
 import com._blog.demo.services.UserService;
 
 
+
 @RestController // Tells Spring this class listens for web traffic
 @RequestMapping("/api/users") // The base URL for all user stuff
 public class UserController {
@@ -30,6 +31,7 @@ public class UserController {
         userDTO user = userService.getCurrentUser(param);
         return user;
     }
+  
     
 
 }

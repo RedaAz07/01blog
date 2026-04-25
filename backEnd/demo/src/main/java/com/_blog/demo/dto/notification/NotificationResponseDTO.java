@@ -1,17 +1,13 @@
 package com._blog.demo.dto.notification;
 
-import com._blog.demo.dto.post.PostResponseDTO;
 
-import lombok.Getter;
-import lombok.Setter;
+public record NotificationResponseDTO(
+long id,
+    boolean isRead,
+    String senderUsername,
+    long post,
+    String timestamp
+) {
 
-@Getter
-@Setter
-public class NotificationResponseDTO {
-
-    boolean isRead;
-    String senderUsername;
-    PostResponseDTO post;
-    String timestamp;
 
 }

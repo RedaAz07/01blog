@@ -17,47 +17,52 @@
       <mat-icon>dashboard</mat-icon>
       <span>Dashboard</span>
     </a>
-
-    <!-- Notifications -->
-    <div class="notif-wrapper" #notifRef>
+    <div>
       <button class="notif-btn" (click)="toggleNotifications()">
         <mat-icon>notifications</mat-icon>
-        <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+        <span class="notif-count" *ngIf="notificationService.notifications$ | async as notifs">
+          {{ notifs.length }}
+        </span>
       </button>
+    </div>
 
-      <!-- Notification Popup -->
-      <div class="notif-popup" [class.open]="notifOpen">
-        <div class="notif-popup-header">
-          <span class="notif-popup-title">Notifications</span>
-          <button class="notif-clear-btn" (click)="clearAll()" [disabled]="notifications.length === 0">
-            <mat-icon>delete_sweep</mat-icon> Clear all
-          </button>
-        </div>
-
-        <div class="notif-list" *ngIf="notifications.length > 0; else emptyNotif">
-          <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.read" (click)="markRead(n)">
-            <div class="notif-icon-wrap" [ngClass]="n.type">
-              <mat-icon>{{ n.icon }}</mat-icon>
-            </div>
-            <div class="notif-content">
-              <p class="notif-text">{{ n.text }}</p>
-              <span class="notif-time">{{ n.time }}</span>
-            </div>
-            <span class="notif-dot" *ngIf="!n.read"></span>
+    <!-- Notifications -->
+     
+   <div class="notif-popup" [class.open]="notifOpen">
+        <ng-container *ngIf="notificationService.notifications$ | async as notifs">
+          
+          <div class="notif-popup-header">
+            <span class="notif-popup-title">Notifications</span>
+            <button class="notif-clear-btn" (click)="clearAll()" [disabled]="notifs.length === 0">
+              <mat-icon>delete_sweep</mat-icon> Clear all
+            </button>
           </div>
-        </div>
 
-        <ng-template #emptyNotif>
-          <div class="notif-empty">
-            <mat-icon>notifications_none</mat-icon>
-            <p>You're all caught up!</p>
+          <div class="notif-list" *ngIf="notifs.length > 0; else emptyNotif">
+            <div class="notif-item" *ngFor="let n of notifs" [class.unread]="!n.isRead" (click)="markRead(n)">
+              
+              <div class="notif-icon-wrap" >
+                <mat-icon>article</mat-icon>
+              </div>
+              
+              <div class="notif-content">
+                <p class="notif-text">{{ n.senderUsername }} posted a new article  </p> <span class="notif-time">{{ n.timestamp }}</span>
+              </div>
+              <span class="notif-dot" *ngIf="!n.isRead"></span>
+            </div>
           </div>
-        </ng-template>
 
-        <div class="notif-popup-footer">
-          <button class="notif-load-btn" (click)="loadMore()" [disabled]="loadingMore">
+          <ng-template #emptyNotif>
+            <div class="notif-empty">
+              <mat-icon>notifications_none</mat-icon>
+              <p>You're all caught up!</p>
+            </div>
+          </ng-template>
+
+        </ng-container> <div class="notif-popup-footer">
+          <button class="notif-load-btn" (click)="loadMore()" [disabled]="isLoading || isLastPage">
             <mat-icon>expand_more</mat-icon>
-            {{ loadingMore ? 'Loading…' : 'Load 5 more' }}
+            {{ isLoading ? 'Loading…' : 'Load 5 more' }}
           </button>
         </div>
       </div>
@@ -66,12 +71,11 @@
     <!-- Profile avatar + sidebar trigger -->
     <button class="avatar-btn" (click)="toggleProfileSidebar()">
       <span class="cover">
-        <p class="nav-avatar">{{ user.username.charAt(0) }}</p>
+        <p class="nav-avatar">{{ user.username.charAt(0)  | uppercase }}</p>
       </span>
       <span class="avatar-name">{{ user.username }}</span>
     </button>
-  </div>
 </header>
 
 <!-- Overlay to close notification popup -->
-<div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div>
+<!-- <div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div>   -->

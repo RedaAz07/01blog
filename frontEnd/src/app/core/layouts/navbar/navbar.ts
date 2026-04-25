@@ -1,79 +1,127 @@
-
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core'; // 👈 Add OnInit
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs'; // 👈 Import RxJS tools
 import { AuthService } from '../../services/auth';
-// import { AuthService } from '../services/auth.service'; // ← wire your real service
+import { NotificationDTO, NotificationService } from '../../services/notification';
+import { GlobalSearchDTO, SearchService } from '../../services/search';
 
-export interface Notification {
-  id: number;
-  text: string;
-  time: string;
-  icon: string;
-  type: 'like' | 'comment' | 'follow' | 'system';
-  read: boolean;
-}
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './navbar.html',
-  styleUrls: ['./navbar.css']
+  styleUrls: ['./navbar.css'] // (Changed from styleUrl to styleUrls to match your code)
 })
-export class Navbar {
-  constructor(public authService: AuthService) {}
-
-
-
+export class Navbar implements OnInit {
+  
   searchQuery = '';
   notifOpen   = false;
-  loadingMore = false;
+  
+  // 1. Pagination tracking
+  currentPage = 0;
+  isLastPage  = false;
+  isLoading   = false;
 
-  notifications: Notification[] = [
-    { id: 1, text: 'Alex Rivera liked your post "The Art of Slow Travel"',   time: '2 min ago',  icon: 'favorite',       type: 'like',    read: false },
-    { id: 2, text: 'Maya Chen commented on your post.',                       time: '15 min ago', icon: 'chat_bubble',    type: 'comment', read: false },
-    { id: 3, text: 'Carlos Vega started following you.',                      time: '1 hr ago',   icon: 'person_add',     type: 'follow',  read: false },
-    { id: 4, text: 'Emma Walsh liked your comment.',                          time: '3 hr ago',   icon: 'favorite',       type: 'like',    read: true  },
-    { id: 5, text: 'Your post was featured in the weekly digest.',            time: 'Yesterday',  icon: 'campaign',       type: 'system',  read: true  },
-    
-  ];
+  // 2. The dynamic unread badge! (Using an Observable)
+  unreadCount$: Observable<number>;
 
-  private _allNotifications: Notification[] = [
-    ...[] as Notification[], // already shown above
-    { id: 6,  text: 'Priya Sharma liked your post.',                         time: '2 days ago', icon: 'favorite',    type: 'like',    read: true },
-    { id: 7,  text: 'Tom Nguyen started following you.',                     time: '3 days ago', icon: 'person_add',  type: 'follow',  read: true },
-    { id: 8,  text: 'Daniel Park commented on your photo.',                  time: '4 days ago', icon: 'chat_bubble', type: 'comment', read: true },
-    { id: 9,  text: 'New feature: Media uploads are now available!',         time: '5 days ago', icon: 'campaign',    type: 'system',  read: true },
-    { id: 10, text: 'Sofia Rossi liked your post "Minimalist Photography"',  time: '1 week ago', icon: 'favorite',    type: 'like',    read: true },
-  ];
+  constructor(
+    public authService: AuthService,
+    public notificationService: NotificationService,
+    private searchService: SearchService // 👈 Inject it!
 
-  get unreadCount(): number {
-    return this.notifications.filter(n => !n.read).length;
+
+  ) {
+    this.unreadCount$ = this.notificationService.notifications$.pipe(
+      map(notifs => notifs.filter(n => !n.isRead).length)
+    );
   }
 
+/*   ngOnInit() {
+    this.loadMore();
+  }
+ */
   toggleNotifications(): void { this.notifOpen = !this.notifOpen; }
   closeNotifications(): void  { this.notifOpen = false; }
 
-  markRead(n: Notification): void { n.read = true; }
-
-  clearAll(): void { this.notifications = []; }
-
   loadMore(): void {
-    if (this.loadingMore) return;
-    this.loadingMore = true;
-    setTimeout(() => {
-      this.notifications = [...this.notifications, ...this._allNotifications.slice(0, 5)];
-      this._allNotifications = this._allNotifications.slice(5);
-      this.loadingMore = false;
-    }, 800);
+    if (this.isLoading || this.isLastPage) return;
+
+    this.isLoading = true;
+
+    this.notificationService.fetchNotifications(this.currentPage, 5).subscribe({
+      next: (response) => {
+        this.isLastPage = response.last; // Did Spring Boot say this is the end?
+        this.currentPage++; // Get ready for the next click
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching notifications', err);
+        this.isLoading = false;
+      }
+    });
   }
 
-  onSearch(): void { /* wire to your search service */ }
+  markRead(n: NotificationDTO): void { 
+    if (n.isRead) return; // No need to mark again!
+    this.notificationService.markAsRead(n.id).subscribe();
+    
+  }
+
+  clearAll(): void { 
+    this.notificationService.clearAll().subscribe();
+  }
+
   toggleProfileSidebar(): void { /* emit or call sidebar service */ }
 
   @HostListener('document:keydown.escape')
   onEscape(): void { this.notifOpen = false; }
+
+
+
+  //searchh 
+
+  isSearchOpen = false;
+
+  // 1. The pipe we shove keystrokes into
+  private searchSubject = new Subject<string>();
+  
+  // 2. The box that holds our live results
+  searchResults$!: Observable<GlobalSearchDTO | null>;
+
+
+
+  ngOnInit() {
+    // 3. Configure the RxJS Magic Pipe!
+    this.searchResults$ = this.searchSubject.pipe(
+      debounceTime(300), // Wait 300ms after they stop typing
+      distinctUntilChanged(), // Don't search if they typed the same thing twice
+      switchMap((query) => {
+        if (!query.trim()) {
+          this.isSearchOpen = false;
+          return of(null); // Return empty if search bar is cleared
+        }
+        this.isSearchOpen = true;
+        return this.searchService.search(query).pipe(
+          catchError(() => of(null)) // Prevent app crash if server fails
+        );
+      })
+    );
+  }
+
+  // 4. This fires every time you type a letter in the HTML
+  onSearch(): void {
+    // Shove the current text into the pipe!
+    this.searchSubject.next(this.searchQuery);
+  }
+  
+  closeSearch(): void {
+    this.isSearchOpen = false;
+    this.searchQuery = '';
+    this.searchSubject.next('');
+  }
 }
