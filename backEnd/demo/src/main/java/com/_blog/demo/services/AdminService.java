@@ -88,8 +88,6 @@ public class AdminService {
                 p.getId(),
                 p.getTitle(),
                 p.getContent(),
-                p.getMedia(),
-                p.getDescription(),
                 p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                 p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, p),

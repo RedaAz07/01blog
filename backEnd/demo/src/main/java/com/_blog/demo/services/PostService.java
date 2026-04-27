@@ -41,14 +41,10 @@ public class PostService {
         post newPost = new post();
         newPost.setTitle(request.title());
         newPost.setContent(request.content());
-        newPost.setDescription(request.description());
         newPost.setStatus(true);
         newPost.setUser(auth);
         newPost.setTimestamp(new Date());
         if (request.mediaFile() != null && !request.mediaFile().isEmpty()) {
-            FileStorageService fileStorageService = new FileStorageService();
-            String savedFileUrl = fileStorageService.saveFile(request.mediaFile());
-            newPost.setMedia(savedFileUrl);
         }
 
         post savedPost = postRepository.save(newPost);
@@ -57,8 +53,7 @@ public class PostService {
                 savedPost.getId(),
                 savedPost.getTitle(),
                 savedPost.getContent(),
-                savedPost.getMedia(),
-                savedPost.getDescription(),
+            
                 savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, savedPost),
@@ -80,8 +75,7 @@ public class PostService {
                     p.getId(),
                     p.getTitle(),
                     p.getContent(),
-                    p.getMedia(),
-                    p.getDescription(),
+       
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                     likeRepository.existsByUserAndPost(auth, p),
@@ -102,12 +96,8 @@ public class PostService {
 
         existingPost.setTitle(request.getTitle());
         existingPost.setContent(request.getContent());
-        existingPost.setDescription(request.getDescription());
 
         if (request.getMediaFile() != null && !request.getMediaFile().isEmpty()) {
-            FileStorageService fileStorageService = new FileStorageService();
-            String savedFileUrl = fileStorageService.saveFile(request.getMediaFile());
-            existingPost.setMedia(savedFileUrl);
         }
 
         postRepository.save(existingPost);
@@ -115,8 +105,7 @@ public class PostService {
                 existingPost.getId(),
                 existingPost.getTitle(),
                 existingPost.getContent(),
-                existingPost.getMedia(),
-                existingPost.getDescription(),
+     
                 existingPost.getUser() != null ? existingPost.getUser().getUsername() : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, existingPost),
@@ -148,8 +137,6 @@ public class PostService {
                 existingPost.getId(),
                 existingPost.getTitle(),
                 existingPost.getContent(),
-                existingPost.getMedia(),
-                existingPost.getDescription(),
                 existingPost.getUser() != null ? existingPost.getUser().getUsername()
                 : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,

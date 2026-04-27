@@ -28,12 +28,8 @@ public class post {
     private Long id;
     @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
-    @Column(name = "description", nullable = false)
-    private String description;
-    @Column(name = "media")
-    private String media;
     @Column(name = "timestamp", nullable = false)
     private Date timestamp;
     @Column(name = "status", nullable = false)
@@ -41,14 +37,14 @@ public class post {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private user user;
-    @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<comment> comments;
-    @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<like> likes;
-    @OneToMany(mappedBy = "reportedPost" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reportedPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<report> reportsReceived;
-    
-    @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<notification> notifications;
 
 }
