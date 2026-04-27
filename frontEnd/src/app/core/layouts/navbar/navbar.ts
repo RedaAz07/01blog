@@ -14,49 +14,55 @@ import { GlobalSearchDTO, SearchService } from '../../services/search';
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './navbar.html',
-  styleUrls: ['./navbar.css'] // (Changed from styleUrl to styleUrls to match your code)
+  styleUrls: ['./navbar.css']
 })
 export class Navbar implements OnInit {
-  
   searchQuery = '';
   notifOpen   = false;
-  
-  // 1. Pagination tracking
   currentPage = 0;
   isLastPage  = false;
   isLoading   = false;
-
-  // 2. The dynamic unread badge! (Using an Observable)
   unreadCount$: Observable<number>;
 
   constructor(
     public authService: AuthService,
     public notificationService: NotificationService,
-    private searchService: SearchService // 👈 Inject it!
-
-
+    private searchService: SearchService 
   ) {
     this.unreadCount$ = this.notificationService.notifications$.pipe(
       map(notifs => notifs.filter(n => !n.isRead).length)
     );
   }
-
-/*   ngOnInit() {
+  
+  ngOnInit() {
     this.loadMore();
+    this.searchResults$ = this.searchSubject.pipe(
+      debounceTime(300), 
+      distinctUntilChanged(), 
+      switchMap((query) => {
+        if (!query.trim()) {
+          this.isSearchOpen = false;
+          return of(null); 
+        }
+        this.isSearchOpen = true;
+        return this.searchService.search(query).pipe(
+          catchError(() => of(null))
+        );
+      })
+    );
   }
- */
+
+ 
   toggleNotifications(): void { this.notifOpen = !this.notifOpen; }
   closeNotifications(): void  { this.notifOpen = false; }
 
   loadMore(): void {
     if (this.isLoading || this.isLastPage) return;
-
     this.isLoading = true;
-
     this.notificationService.fetchNotifications(this.currentPage, 5).subscribe({
       next: (response) => {
-        this.isLastPage = response.last; // Did Spring Boot say this is the end?
-        this.currentPage++; // Get ready for the next click
+        this.isLastPage = response.last; 
+        this.currentPage++;
         this.isLoading = false;
       },
       error: (err) => {
@@ -67,16 +73,19 @@ export class Navbar implements OnInit {
   }
 
   markRead(n: NotificationDTO): void { 
-    if (n.isRead) return; // No need to mark again!
+    if (n.isRead) return; 
     this.notificationService.markAsRead(n.id).subscribe();
     
   }
 
   clearAll(): void { 
+    this.isLastPage = true ;
+    this.currentPage = 0;
+    this.isLoading = false;
     this.notificationService.clearAll().subscribe();
   }
 
-  toggleProfileSidebar(): void { /* emit or call sidebar service */ }
+  toggleProfileSidebar(): void { }
 
   @HostListener('document:keydown.escape')
   onEscape(): void { this.notifOpen = false; }
@@ -87,41 +96,24 @@ export class Navbar implements OnInit {
 
   isSearchOpen = false;
 
-  // 1. The pipe we shove keystrokes into
   private searchSubject = new Subject<string>();
   
-  // 2. The box that holds our live results
   searchResults$!: Observable<GlobalSearchDTO | null>;
 
 
-
-  ngOnInit() {
-    // 3. Configure the RxJS Magic Pipe!
-    this.searchResults$ = this.searchSubject.pipe(
-      debounceTime(300), // Wait 300ms after they stop typing
-      distinctUntilChanged(), // Don't search if they typed the same thing twice
-      switchMap((query) => {
-        if (!query.trim()) {
-          this.isSearchOpen = false;
-          return of(null); // Return empty if search bar is cleared
-        }
-        this.isSearchOpen = true;
-        return this.searchService.search(query).pipe(
-          catchError(() => of(null)) // Prevent app crash if server fails
-        );
-      })
-    );
-  }
-
-  // 4. This fires every time you type a letter in the HTML
   onSearch(): void {
-    // Shove the current text into the pipe!
-    this.searchSubject.next(this.searchQuery);
+    this.searchSubject.next(this.searchQuery)  ;
+    
   }
   
   closeSearch(): void {
     this.isSearchOpen = false;
     this.searchQuery = '';
     this.searchSubject.next('');
+  }
+
+
+  logout(): void {
+    this.authService.logout();
   }
 }

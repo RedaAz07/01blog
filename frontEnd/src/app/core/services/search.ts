@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface UserSearchDTO {
+  id: number;
+  username: string;
+}
 export interface GlobalSearchDTO {
-  users: any[]; // Replace 'any' with your actual User DTO
-  posts: any[]; // Replace 'any' with your actual Post DTO
+  users: UserSearchDTO[]; 
 }
 
 @Injectable({ providedIn: 'root' })

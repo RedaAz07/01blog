@@ -11,71 +11,99 @@
     </div>
   </div>
 
+  <!-- Search Results Dropdown -->
+  <div class="nav-center search-results" *ngIf="searchResults$ | async as results">
+    <div class="search-result-item" *ngFor="let user of results.users">
+      <a [routerLink]="['/users', user.id]" (click)="closeSearch()">
+        <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
+        
+        {{ user.username }}</a>
+    </div>
+  </div>
+
   <div class="nav-right">
+
     <!-- Dashboard — admin only -->
     <a *ngIf="user?.role === 'ROLE_ADMIN'" class="nav-link dashboard-link" href="#">
       <mat-icon>dashboard</mat-icon>
       <span>Dashboard</span>
     </a>
+
+    <!-- Notifications Bell -->
     <div>
       <button class="notif-btn" (click)="toggleNotifications()">
         <mat-icon>notifications</mat-icon>
         <span class="notif-count" *ngIf="notificationService.notifications$ | async as notifs">
-          {{ notifs.length }}
+          {{ unreadCount$ | async }}
         </span>
       </button>
     </div>
 
-    <!-- Notifications -->
-     
-   <div class="notif-popup" [class.open]="notifOpen">
-        <ng-container *ngIf="notificationService.notifications$ | async as notifs">
-          
-          <div class="notif-popup-header">
-            <span class="notif-popup-title">Notifications</span>
-            <button class="notif-clear-btn" (click)="clearAll()" [disabled]="notifs.length === 0">
-              <mat-icon>delete_sweep</mat-icon> Clear all
-            </button>
-          </div>
+    <!-- Notification Popup -->
+    <div class="notif-popup" [class.open]="notifOpen">
+      <ng-container *ngIf="notificationService.notifications$ | async as notifs">
 
-          <div class="notif-list" *ngIf="notifs.length > 0; else emptyNotif">
-            <div class="notif-item" *ngFor="let n of notifs" [class.unread]="!n.isRead" (click)="markRead(n)">
-              
-              <div class="notif-icon-wrap" >
-                <mat-icon>article</mat-icon>
-              </div>
-              
-              <div class="notif-content">
-                <p class="notif-text">{{ n.senderUsername }} posted a new article  </p> <span class="notif-time">{{ n.timestamp }}</span>
-              </div>
-              <span class="notif-dot" *ngIf="!n.isRead"></span>
-            </div>
-          </div>
-
-          <ng-template #emptyNotif>
-            <div class="notif-empty">
-              <mat-icon>notifications_none</mat-icon>
-              <p>You're all caught up!</p>
-            </div>
-          </ng-template>
-
-        </ng-container> <div class="notif-popup-footer">
-          <button class="notif-load-btn" (click)="loadMore()" [disabled]="isLoading || isLastPage">
-            <mat-icon>expand_more</mat-icon>
-            {{ isLoading ? 'Loading…' : 'Load 5 more' }}
+        <div class="notif-popup-header">
+          <span class="notif-popup-title">Notifications</span>
+          <button class="notif-clear-btn" (click)="clearAll()" [disabled]="notifs.length === 0">
+            <mat-icon>delete_sweep</mat-icon> Clear all
           </button>
         </div>
+
+        <div class="notif-list" *ngIf="notifs.length > 0; else emptyNotif">
+          <div class="notif-item" *ngFor="let n of notifs"
+               [class.unread]="!n.isRead" (click)="markRead(n)">
+            <div class="notif-icon-wrap">
+              <mat-icon>article</mat-icon>
+            </div>
+            <div class="notif-content">
+              <p class="notif-text">{{ n.senderUsername }} posted a new article</p>
+              <span class="notif-time">{{ n.timestamp }}</span>
+            </div>
+            <span class="notif-dot" *ngIf="!n.isRead"></span>
+          </div>
+        </div>
+
+        <ng-template #emptyNotif>
+          <div class="notif-empty">
+            <mat-icon>notifications_none</mat-icon>
+            <p>You're all caught up!</p>
+          </div>
+        </ng-template>
+
+      </ng-container>
+
+      <div class="notif-popup-footer">
+        <button class="notif-load-btn" (click)="loadMore()" [disabled]="isLoading || isLastPage">
+          <mat-icon>expand_more</mat-icon>
+          {{ isLoading ? 'Loading…' : 'Load 5 more' }}
+        </button>
       </div>
     </div>
 
-    <!-- Profile avatar + sidebar trigger -->
+    <!-- Profile Avatar Button + Hover Popup -->
     <button class="avatar-btn" (click)="toggleProfileSidebar()">
       <span class="cover">
-        <p class="nav-avatar">{{ user.username.charAt(0)  | uppercase }}</p>
+        <p class="nav-avatar">{{ user.username.charAt(0) | uppercase }}</p>
       </span>
       <span class="avatar-name">{{ user.username }}</span>
+
+      <!-- Profile mini-popup (shows on hover) -->
+      <div class="profile-popup" (click)="$event.stopPropagation()">
+        <div class="pp-circle">{{ user.username.charAt(0) | uppercase }}</div>
+        <span class="pp-name">{{ user.username | titlecase }}</span>
+        <span class="pp-username">@{{ user.username }}</span>
+        <a class="pp-btn" [routerLink]="['/profile']">
+          <mat-icon>person</mat-icon> View Profile
+        </a>
+          <button  class="pp-btn" (click)="logout()">
+            <mat-icon>logout</mat-icon> Logout
+          </button>
+      </div>
     </button>
+
+  </div>
 </header>
 
 <!-- Overlay to close notification popup -->
-<!-- <div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div>   -->
+<!-- <div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div> -->
