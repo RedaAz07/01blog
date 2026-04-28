@@ -15,4 +15,8 @@ public class userDTO {
     String lastName;
     Date birthDate;
     String profilePictureUrl;
+    int posts;
+    int followers;
+    int following;
+    int notifications;
 }

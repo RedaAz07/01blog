@@ -6,8 +6,13 @@
   <div class="nav-center">
     <div class="search-wrap">
       <mat-icon class="search-ico">search</mat-icon>
-      <input type="text" class="search-input" placeholder="Search posts, topics, people…"
-        [(ngModel)]="searchQuery" (input)="onSearch()">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search posts, topics, people…"
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      />
     </div>
   </div>
 
@@ -16,13 +21,13 @@
     <div class="search-result-item" *ngFor="let user of results.users">
       <a [routerLink]="['/users', user.id]" (click)="closeSearch()">
         <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
-        
-        {{ user.username }}</a>
+
+        {{ user.username }}</a
+      >
     </div>
   </div>
 
   <div class="nav-right">
-
     <!-- Dashboard — admin only -->
     <a *ngIf="user?.role === 'ROLE_ADMIN'" class="nav-link dashboard-link" href="#">
       <mat-icon>dashboard</mat-icon>
@@ -33,8 +38,8 @@
     <div>
       <button class="notif-btn" (click)="toggleNotifications()">
         <mat-icon>notifications</mat-icon>
-        <span class="notif-count" *ngIf="notificationService.notifications$ | async as notifs">
-          {{ unreadCount$ | async }}
+        <span class="notif-count" *ngIf="authService.currentUser$ | async as currentUser">
+          {{ currentUser.notifications }}
         </span>
       </button>
     </div>
@@ -42,7 +47,6 @@
     <!-- Notification Popup -->
     <div class="notif-popup" [class.open]="notifOpen">
       <ng-container *ngIf="notificationService.notifications$ | async as notifs">
-
         <div class="notif-popup-header">
           <span class="notif-popup-title">Notifications</span>
           <button class="notif-clear-btn" (click)="clearAll()" [disabled]="notifs.length === 0">
@@ -51,8 +55,12 @@
         </div>
 
         <div class="notif-list" *ngIf="notifs.length > 0; else emptyNotif">
-          <div class="notif-item" *ngFor="let n of notifs"
-               [class.unread]="!n.isRead" (click)="markRead(n)">
+          <div
+            class="notif-item"
+            *ngFor="let n of notifs"
+            [class.unread]="!n.isRead"
+            (click)="markRead(n)"
+          >
             <div class="notif-icon-wrap">
               <mat-icon>article</mat-icon>
             </div>
@@ -70,7 +78,6 @@
             <p>You're all caught up!</p>
           </div>
         </ng-template>
-
       </ng-container>
 
       <div class="notif-popup-footer">
@@ -93,15 +100,25 @@
         <div class="pp-circle">{{ user.username.charAt(0) | uppercase }}</div>
         <span class="pp-name">{{ user.username | titlecase }}</span>
         <span class="pp-username">@{{ user.username }}</span>
-        <a class="pp-btn" [routerLink]="['/profile']">
-          <mat-icon>person</mat-icon> View Profile
-        </a>
-          <button  class="pp-btn" (click)="logout()">
-            <mat-icon>logout</mat-icon> Logout
-          </button>
+
+        <div class="ps-stats" *ngIf="authService.currentUser$ | async as currentUser">
+          <div class="ps-stat">
+            <span class="ps-stat-val">{{ currentUser.posts }}</span>
+            <span class="ps-stat-lbl">Posts</span>
+          </div>
+          <div class="ps-stat">
+            <span class="ps-stat-val">{{ currentUser.followers }}</span>
+            <span class="ps-stat-lbl">Followers</span>
+          </div>
+          <div class="ps-stat">
+            <span class="ps-stat-val">{{ currentUser.following }}</span>
+            <span class="ps-stat-lbl">Following</span>
+          </div>
+        </div>
+        <a class="pp-btn" [routerLink]="['/profile']"> <mat-icon>person</mat-icon> View Profile </a>
+        <button class="pp-btn" (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
       </div>
     </button>
-
   </div>
 </header>
 

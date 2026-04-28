@@ -20,6 +20,8 @@
   --muted  : #6b8f82;
   --radius : 14px;
   --shadow : 0 2px 16px rgba(9, 20, 19, 0.08);
+  --mint40 : rgba(176, 228, 204, 0.4);
+
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,6 +103,8 @@ body {
 
   &::placeholder { color: rgba(176, 228, 204, 0.6); }
 }
+
+
 
 .nav-right {
   flex: 0 0 auto;
@@ -849,4 +853,29 @@ body {
 
     &.delete-item mat-icon { color: #dc2626; }
   }
+}
+
+
+
+.pp-circle1 {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgb(176, 228, 204);
+  border: 2px solid  rgb(64, 138, 113);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--forest);
+  text-transform: uppercase;
+}
+
+.pp-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.3;
 }

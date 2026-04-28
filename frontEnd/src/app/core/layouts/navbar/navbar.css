@@ -428,7 +428,7 @@
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: 210px;
+  width: 250px;
   background: var(--white);
   border-radius: 18px;
   box-shadow: 0 12px 40px rgba(9, 20, 19, 0.2);
@@ -513,4 +513,34 @@
   box-sizing: border-box; 
 
   &:hover { background: var(--teal); }
+}
+
+
+
+.ps-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  background: #f0f5f3;
+  border-radius: 12px;
+  padding: 14px 15px;
+}
+
+.ps-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ps-stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--forest);
+}
+
+.ps-stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }

@@ -6,6 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { AuthService } from '../core/services/auth';
 
 export interface Comment {
   id: number;
@@ -55,6 +56,9 @@ export interface SuggestedUser {
 })
 export class Home implements OnInit {
 
+  constructor(
+    public authservice: AuthService
+  ) {}
   /* ── Current user ── */
   currentUser = {
     id: 1,

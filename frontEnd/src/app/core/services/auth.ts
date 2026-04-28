@@ -24,6 +24,11 @@ export interface UserProfileDTO {
   role: string;
   firstName: string;
   lastName: string;
+  posts: number;
+  followers: number;
+  following: number;
+  notifications: number;
+
 }
 
 @Injectable({

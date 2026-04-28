@@ -72,6 +72,10 @@ public class UserService {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setBirthDate(user.getBirthDate());
+        dto.setPosts(user.getPosts().size());
+        dto.setFollowers(user.getFollowers().size());
+        dto.setFollowing(user.getFollowing().size());
+        dto.setNotifications(user.getReceivedNotifications().size());
         dto.setProfilePictureUrl(user.getProfilePictureUrl());
         return dto;
     }

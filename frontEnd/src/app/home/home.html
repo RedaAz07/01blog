@@ -1,56 +1,14 @@
-<!-- ═══════════════════════════════════════
-     NAVBAR
-════════════════════════════════════════ -->
 
-
-<!-- ═══════════════════════════════════════
-     PROFILE SIDEBAR
-════════════════════════════════════════ -->
-<div class="sidebar-overlay" [class.active]="profileSidebarOpen" (click)="closeProfileSidebar()"></div>
-<aside class="profile-sidebar" [class.open]="profileSidebarOpen">
-  <div class="ps-header">
-    <img [src]="currentUser.avatar" class="ps-avatar">
-    <div>
-      <p class="ps-name">{{ currentUser.name }}</p>
-      <p class="ps-handle">@{{ currentUser.username }}</p>
-    </div>
-    <button class="ps-close" (click)="closeProfileSidebar()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-  <div class="ps-stats">
-    <div class="ps-stat">
-      <span class="ps-stat-val">{{ currentUser.posts }}</span>
-      <span class="ps-stat-lbl">Posts</span>
-    </div>
-    <div class="ps-stat">
-      <span class="ps-stat-val">{{ currentUser.followers }}</span>
-      <span class="ps-stat-lbl">Followers</span>
-    </div>
-    <div class="ps-stat">
-      <span class="ps-stat-val">{{ currentUser.following }}</span>
-      <span class="ps-stat-lbl">Following</span>
-    </div>
-  </div>
-  <p class="ps-bio">{{ currentUser.bio }}</p>
-  <a class="ps-profile-btn" href="#">
-    <mat-icon>person</mat-icon> View Full Profile
-  </a>
-</aside>
-
-<!-- ═══════════════════════════════════════
-     MAIN LAYOUT
-════════════════════════════════════════ -->
-<main class="page-layout">
+<main class="page-layout" *ngIf="authservice.currentUser$ | async as cUser">
 
   <!-- ── CENTER COLUMN ── -->
   <section class="feed-col">
 
     <!-- Create Post Trigger -->
     <div class="create-trigger" (click)="openCreatePost()">
-      <img [src]="currentUser.avatar" class="ct-avatar">
+   <div class="pp-circle1"> {{ cUser.username.charAt(0) | uppercase }}</div>
       <div class="ct-input">
-        <span>What's on your mind, {{ currentUser.name.split(' ')[0] }}?</span>
+        <span>What's on your mind, {{ cUser.username.split(' ')[0] }}?</span>
       </div>
       <button class="ct-media-btn" (click)="$event.stopPropagation(); openCreatePost()">
         <mat-icon>add_photo_alternate</mat-icon>

@@ -11,7 +11,6 @@ import { roleGuard } from './core/guards/role-guard';
 export const routes: Routes = [
   { path: 'login', component: Login, canActivate: [guestGuard] },
   { path: 'register', component: Register, canActivate: [guestGuard] },
-
  {
     path: '',
     component: MainLayout, 
