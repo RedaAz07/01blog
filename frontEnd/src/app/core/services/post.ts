@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, tap } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 
 export interface PostRequestDTO {
@@ -18,21 +19,37 @@ export interface PostResponseDTO {
   commentsCount: number;
   likesCount: number;
 }
+export interface PageResponse {
+  content: PostResponseDTO[];
+  last: boolean;
+}
 @Injectable({
   providedIn: 'root',
 })
 export class PostService {
-  private apiUrl = 'http://localhost:8080/api/post/create'; // Change to match your exact endpoint!
+  private apiUrl = 'http://localhost:8080/api/post/'; // Change to match your exact endpoint!
+  private postSubject = new BehaviorSubject<PostResponseDTO[]>([]);
+  public posts$ = this.postSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   // 3. The Create Method
   createPost(data: PostRequestDTO): Observable<PostResponseDTO> {
-    return this.http.post<PostResponseDTO>(this.apiUrl, data);
+    return this.http.post<PostResponseDTO>(`${this.apiUrl}create`, data);
   }
 
-  // 4. (Bonus) The Fetch Method for your Home Feed!
-  getFeed(): Observable<PostResponseDTO[]> {
-    return this.http.get<PostResponseDTO[]>(this.apiUrl);
+
+  fetchPosts(pageNumber: number, pageSize: number = 10): Observable<PageResponse> {
+    let params = new HttpParams()
+      .set('page', pageNumber.toString())
+      .set('size', pageSize.toString());
+
+    return this.http.get<PageResponse>(`${this.apiUrl}all`, { params }).pipe(
+      tap((response) => {
+        const currentPost = this.postSubject.value;
+        const combinedList = [...currentPost, ...response.content];
+        this.postSubject.next(combinedList);
+      }),
+    );
   }
 }

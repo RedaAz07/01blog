@@ -1,12 +1,9 @@
-
 <main class="page-layout" *ngIf="authservice.currentUser$ | async as cUser">
-
   <!-- ── CENTER COLUMN ── -->
   <section class="feed-col">
-
     <!-- Create Post Trigger -->
     <div class="create-trigger" (click)="openCreatePost()">
-   <div class="pp-circle1"> {{ cUser.username.charAt(0) | uppercase }}</div>
+      <div class="pp-circle1">{{ cUser.username.charAt(0) | uppercase }}</div>
       <div class="ct-input">
         <span>What's on your mind, {{ cUser.username.split(' ')[0] }}?</span>
       </div>
@@ -16,88 +13,24 @@
     </div>
 
     <!-- Blog Feed -->
-    <article class="blog-card" *ngFor="let post of posts">
-      <div class="blog-card-header">
-        <img [src]="post.authorAvatar" class="blog-avatar">
-        <div class="blog-meta">
-          <span class="blog-author">{{ post.authorName }}</span>
-          <span class="blog-time">{{ post.createdAt | date:'MMM d, y · h:mm a' }}</span>
-        </div>
-        <!-- 3-dot menu -->
-        <button class="more-btn" [matMenuTriggerFor]="postMenu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #postMenu="matMenu" class="post-menu">
-          <ng-container *ngIf="post.authorId === currentUser.id; else reportTpl">
-            <button mat-menu-item (click)="editPost(post)">
-              <mat-icon>edit</mat-icon> Edit Post
-            </button>
-            <button mat-menu-item class="delete-item" (click)="deletePost(post)">
-              <mat-icon>delete</mat-icon> Delete Post
-            </button>
-          </ng-container>
-          <ng-template #reportTpl>
-            <button mat-menu-item (click)="reportPost(post)">
-              <mat-icon>flag</mat-icon> Report Post
-            </button>
-          </ng-template>
-        </mat-menu>
-      </div>
+    <app-post-feed
+      *ngFor="let p of postService.posts$ | async"
+      [post]="p"
+      [currentUser]="authservice.currentUser$ | async"
+      (edit)="editPost($event)"
+      (report)="reportPost($event)"
+    >
+    </app-post-feed>
 
-      <h2 class="blog-title">{{ post.title }}</h2>
-      <p class="blog-desc">{{ post.description }}</p>
-
-      <div class="blog-media" *ngIf="post.mediaUrl">
-        <img [src]="post.mediaUrl" [alt]="post.title" class="blog-img">
-      </div>
-
-      <!-- Actions -->
-      <div class="blog-actions">
-        <button class="action-btn like-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
-          <mat-icon>{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
-          <span>{{ post.likes }}</span>
-        </button>
-
-        <button class="action-btn comment-btn" (click)="toggleComments(post)">
-          <mat-icon>chat_bubble_outline</mat-icon>
-          <span>{{ post.comments.length }}</span>
-        </button>
-      </div>
-
-      <!-- Comments Section -->
-      <div class="comments-section" *ngIf="post.showComments">
-        <div class="comment" *ngFor="let c of post.comments">
-          <img [src]="c.avatar" class="comment-avatar">
-          <div class="comment-body">
-            <span class="comment-author">{{ c.author }}</span>
-            <p class="comment-text">{{ c.text }}</p>
-          </div>
-        </div>
-
-        <div class="comment-form">
-          <img [src]="currentUser.avatar" class="comment-avatar">
-          <div class="comment-input-wrap">
-            <input type="text" class="comment-input" placeholder="Write a comment…"
-              [(ngModel)]="post.newComment"
-              (keyup.enter)="addComment(post)">
-            <button class="comment-send" (click)="addComment(post)">
-              <mat-icon>send</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-    </article>
-
+    <button (click)="loadMorePosts()" class="load-more-btn">Load More</button>
   </section>
 
   <!-- ── RIGHT COLUMN — Suggestions ── -->
   <aside class="suggestions-col">
     <div class="suggestions-card">
-      <h3 class="sug-title">
-        <mat-icon>group_add</mat-icon> People to Follow
-      </h3>
+      <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
       <div class="sug-user" *ngFor="let u of suggestedUsers">
-        <img [src]="u.avatar" class="sug-avatar">
+        <img [src]="u.avatar" class="sug-avatar" />
         <div class="sug-info">
           <span class="sug-name">{{ u.name }}</span>
           <span class="sug-handle">@{{ u.username }}</span>
@@ -108,7 +41,6 @@
       </div>
     </div>
   </aside>
-
 </main>
 
 <!-- ═══════════════════════════════════════
@@ -118,5 +50,6 @@
 <app-post-component
   [isOpen]="postModalOpen"
   (save)="handlePostSave($event)"
-  (close)="closePostModal()">
+  (close)="closePostModal()"
+>
 </app-post-component>

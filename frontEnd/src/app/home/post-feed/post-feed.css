@@ -1,0 +1,340 @@
+.blog-card {
+  background: var(--card);
+  border-radius: 20px;
+  box-shadow:
+    0 18px 40px rgba(9, 20, 19, 0.08),
+    0 0 0 1px rgba(40, 90, 72, 0.08);
+  margin-bottom: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(176, 228, 204, 0.3);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 24px 44px rgba(9, 20, 19, 0.11),
+      0 0 0 1px rgba(64, 138, 113, 0.12);
+  }
+}
+
+.blog-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 18px 12px;
+}
+
+.blog-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--mint);
+  flex-shrink: 0;
+}
+
+.blog-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.blog-badge {
+  align-self: flex-start;
+  background: rgba(176, 228, 204, 0.28);
+  color: var(--forest);
+  border: 1px solid rgba(64, 138, 113, 0.14);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.blog-author {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.blog-time {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.more-btn {
+  background: #f7faf8;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  padding: 6px;
+  border-radius: 999px;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover { background: rgba(176, 228, 204, 0.4); color: var(--ink); }
+}
+
+.blog-copy {
+  padding: 0 18px 18px;
+}
+
+.blog-title {
+  font-size: 25px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  font-family: Georgia, 'Times New Roman', serif;
+  margin-bottom: 14px;
+}
+
+.blog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #32413d;
+}
+
+.blog-media {
+  width: 100%;
+  max-height: 420px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f6faf8 0%, #edf5f1 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(40, 90, 72, 0.1);
+}
+
+.blog-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.blog-text {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #314542;
+}
+
+.blog-heading {
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--forest);
+  font-weight: 700;
+  margin-top: 4px;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.img-caption {
+  display: block;
+  padding: 12px 14px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.blog-empty {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #f6faf8;
+  border: 1px dashed rgba(64, 138, 113, 0.2);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.blog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 18px;
+  border-top: none;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f7faf8;
+  border: 1px solid rgba(40, 90, 72, 0.1);
+  cursor: pointer;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
+
+  &:hover {
+    background: #eef6f2;
+    color: var(--ink);
+    border-color: rgba(64, 138, 113, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &.liked {
+    color: #e11d48;
+    background: rgba(225, 29, 72, 0.06);
+    border-color: rgba(225, 29, 72, 0.12);
+
+    mat-icon { color: #e11d48; }
+  }
+}
+
+.comments-section {
+  padding: 0 18px 18px;
+  border-top: 1px solid rgba(40, 90, 72, 0.08);
+  margin: 0 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comments-title {
+  padding-top: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.comment {
+  display: flex;
+  gap: 10px;
+}
+
+.comment-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid var(--mint);
+}
+
+.comment-body {
+  background: #f4f8f6;
+  border-radius: 14px;
+  padding: 10px 12px;
+  flex: 1;
+  border: 1px solid rgba(40, 90, 72, 0.08);
+}
+
+.comment-author {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 2px;
+}
+
+.comment-text {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.comment-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f7faf8;
+  border: 1.5px solid rgba(40, 90, 72, 0.1);
+  border-radius: 999px;
+  padding: 6px 6px 6px 14px;
+  gap: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(64, 138, 113, 0.1);
+  }
+}
+
+.comment-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+
+  &::placeholder { color: var(--muted); }
+}
+
+.comment-send {
+  background: linear-gradient(135deg, var(--teal), var(--forest));
+  border: none;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  flex-shrink: 0;
+  transition: transform 0.2s, filter 0.2s;
+
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+
+  &:hover {
+    transform: scale(1.04);
+    filter: brightness(0.96);
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-card {
+    border-radius: 18px;
+  }
+
+  .blog-card-header,
+  .blog-copy,
+  .blog-actions,
+  .comments-section {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .blog-title {
+    font-size: 22px;
+  }
+
+  .comments-section {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+}
+
+
+
+.pp-circle1 {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgb(176, 228, 204);
+  border: 2px solid  rgb(64, 138, 113);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color:  rgb(64, 138, 113);
+  text-transform: uppercase;
+}

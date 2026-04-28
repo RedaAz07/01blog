@@ -9,28 +9,17 @@ import { DatePipe } from '@angular/common';
 import { AuthService } from '../core/services/auth';
 import { PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
 import { PostComponent } from './post-component/post-component';
-
-export interface Comment {
-  id: number;
-  author: string;
-  avatar: string;
-  text: string;
-}
+import { PostFeed } from './post-feed/post-feed';
 
 export interface Post {
   id: number;
-  authorId: number;
   authorName: string;
-  authorAvatar: string;
   title: string;
-  description: string;
-  mediaUrl?: string;
   likes: number;
   liked: boolean;
-  comments: Comment[];
-  showComments: boolean;
-  newComment: string;
   createdAt: Date;
+  content: string;
+  comments: number;
 }
 
 export interface SuggestedUser {
@@ -51,25 +40,23 @@ export interface SuggestedUser {
     MatMenuModule,
     MatButtonModule,
     RouterModule,
-    DatePipe,
-    PostComponent
+    PostComponent,
+    PostFeed,
   ],
   templateUrl: './home.html',
-  styleUrls: ['./home.css']
+  styleUrls: ['./home.css'],
 })
 export class Home implements OnInit {
-
+  currentPage = 0;
   constructor(
     public authservice: AuthService,
-    private postService: PostService  
+    public postService: PostService,
   ) {}
-
-
-
-
-postModalOpen = false;
+  toggleFollow(user: any): void {
+    user.following = !user.following;
+  }
+  postModalOpen = false;
   editingPost: Post | null = null;
-  // 🗑️ DELETED postForm!
 
   openCreatePost(): void {
     this.editingPost = null;
@@ -87,165 +74,141 @@ postModalOpen = false;
   }
 
   handlePostSave(postData: any): void {
-
-
-const requestPayload: PostRequestDTO = {
+    const requestPayload: PostRequestDTO = {
       title: postData.title,
-      content: postData.content // This is the Editor.js JSON string!
+      content: postData.content, // This is the Editor.js JSON string!
     };
 
-
     if (this.editingPost) {
-      this.editingPost.title = postData.title;
-      this.editingPost.description = postData.content; 
     } else {
-     
       this.postService.createPost(requestPayload).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
-          
           // Map the Database response to your Frontend Feed structure
           const newPost: Post = {
             id: savedPostFromDB.id,
-            authorId: this.currentUser.id, // Assuming it's you!
             authorName: savedPostFromDB.author,
-            authorAvatar: this.currentUser.avatar,
             title: savedPostFromDB.title,
-            description: savedPostFromDB.content, 
             likes: savedPostFromDB.likesCount,
             liked: savedPostFromDB.liked,
-            comments: [], // New posts have 0 comments
-            showComments: false,
-            newComment: '',
-            createdAt: new Date(savedPostFromDB.timestamp)
+            createdAt: new Date(savedPostFromDB.timestamp),
+            comments: savedPostFromDB.commentsCount,
+            content: savedPostFromDB.content,
           };
-          
-          // Push the REAL post from the database to the top of the feed!
-          this.posts.unshift(newPost); 
-          this.currentUser.posts++;
-          
-          // Close the modal now that it's successfully saved
+
+          /*    this.posts.unshift(newPost);
+          this.currentUser.posts++; */
+
           this.closePostModal();
         },
         error: (err) => {
           console.error('Failed to save post:', err);
           alert('Sorry, something went wrong while saving your post. Please try again.');
-        }
+        },
       });
-   
     }
 
     // Close the modal when done!
     this.closePostModal();
   }
 
-  /* ── Current user ── */
-  currentUser = {
-    id: 1,
-    name: 'Sarah Johnson',
-    username: 'sarahj',
-    avatar: 'https://i.pravatar.cc/150?img=47',
-    bio: 'Writer, explorer, coffee addict ☕ | Sharing stories that matter.',
-    posts: 48,
-    followers: 1_240,
-    following: 312
-  };
-
-  isAdmin = true; // toggle to hide dashboard link
-  profileSidebarOpen = false;
-  searchQuery = '';
-
-  /* ── Post modal state ── */
-  postForm = { title: '', description: '', mediaPreview: '' as string | null };
-
-  /* ── Feed ── */
-  posts: Post[] = [
-    {
-      id: 1,
-      authorId: 1,
-      authorName: 'Sarah Johnson',
-      authorAvatar: 'https://i.pravatar.cc/150?img=47',
-      title: 'The Art of Slow Travel',
-      description: 'Travel isn\'t about how many places you visit — it\'s about how deeply you experience each one. I spent three weeks in a single village in Portugal and came back transformed.',
-      mediaUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80',
-      likes: 142,
-      liked: false,
-      comments: [
-        { id: 1, author: 'Alex Rivera', avatar: 'https://i.pravatar.cc/150?img=12', text: 'This really resonates with me. Quality over quantity!' },
-        { id: 2, author: 'Maya Chen', avatar: 'https://i.pravatar.cc/150?img=25', text: 'Portugal is absolutely magical. Which village?' }
-      ],
-      showComments: false,
-      newComment: '',
-      createdAt: new Date('2026-04-24T09:30:00')
-    },
-    {
-      id: 2,
-      authorId: 2,
-      authorName: 'James Okafor',
-      authorAvatar: 'https://i.pravatar.cc/150?img=15',
-      title: 'Why I Quit My 6-Figure Job to Write',
-      description: 'Everyone thought I was crazy. My family, my friends, my therapist. But eighteen months later, I\'ve never been more fulfilled. Here\'s what I learned about risk, identity, and what we owe ourselves.',
-      likes: 389,
-      liked: true,
-      comments: [
-        { id: 3, author: 'Emma Walsh', avatar: 'https://i.pravatar.cc/150?img=32', text: 'Incredibly brave. This is the kind of content I come here for.' }
-      ],
-      showComments: false,
-      newComment: '',
-      createdAt: new Date('2026-04-23T14:15:00')
-    },
-    {
-      id: 3,
-      authorId: 3,
-      authorName: 'Lena Fischer',
-      authorAvatar: 'https://i.pravatar.cc/150?img=44',
-      title: 'Minimalist Photography: Less Is More',
-      description: 'The most powerful images are often the simplest. A single subject. Negative space. No distractions. Learning to subtract until only truth remains.',
-      mediaUrl: 'https://images.unsplash.com/photo-1518991669955-9c7e78ec80ca?w=700&q=80',
-      likes: 211,
-      liked: false,
-      comments: [],
-      showComments: false,
-      newComment: '',
-      createdAt: new Date('2026-04-22T18:00:00')
-    }
-  ];
-
   /* ── Suggested Users ── */
   suggestedUsers: SuggestedUser[] = [
-    { id: 10, name: 'Alex Rivera',   username: 'alexr',    avatar: 'https://i.pravatar.cc/150?img=12', following: false },
-    { id: 11, name: 'Maya Chen',     username: 'mayac',    avatar: 'https://i.pravatar.cc/150?img=25', following: true  },
-    { id: 12, name: 'Emma Walsh',    username: 'emmaw',    avatar: 'https://i.pravatar.cc/150?img=32', following: false },
-    { id: 13, name: 'Carlos Vega',   username: 'carlosv',  avatar: 'https://i.pravatar.cc/150?img=53', following: false },
-    { id: 14, name: 'Priya Sharma',  username: 'priyas',   avatar: 'https://i.pravatar.cc/150?img=60', following: false },
-    { id: 15, name: 'Tom Nguyen',    username: 'tomn',     avatar: 'https://i.pravatar.cc/150?img=65', following: true  },
-    { id: 16, name: 'Sofia Rossi',   username: 'sofiar',   avatar: 'https://i.pravatar.cc/150?img=49', following: false },
-    { id: 17, name: 'Daniel Park',   username: 'danielp',  avatar: 'https://i.pravatar.cc/150?img=67', following: false },
-    { id: 18, name: 'Isla Morgan',   username: 'islam',    avatar: 'https://i.pravatar.cc/150?img=56', following: false },
-    { id: 19, name: 'Omar Farouq',   username: 'omarf',    avatar: 'https://i.pravatar.cc/150?img=70', following: false }
+    {
+      id: 10,
+      name: 'Alex Rivera',
+      username: 'alexr',
+      avatar: 'https://i.pravatar.cc/150?img=12',
+      following: false,
+    },
+    {
+      id: 11,
+      name: 'Maya Chen',
+      username: 'mayac',
+      avatar: 'https://i.pravatar.cc/150?img=25',
+      following: true,
+    },
+    {
+      id: 12,
+      name: 'Emma Walsh',
+      username: 'emmaw',
+      avatar: 'https://i.pravatar.cc/150?img=32',
+      following: false,
+    },
+    {
+      id: 13,
+      name: 'Carlos Vega',
+      username: 'carlosv',
+      avatar: 'https://i.pravatar.cc/150?img=53',
+      following: false,
+    },
+    {
+      id: 14,
+      name: 'Priya Sharma',
+      username: 'priyas',
+      avatar: 'https://i.pravatar.cc/150?img=60',
+      following: false,
+    },
+    {
+      id: 15,
+      name: 'Tom Nguyen',
+      username: 'tomn',
+      avatar: 'https://i.pravatar.cc/150?img=65',
+      following: true,
+    },
+    {
+      id: 16,
+      name: 'Sofia Rossi',
+      username: 'sofiar',
+      avatar: 'https://i.pravatar.cc/150?img=49',
+      following: false,
+    },
+    {
+      id: 17,
+      name: 'Daniel Park',
+      username: 'danielp',
+      avatar: 'https://i.pravatar.cc/150?img=67',
+      following: false,
+    },
+    {
+      id: 18,
+      name: 'Isla Morgan',
+      username: 'islam',
+      avatar: 'https://i.pravatar.cc/150?img=56',
+      following: false,
+    },
+    {
+      id: 19,
+      name: 'Omar Farouq',
+      username: 'omarf',
+      avatar: 'https://i.pravatar.cc/150?img=70',
+      following: false,
+    },
   ];
-
-  ngOnInit(): void {}
-
-  /* ── Navbar / Sidebar ── */
-  toggleProfileSidebar(): void { this.profileSidebarOpen = !this.profileSidebarOpen; }
-  closeProfileSidebar(): void  { this.profileSidebarOpen = false; }
-  onSearch(): void { /* wire to search service */ }
-
-
-
-
-
- 
-
-  
-
-
-  /* ── Post actions ── */
-  deletePost(post: Post): void {
-    this.posts = this.posts.filter(p => p.id !== post.id);
-    this.currentUser.posts = Math.max(0, this.currentUser.posts - 1);
+  private profileSidebarOpen = false;
+  private showComments = false;
+  ngOnInit(): void {
+    this.postService.fetchPosts(this.currentPage, 10).subscribe();
+  }
+  loadMorePosts(): void {
+    this.currentPage++; 
+    this.postService.fetchPosts(this.currentPage, 10).subscribe();
   }
 
+  toggleProfileSidebar(): void {
+    this.profileSidebarOpen = !this.profileSidebarOpen;
+  }
+  closeProfileSidebar(): void {
+    this.profileSidebarOpen = false;
+  }
+  onSearch(): void {
+    /* wire to search service */
+  }
+
+  /*   deletePost(post: Post): void {
+    this.posts = this.posts.filter((p) => p.id !== post.id);
+    this.currentUser.posts = Math.max(0, this.currentUser.posts - 1);
+  }
+ */
   reportPost(post: Post): void {
     alert(`Post "${post.title}" has been reported. Thank you!`);
   }
@@ -255,23 +218,14 @@ const requestPayload: PostRequestDTO = {
     post.likes += post.liked ? 1 : -1;
   }
 
-  toggleComments(post: Post): void { post.showComments = !post.showComments; }
-
-  addComment(post: Post): void {
-    if (!post.newComment.trim()) return;
-    post.comments.push({
-      id: Date.now(),
-      author: this.currentUser.name,
-      avatar: this.currentUser.avatar,
-      text: post.newComment.trim()
-    });
-    post.newComment = '';
+  toggleComments(post: Post): void {
+    this.showComments = !this.showComments;
   }
 
-  /* ── Suggestions ── */
+  /* 
   toggleFollow(user: SuggestedUser): void {
     user.following = !user.following;
     if (user.following) this.currentUser.following++;
     else this.currentUser.following = Math.max(0, this.currentUser.following - 1);
-  }
+  } */
 }

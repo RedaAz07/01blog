@@ -1,0 +1,80 @@
+<article class="blog-card">
+  <div class="blog-card-header">
+    <img [src]="post.authorAvatar || 'assets/default-avatar.png'" class="blog-avatar">
+    <div class="blog-meta">
+      <span class="blog-author">{{ post.authorName }}</span>
+      <span class="blog-time">{{ post.createdAt | date:'MMM d, y · h:mm a' }}</span>
+    </div>
+    
+    <button class="more-btn" [matMenuTriggerFor]="postMenu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    
+    <mat-menu #postMenu="matMenu" class="post-menu">
+      <ng-container *ngIf="post.authorId === currentUser?.id; else reportTpl">
+        <button mat-menu-item (click)="editPost(post)">
+          <mat-icon>edit</mat-icon> Edit Post
+        </button>
+        <button mat-menu-item class="delete-item" (click)="deletePost(post)">
+          <mat-icon>delete</mat-icon> Delete Post
+        </button>
+      </ng-container>
+      <ng-template #reportTpl>
+        <button mat-menu-item (click)="reportPost(post)">
+          <mat-icon>flag</mat-icon> Report Post
+        </button>
+      </ng-template>
+    </mat-menu>
+  </div>
+
+  <h2 class="blog-title">{{ post.title }}</h2>
+
+  <div class="blog-content">
+    <ng-container *ngFor="let block of parsedBlocks">
+      
+      <p class="blog-text" *ngIf="block.type === 'paragraph'" [innerHTML]="block.data.text"></p>
+      
+      <h3 class="blog-heading" *ngIf="block.type === 'header'" [innerHTML]="block.data.text"></h3>
+      
+      <div class="blog-media" *ngIf="block.type === 'image'">
+        <img [src]="block.data.file.url" class="blog-img">
+        <span class="img-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
+      </div>
+
+    </ng-container>
+  </div>
+
+  <div class="blog-actions">
+    <button class="action-btn like-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
+      <mat-icon>{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ post.likes || 0 }}</span>
+    </button>
+
+    <button class="action-btn comment-btn" (click)="toggleComments(post)">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <span>{{ post.comments || 0 }}</span>
+    </button>
+  </div>
+
+  <div class="comments-section" *ngIf="showComments">
+    <div class="comment" *ngFor="let c of post.commentsList">
+      <img [src]="c.avatar" class="comment-avatar">
+      <div class="comment-body">
+        <span class="comment-author">{{ c.author }}</span>
+        <p class="comment-text">{{ c.text }}</p>
+      </div>
+    </div>
+
+    <div class="comment-form">
+      <img [src]="currentUser?.avatar || 'assets/default-avatar.png'" class="comment-avatar">
+      <div class="comment-input-wrap">
+        <input type="text" class="comment-input" placeholder="Write a comment…"
+          [(ngModel)]="newCommentText"
+          (keyup.enter)="addComment(post)">
+        <button class="comment-send" (click)="addComment(post)">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
