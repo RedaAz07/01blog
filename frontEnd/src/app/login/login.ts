@@ -45,6 +45,7 @@ export class Login {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         localStorage.setItem('jwt_token', response.token); 
+        
         this.router.navigate(['/home']);
         this.snackbar.open('Login successful!', 'Close', { duration: 3000 });
       },

@@ -8,9 +8,9 @@ export const authGuard: CanActivateFn = (route, state) => {
   
   // Look for the wristband
   const token = localStorage.getItem('jwt_token');
-
   if (token) {
     // They have a token! Let them through the door.
+    
     return true; 
   } else {
     // No token? Kick them back to login and show a toast!

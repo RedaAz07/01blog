@@ -34,7 +34,7 @@ class PostController {
     private NotificationService NotificationService;
 
     @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> createPost(@Valid @ModelAttribute PostRequestDTO request, Principal principal) {
+    public ResponseEntity<PostResponseDTO> createPost(@Valid @RequestBody PostRequestDTO request, Principal principal) {
         String username = principal.getName();
         PostResponseDTO result = PostService.createPost(request, username);
 

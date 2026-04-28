@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../core/services/auth';
+import { PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
+import { PostComponent } from './post-component/post-component';
 
 export interface Comment {
   id: number;
@@ -49,7 +51,8 @@ export interface SuggestedUser {
     MatMenuModule,
     MatButtonModule,
     RouterModule,
-    DatePipe
+    DatePipe,
+    PostComponent
   ],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
@@ -57,8 +60,84 @@ export interface SuggestedUser {
 export class Home implements OnInit {
 
   constructor(
-    public authservice: AuthService
+    public authservice: AuthService,
+    private postService: PostService  
   ) {}
+
+
+
+
+postModalOpen = false;
+  editingPost: Post | null = null;
+  // 🗑️ DELETED postForm!
+
+  openCreatePost(): void {
+    this.editingPost = null;
+    this.postModalOpen = true;
+  }
+
+  editPost(post: Post): void {
+    this.editingPost = post;
+    this.postModalOpen = true;
+  }
+
+  closePostModal(): void {
+    this.postModalOpen = false;
+    this.editingPost = null;
+  }
+
+  handlePostSave(postData: any): void {
+
+
+const requestPayload: PostRequestDTO = {
+      title: postData.title,
+      content: postData.content // This is the Editor.js JSON string!
+    };
+
+
+    if (this.editingPost) {
+      this.editingPost.title = postData.title;
+      this.editingPost.description = postData.content; 
+    } else {
+     
+      this.postService.createPost(requestPayload).subscribe({
+        next: (savedPostFromDB: PostResponseDTO) => {
+          
+          // Map the Database response to your Frontend Feed structure
+          const newPost: Post = {
+            id: savedPostFromDB.id,
+            authorId: this.currentUser.id, // Assuming it's you!
+            authorName: savedPostFromDB.author,
+            authorAvatar: this.currentUser.avatar,
+            title: savedPostFromDB.title,
+            description: savedPostFromDB.content, 
+            likes: savedPostFromDB.likesCount,
+            liked: savedPostFromDB.liked,
+            comments: [], // New posts have 0 comments
+            showComments: false,
+            newComment: '',
+            createdAt: new Date(savedPostFromDB.timestamp)
+          };
+          
+          // Push the REAL post from the database to the top of the feed!
+          this.posts.unshift(newPost); 
+          this.currentUser.posts++;
+          
+          // Close the modal now that it's successfully saved
+          this.closePostModal();
+        },
+        error: (err) => {
+          console.error('Failed to save post:', err);
+          alert('Sorry, something went wrong while saving your post. Please try again.');
+        }
+      });
+   
+    }
+
+    // Close the modal when done!
+    this.closePostModal();
+  }
+
   /* ── Current user ── */
   currentUser = {
     id: 1,
@@ -76,8 +155,6 @@ export class Home implements OnInit {
   searchQuery = '';
 
   /* ── Post modal state ── */
-  postModalOpen = false;
-  editingPost: Post | null = null;
   postForm = { title: '', description: '', mediaPreview: '' as string | null };
 
   /* ── Feed ── */
@@ -154,69 +231,14 @@ export class Home implements OnInit {
   closeProfileSidebar(): void  { this.profileSidebarOpen = false; }
   onSearch(): void { /* wire to search service */ }
 
-  /* ── Post Modal ── */
-  openCreatePost(): void {
-    this.editingPost = null;
-    this.postForm = { title: '', description: '', mediaPreview: null };
-    this.postModalOpen = true;
-  }
 
-  editPost(post: Post): void {
-    this.editingPost = post;
-    this.postForm = {
-      title: post.title,
-      description: post.description,
-      mediaPreview: post.mediaUrl || null
-    };
-    this.postModalOpen = true;
-  }
 
-  closePostModal(): void {
-    this.postModalOpen = false;
-    this.editingPost = null;
-  }
 
-  submitPost(): void {
-    if (!this.postForm.title || !this.postForm.description) return;
 
-    if (this.editingPost) {
-      // Update
-      this.editingPost.title = this.postForm.title;
-      this.editingPost.description = this.postForm.description;
-      this.editingPost.mediaUrl = this.postForm.mediaPreview || undefined;
-    } else {
-      // Create
-      const newPost: Post = {
-        id: Date.now(),
-        authorId: this.currentUser.id,
-        authorName: this.currentUser.name,
-        authorAvatar: this.currentUser.avatar,
-        title: this.postForm.title,
-        description: this.postForm.description,
-        mediaUrl: this.postForm.mediaPreview || undefined,
-        likes: 0,
-        liked: false,
-        comments: [],
-        showComments: false,
-        newComment: '',
-        createdAt: new Date()
-      };
-      this.posts.unshift(newPost);
-      this.currentUser.posts++;
-    }
+ 
 
-    this.closePostModal();
-  }
+  
 
-  onMediaSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => { this.postForm.mediaPreview = e.target?.result as string; };
-    reader.readAsDataURL(file);
-  }
-
-  removeMedia(): void { this.postForm.mediaPreview = null; }
 
   /* ── Post actions ── */
   deletePost(post: Post): void {

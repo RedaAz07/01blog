@@ -114,47 +114,9 @@
 <!-- ═══════════════════════════════════════
      CREATE / EDIT POST MODAL
 ════════════════════════════════════════ -->
-<div class="modal-overlay" [class.active]="postModalOpen" (click)="closePostModal()"></div>
-<div class="post-modal" [class.open]="postModalOpen">
-  <div class="modal-header">
-    <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
-    <button class="modal-close" (click)="closePostModal()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
 
-  <div class="modal-body">
-    <div class="modal-user">
-      <img [src]="currentUser.avatar" class="modal-avatar">
-      <span class="modal-username">{{ currentUser.name }}</span>
-    </div>
-
-    <input type="text" class="modal-input" placeholder="Post title *"
-      [(ngModel)]="postForm.title">
-
-    <textarea class="modal-textarea" rows="5" placeholder="What's on your mind? *"
-      [(ngModel)]="postForm.description"></textarea>
-
-    <!-- Media preview -->
-    <div class="media-preview" *ngIf="postForm.mediaPreview">
-      <img [src]="postForm.mediaPreview" class="media-prev-img">
-      <button class="remove-media" (click)="removeMedia()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <div class="modal-actions-bar">
-      <label class="media-label" for="mediaUpload">
-        <mat-icon>add_photo_alternate</mat-icon> Photo / Video
-        <input type="file" id="mediaUpload" hidden accept="image/*,video/*"
-          (change)="onMediaSelected($event)">
-      </label>
-
-      <button class="submit-post-btn"
-        [disabled]="!postForm.title || !postForm.description"
-        (click)="submitPost()">
-        {{ editingPost ? 'Update' : 'Publish' }}
-      </button>
-    </div>
-  </div>
-</div>
+<app-post-component
+  [isOpen]="postModalOpen"
+  (save)="handlePostSave($event)"
+  (close)="closePostModal()">
+</app-post-component>

@@ -1,7 +1,7 @@
 package com._blog.demo.controllers;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,28 +23,32 @@ public class MediaController {
         this.mediaUploadService = mediaUploadService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadMultipleMedia(@RequestParam("files") List<MultipartFile> files) {
-        
-        if (files.size() > 5) {
-            return ResponseEntity.badRequest().body("Bro, you can only upload a maximum of 5 files at a time!");
+    @PostMapping("/editor-upload")
+    public ResponseEntity<Map<String, Object>> uploadEditorImage(@RequestParam("image") MultipartFile file) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 1. Use our awesome bouncer to check for viruses/types
+            FileValidator.validateMediaFile(file);
+
+            // 2. Upload the single file to Cloudinary
+            String url = mediaUploadService.uploadFile(file);
+
+            // 3. 🟢 SUCCESS: Build the exact JSON Editor.js wants
+            response.put("success", 1);
+
+            Map<String, String> fileData = new HashMap<>();
+            fileData.put("url", url);
+            response.put("file", fileData);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("🚨 EDITOR UPLOAD FAILED: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + e.getMessage());
+            response.put("success", 0);
+            return ResponseEntity.badRequest().body(response);
         }
-
-        List<String> uploadedUrls = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            try {
-                FileValidator.validateMediaFile(file);
-
-                String url = mediaUploadService.uploadFile(file);
-                uploadedUrls.add(url);
-
-            } catch (RuntimeException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            } catch (IOException e) {
-                return ResponseEntity.internalServerError().body("Cloudinary upload failed!");
-            }
-        }
-        return ResponseEntity.ok(uploadedUrls);
     }
+
 }
