@@ -14,7 +14,7 @@ import com._blog.demo.dto.RegisterRequestDTO;
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.auth.AuthResponseDTO;
 import com._blog.demo.dto.auth.LoginRequestDTO;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.security.CustomUserDetailsService;
 import com._blog.demo.security.JwtUtil;
@@ -61,7 +61,7 @@ public class AuthController {
 
         // C. Print a brand new JWT wristband for them
         final String jwt = jwtUtil.generateToken(userDetails);
-        user user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.isStatus()) {
             throw new RuntimeException("your account is blocked");
         }

@@ -17,16 +17,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class like {
+public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- You need this line!
     @Column(name = "id", nullable = false)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private user user;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private post post;
+    private Post post;
 }

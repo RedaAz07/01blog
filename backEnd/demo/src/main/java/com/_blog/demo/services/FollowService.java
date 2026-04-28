@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com._blog.demo.dto.follow.FollowResponseDTO;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 
 @Service
@@ -23,10 +23,10 @@ public class FollowService {
             throw new RuntimeException("Bro, you cannot follow yourself!");
         }
 
-        user me = userRepository.findByUsername(myUsername)
+        User me = userRepository.findByUsername(myUsername)
                 .orElseThrow(() -> new RuntimeException("Your user not found"));
 
-        user targetUser = userRepository.findByUsername(targetUsername)
+        User targetUser = userRepository.findByUsername(targetUsername)
                 .orElseThrow(() -> new RuntimeException("Target user not found"));
 
         if (me.getFollowing().contains(targetUser)) {
@@ -41,13 +41,13 @@ public class FollowService {
     }
 
     public List<FollowResponseDTO> getFollowing(String username, String myUsername) {
-        user user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
             throw new RuntimeException("You can only see the following list of users you follow");
         }
 
-        List<user> following = user.getFollowing();
+        List<User> following = user.getFollowing();
         return following.stream()
                 .map(followedUser -> {
                     FollowResponseDTO dto = new FollowResponseDTO();
@@ -59,12 +59,12 @@ public class FollowService {
     }
 
     public List<FollowResponseDTO> getFollowers(String username, String myUsername) {
-        user user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
             throw new RuntimeException("You can only see the followers list of users you follow");
         }
-        List<user> followers = user.getFollowers();
+        List<User> followers = user.getFollowers();
         return followers.stream()
                 .map(follower -> {
                     FollowResponseDTO dto = new FollowResponseDTO();

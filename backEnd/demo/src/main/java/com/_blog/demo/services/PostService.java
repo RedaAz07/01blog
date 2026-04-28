@@ -13,8 +13,8 @@ import com._blog.demo.dto.post.PostDeleteReqDTO;
 import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
-import com._blog.demo.entities.post;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.Post;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
@@ -36,18 +36,15 @@ public class PostService {
 
     public PostResponseDTO createPost(PostRequestDTO request, String author) {
 
-        user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
 
-        post newPost = new post();
+        Post newPost = new Post();
         newPost.setTitle(request.title());
         newPost.setContent(request.content());
         newPost.setStatus(true);
         newPost.setUser(auth);
         newPost.setTimestamp(new Date());
-        if (request.mediaFile() != null && !request.mediaFile().isEmpty()) {
-        }
-
-        post savedPost = postRepository.save(newPost);
+        Post savedPost = postRepository.save(newPost);
 
         PostResponseDTO postDto = new PostResponseDTO(
                 savedPost.getId(),
@@ -64,18 +61,17 @@ public class PostService {
     }
 
     public Page<PostResponseDTO> getAllPosts(int page, int size, String username) {
-        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        Page<post> postPage = postRepository.findAll(pageable);
+        Page<Post> postPage = postRepository.findAll(pageable);
 
         return postPage.map(p -> {
             PostResponseDTO postDto = new PostResponseDTO(
                     p.getId(),
                     p.getTitle(),
                     p.getContent(),
-       
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                     likeRepository.existsByUserAndPost(auth, p),
@@ -87,8 +83,8 @@ public class PostService {
     }
 
     public PostResponseDTO updatePost(PostUpdatReqDTO request, String author) {
-        user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
-        post existingPost = postRepository.findById(request.getId())
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        Post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         if (!existingPost.getUser().getId().equals(auth.getId())) {
             throw new RuntimeException("You are not authorized to update this post");
@@ -116,10 +112,9 @@ public class PostService {
     }
 
     public String deletePost(PostDeleteReqDTO request, String author) {
-        user auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
-        post existingPost = postRepository.findById(request.getId())
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        Post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><" + auth.getRole());
         if (!existingPost.getUser().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");
         }
@@ -129,8 +124,8 @@ public class PostService {
     }
 
     public PostResponseDTO findPostById(Long id, String username) {
-        user auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        post existingPost = postRepository.findById(id)
+        User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         PostResponseDTO response = new PostResponseDTO(

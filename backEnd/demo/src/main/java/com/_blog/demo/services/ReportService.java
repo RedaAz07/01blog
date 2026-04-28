@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.report.ReportRequestDTO;
-import com._blog.demo.entities.post;
-import com._blog.demo.entities.report;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.Post;
+import com._blog.demo.entities.Report;
+import com._blog.demo.entities.User;
+import com._blog.demo.repositories.ReportRepository;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.postRepository;
-import com._blog.demo.repositories.reportRepository;
 
 @Service
 public class ReportService {
@@ -21,17 +21,17 @@ public class ReportService {
     @Autowired
     private postRepository postRepository;
     @Autowired
-    private reportRepository reportRepository;
+    private ReportRepository reportRepository;
 
     public String createReport(ReportRequestDTO entity, String username) {
 
-        user reporter = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Reporter not found"));
-        user reportedUser = UserRepository.findById(entity.getReported()).orElseThrow(() -> new RuntimeException("Reported user not found"));
+        User reporter = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Reporter not found"));
+        User reportedUser = UserRepository.findById(entity.getReported()).orElseThrow(() -> new RuntimeException("Reported user not found"));
         if (reportedUser.getId().equals(reporter.getId())) {
             throw new RuntimeException("You cannot report yourself");
         }
 
-        post reportedPost = null;
+        Post reportedPost = null;
         if (entity.getReportedPost() != null) {
             reportedPost = postRepository.findById(entity.getReportedPost()).orElseThrow(() -> new RuntimeException("Reported post not found"));
         }
@@ -48,7 +48,7 @@ public class ReportService {
             throw new RuntimeException("You have already reported this post of this user");
         }
 
-        report newReport = new report();
+        Report newReport = new Report();
         newReport.setReason(entity.getReason());
         newReport.setReporter(reporter);
         newReport.setReported(reportedUser);

@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.dto.userDTO;
-import com._blog.demo.entities.post;
-import com._blog.demo.entities.report;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.Post;
+import com._blog.demo.entities.Report;
+import com._blog.demo.entities.User;
+import com._blog.demo.repositories.ReportRepository;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
 import com._blog.demo.repositories.postRepository;
-import com._blog.demo.repositories.reportRepository;
 
 @Service
 public class AdminService {
@@ -24,7 +24,7 @@ public class AdminService {
     private commentRepository commentRepository;
 
     @Autowired
-    private reportRepository reportRepository;
+    private ReportRepository reportRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -33,7 +33,7 @@ public class AdminService {
     private likeRepository likeRepository;
 
     public List<ReportResponseDTO> getPostReports(String username) {
-        user auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         return reportRepository.findByReportedPostIsNotNull()
                 .stream()
                 .map(report -> mapToReportDTO(report, auth))
@@ -41,14 +41,14 @@ public class AdminService {
     }
 
     public List<ReportResponseDTO> getUserReports(String username) {
-        user auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         return reportRepository.findByReportedPostIsNull()
                 .stream()
                 .map(report -> mapToReportDTO(report, auth))
                 .toList();
     }
 
-    private ReportResponseDTO mapToReportDTO(report report, user auth) {
+    private ReportResponseDTO mapToReportDTO(Report report, User auth) {
         ReportResponseDTO dto = new ReportResponseDTO();
         dto.setId(report.getId());
         dto.setReason(report.getReason());
@@ -66,7 +66,7 @@ public class AdminService {
         return dto;
     }
 
-    private userDTO mapToUserDTO(user u) {
+    private userDTO mapToUserDTO(User u) {
         if (u == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public class AdminService {
         return dto;
     }
 
-    private PostResponseDTO mapToPostDTO(post p, user auth) {
+    private PostResponseDTO mapToPostDTO(Post p, User auth) {
         if (p == null) {
             return null;
         }
@@ -98,7 +98,7 @@ public class AdminService {
     }
 
     public String banUser(String username) {
-        user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("Bro are u crazy ");
@@ -118,7 +118,7 @@ public class AdminService {
 
     public String deleteUser(String username) {
 
-        user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         if (user.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("Bro are u crazy ");
         }
@@ -134,7 +134,7 @@ public class AdminService {
             throw new RuntimeException("Invalid  ID format: ");
         }
         //   user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Post not found"));
-        post post = postRepository.findById(Id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(Id).orElseThrow(() -> new RuntimeException("Post not found"));
 
         if (post.isStatus()) {
 

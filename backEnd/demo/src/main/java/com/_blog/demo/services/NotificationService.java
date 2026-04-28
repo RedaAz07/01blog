@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.notification.NotificationResponseDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
-import com._blog.demo.entities.notification;
-import com._blog.demo.entities.post;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.Notification;
+import com._blog.demo.entities.Post;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
@@ -36,7 +36,7 @@ public class NotificationService {
         
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        Page<notification> notifP = notificationRepository.findByReceiverUsername(username, pageable);
+        Page<Notification> notifP = notificationRepository.findByReceiverUsername(username, pageable);
 
         return notifP.map(notif -> new NotificationResponseDTO(
             notif.getId(),  
@@ -51,12 +51,12 @@ public class NotificationService {
     private postRepository postRepository;
 
     public void createNotification(String senderUsername, PostResponseDTO post) {
-        post currPost = postRepository.findById(post.id()).orElseThrow(() -> new RuntimeException("Post not found with id: " + post.id()));
+        Post currPost = postRepository.findById(post.id()).orElseThrow(() -> new RuntimeException("Post not found with id: " + post.id()));
 
-        user sender = UserRepository.findByUsername(senderUsername)
+        User sender = UserRepository.findByUsername(senderUsername)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + senderUsername));
-        for (user follower : sender.getFollowers()) {
-            notification notification = new notification();
+        for (User follower : sender.getFollowers()) {
+            Notification notification = new Notification();
             notification.setSender(sender);
             notification.setReceiver(follower);
             notification.setTimestamp(new Date());
@@ -74,7 +74,7 @@ public class NotificationService {
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid notification ID format: " + id);
         }
-        notification notification = notificationRepository.findById(notificationId)
+        Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found with id: " + id));
         if (!notification.getReceiver().getUsername().equals(username)) {
             throw new RuntimeException("You are not authorized to mark this notification as read");

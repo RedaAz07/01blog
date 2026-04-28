@@ -15,36 +15,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "comments")
 @Setter
 @Getter
 @NoArgsConstructor
-public class notification {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class Comment {
+  @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- You need this line!
     @Column(name = "id", nullable = false)
     private Long id;
-
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead;
-
-    // It is very important to know exactly WHEN the notification was sent!
+    @Column(name = "content", nullable = false)
+    private String content;
     @Column(name = "timestamp", nullable = false)
     private Date timestamp;
-
-    // The person who made the post
     @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
-    private user sender;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // The specific follower receiving this copy of the notification
-    @ManyToOne
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private user receiver;
-
-    // THE MISSING PIECE: Which post is this notification about?
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private post post;
+    private Post post;
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.search.GlobalSearchDTO;
 import com._blog.demo.dto.search.UserSearchDTO;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 
 @RestController
@@ -28,7 +28,7 @@ public class SearchController {
             return ResponseEntity.ok(new GlobalSearchDTO(List.of()));
         }
 
-        List<user> users = userRepository.findTop5ByUsernameContainingIgnoreCase(query);
+        List<User> users = userRepository.findTop5ByUsernameContainingIgnoreCase(query);
 
 
 

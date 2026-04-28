@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service; // The DTO we talked about!
 
 import com._blog.demo.dto.RegisterRequestDTO;
 import com._blog.demo.dto.userDTO;
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 
 @Service
@@ -22,7 +22,7 @@ public class UserService {
 
     @Autowired
     public List<userDTO> findAllUsers() {
-        List<user> users = userRepository.findAll();
+        List<User> users = userRepository.findAll();
         return users.stream().map(user -> {
             userDTO dto = new userDTO();
             dto.setUsername(user.getUsername());
@@ -43,7 +43,7 @@ public class UserService {
             throw new RuntimeException("Email is already in use!");
         }
 
-        user newUser = new user();
+        User newUser = new User();
         try {
             newUser.setUsername(request.getUsername());
             newUser.setEmail(request.getEmail());
@@ -63,7 +63,7 @@ public class UserService {
     }
 
     public userDTO getCurrentUser(String username) {
-        user user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
         userDTO dto = new userDTO();
         dto.setUsername(user.getUsername());

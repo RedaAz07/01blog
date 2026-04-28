@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class user {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,29 +46,29 @@ public class user {
     @Column(name = "status", nullable = false)
     private boolean status;
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<post> posts;
+    private List<Post> posts;
 
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<comment> comments;
+    private List<Comment> comments;
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<like> likes;
+    private List<Like> likes;
 
     @OneToMany(mappedBy = "reporter" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<report> reportsMade;
+    private List<Report> reportsMade;
 
     @OneToMany(mappedBy = "reported" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<report> reportsReceived;
+    private List<Report> reportsReceived;
     @ManyToMany
     @JoinTable(name = "user_follows" , joinColumns = @JoinColumn(name = "follower_id" ), inverseJoinColumns = @JoinColumn(name = "followed_id"))
-    private List<user> following;
+    private List<User> following;
 
 
     @ManyToMany(mappedBy = "following")
-    private List<user> followers;
+    private List<User> followers;
 
     @OneToMany(mappedBy = "sender" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<notification> sentNotifications;
+    private List<Notification> sentNotifications;
 
     @OneToMany(mappedBy = "receiver" , cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<notification> receivedNotifications;
+    private List<Notification> receivedNotifications;
 }

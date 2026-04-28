@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class report {
+public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- You need this line!
@@ -31,12 +31,12 @@ public class report {
     private Date timestamp;
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
-    private user reporter;
+    private User reporter;
     @ManyToOne
     @JoinColumn(name = "reported_user_id", nullable = false)
-    private user reported;
+    private User reported;
     @ManyToOne
     @JoinColumn(name = "reported_post_id", nullable = true)
-    private post reportedPost;
+    private Post reportedPost;
 
 }

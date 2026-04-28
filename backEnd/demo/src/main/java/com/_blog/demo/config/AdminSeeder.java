@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com._blog.demo.entities.user;
+import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 
 @Configuration
@@ -18,7 +18,7 @@ public class AdminSeeder {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
                 
-                user admin = new user();
+                User admin = new User();
                 admin.setUsername("admin");
                 admin.setEmail("admin@blog.com");
                 
