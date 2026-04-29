@@ -22,6 +22,8 @@
     "@editorjs/editorjs": "^2.31.6",
     "@editorjs/header": "^2.8.8",
     "@editorjs/image": "^2.10.3",
+    "@weekwood/editorjs-video": "^1.0.2",
+    "editorjs-video": "^1.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

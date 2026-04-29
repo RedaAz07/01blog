@@ -1,36 +1,40 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; 
-import { FormsModule } from '@angular/forms'; 
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { PostResponseDTO } from '../../core/services/post';
+import { UserProfileDTO } from '../../core/services/auth';
+import { Like } from '../../core/services/like';
 
 @Component({
   selector: 'app-post-feed',
-  standalone: true, 
+  standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, DatePipe],
   templateUrl: './post-feed.html',
   styleUrls: ['./post-feed.css'],
 })
 export class PostFeed implements OnInit {
   @Input() post: any;
+
   @Input() currentUser: any;
 
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() report = new EventEmitter<any>();
 
+  constructor(private likeService: Like) {}
   parsedBlocks: any[] = [];
   showComments = false;
   newCommentText = '';
 
   ngOnInit() {
+    console.log(this.post);
     if (this.post && this.post.content) {
       try {
         const editorData = JSON.parse(this.post.content);
         this.parsedBlocks = editorData.blocks || [];
-      } catch (e) {
-        console.error("Failed to parse Editor.js content", e);
-      }
+      } catch (e) {}
     }
   }
 
@@ -39,21 +43,23 @@ export class PostFeed implements OnInit {
   }
 
   toggleLike(post: any) {
-    post.liked = !post.liked;
-    post.likes = post.liked ? (post.likes || 0) + 1 : (post.likes || 0) - 1;
+    this.likeService.likePost(post.id).subscribe((res) => {
+      post.liked = !post.liked;
+      post.likesCount = res.likesCount;
+    });
   }
 
   addComment(post: any) {
-    if (!this.newCommentText.trim()) return;
-    
+    /*   if (!this.newCommentText.trim()) return;
+
     if (!post.commentsList) post.commentsList = [];
     post.commentsList.push({
       id: Date.now(),
       author: this.currentUser?.username || 'Me',
       avatar: this.currentUser?.avatar || 'assets/default-avatar.png',
-      text: this.newCommentText.trim()
+      text: this.newCommentText.trim(),
     });
-    this.newCommentText = '';
+    this.newCommentText = ''; */
   }
 
   editPost(post: any) {

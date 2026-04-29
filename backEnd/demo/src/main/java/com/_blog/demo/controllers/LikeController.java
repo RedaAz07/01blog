@@ -4,31 +4,30 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com._blog.demo.dto.Response;
-import com._blog.demo.dto.like.LikeRequestDTO;
 import com._blog.demo.services.LikeService;
-
-import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/api/like") // The base URL for all like stuff
+@RequestMapping("/api/likes") // The base URL for all like stuff
 public class LikeController {
 
     @Autowired
     private LikeService LikeService;
 
-    @PostMapping("/")
-    public ResponseEntity<Response> like(@Valid @RequestBody LikeRequestDTO likeRequest, Principal principal) {
-
+  @PostMapping("/{postId}/like")
+    public ResponseEntity<Integer> toggleLike(@PathVariable Long postId, Principal principal) {
+        
         String username = principal.getName();
-        String res = LikeService.likeReq(likeRequest, username);
-        return ResponseEntity.ok(new Response(res));
+        
+        // 3. The service should handle the logic and return the total like count
+        int newLikeCount = LikeService.likeReq(postId, username);
+        
+        return ResponseEntity.ok(newLikeCount);
     }
   
     

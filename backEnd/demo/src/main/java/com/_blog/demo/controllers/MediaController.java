@@ -24,18 +24,15 @@ public class MediaController {
     }
 
     @PostMapping("/editor-upload")
-    public ResponseEntity<Map<String, Object>> uploadEditorImage(@RequestParam("image") MultipartFile file) {
+    public ResponseEntity<Map<String, Object>> uploadEditorImage(@RequestParam("file") MultipartFile file) {
 
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // 1. Use our awesome bouncer to check for viruses/types
             FileValidator.validateMediaFile(file);
 
-            // 2. Upload the single file to Cloudinary
             String url = mediaUploadService.uploadFile(file);
 
-            // 3. 🟢 SUCCESS: Build the exact JSON Editor.js wants
             response.put("success", 1);
 
             Map<String, String> fileData = new HashMap<>();
@@ -45,7 +42,7 @@ public class MediaController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            System.err.println("🚨 EDITOR UPLOAD FAILED: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + e.getMessage());
+            System.err.println("🚨#####################################################################" + e.getMessage());
             response.put("success", 0);
             return ResponseEntity.badRequest().body(response);
         }

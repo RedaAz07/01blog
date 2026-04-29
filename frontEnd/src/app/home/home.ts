@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -46,8 +46,17 @@ export interface SuggestedUser {
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
-export class Home implements OnInit {
+export class Home implements OnInit, AfterViewInit, OnDestroy {
+@ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
+    if (element && this.observer) {
+      // The exact moment the div appears on screen, attach the camera!
+      this.observer.observe(element.nativeElement);
+    }
+  }
+  
+  private observer!: IntersectionObserver;
   currentPage = 0;
+  isLoading = false;
   constructor(
     public authservice: AuthService,
     public postService: PostService,
@@ -187,11 +196,46 @@ export class Home implements OnInit {
   private profileSidebarOpen = false;
   private showComments = false;
   ngOnInit(): void {
-    this.postService.fetchPosts(this.currentPage, 10).subscribe();
+    this.loadMorePosts();
   }
+
+  ngAfterViewInit(): void {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1, // Triggers when 10% of the invisible div is on screen
+    };
+
+    this.observer = new IntersectionObserver(([entry]) => {
+      // If the tripwire crosses into the screen, and we aren't already loading...
+      if (entry.isIntersecting && !this.isLoading) {
+        this.loadMorePosts();
+      }
+    }, options);
+
+
+  }
+
   loadMorePosts(): void {
-    this.currentPage++; 
-    this.postService.fetchPosts(this.currentPage, 10).subscribe();
+    if (this.isLoading) return; // Block spam clicks/scrolls
+
+    this.isLoading = true; // Lock the door
+
+    this.postService.fetchPosts(this.currentPage, 10).subscribe({
+      next: () => {
+        this.currentPage++; // Prep for the next time they hit the bottom
+        this.isLoading = false; // Unlock the door
+      },
+      error: (err) => {
+        console.error('Failed to fetch posts', err);
+        this.isLoading = false; // Unlock the door even on error!
+      },
+    });
+  }
+  ngOnDestroy(): void {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
   }
 
   toggleProfileSidebar(): void {

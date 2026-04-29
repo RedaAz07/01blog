@@ -1,32 +1,34 @@
-<main class="page-layout" *ngIf="authservice.currentUser$ | async as cUser">
-  <!-- ── CENTER COLUMN ── -->
-  <section class="feed-col">
-    <!-- Create Post Trigger -->
-    <div class="create-trigger" (click)="openCreatePost()">
-      <div class="pp-circle1">{{ cUser.username.charAt(0) | uppercase }}</div>
-      <div class="ct-input">
-        <span>What's on your mind, {{ cUser.username.split(' ')[0] }}?</span>
+<main class="page-layout">
+
+  <ng-container *ngIf="authservice.currentUser$ | async as cUser">
+
+    <section class="feed-col">
+      
+      <div class="create-trigger" (click)="openCreatePost()">
+        <div class="pp-circle1">{{ cUser.username.charAt(0) | uppercase }}</div>
+        <div class="ct-input">
+          <span>What's on your mind, {{ cUser.username.split(' ')[0] }}?</span>
+        </div>
+        <button class="ct-media-btn" (click)="$event.stopPropagation(); openCreatePost()">
+          <mat-icon>add_photo_alternate</mat-icon>
+        </button>
       </div>
-      <button class="ct-media-btn" (click)="$event.stopPropagation(); openCreatePost()">
-        <mat-icon>add_photo_alternate</mat-icon>
-      </button>
-    </div>
 
-    <!-- Blog Feed -->
-    <app-post-feed
-      *ngFor="let p of postService.posts$ | async"
-      [post]="p"
-      [currentUser]="authservice.currentUser$ | async"
-      (edit)="editPost($event)"
-      (report)="reportPost($event)"
-    >
-    </app-post-feed>
+      <app-post-feed
+        *ngFor="let p of postService.posts$ | async"
+        [post]="p"
+        [currentUser]="cUser" 
+        (edit)="editPost($event)"
+        (report)="reportPost($event)"
+      >
+      </app-post-feed>
 
-    <button (click)="loadMorePosts()" class="load-more-btn">Load More</button>
-  </section>
+<div #scrollAnchor class="scroll-anchor">
+      <span *ngIf="isLoading">Loading more posts...</span>
+    </div>   
+   </section>
 
-  <!-- ── RIGHT COLUMN — Suggestions ── -->
-  <aside class="suggestions-col">
+    <aside class="suggestions-col">
     <div class="suggestions-card">
       <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
       <div class="sug-user" *ngFor="let u of suggestedUsers">
@@ -41,15 +43,11 @@
       </div>
     </div>
   </aside>
-</main>
 
-<!-- ═══════════════════════════════════════
-     CREATE / EDIT POST MODAL
-════════════════════════════════════════ -->
+  </ng-container> </main>
 
 <app-post-component
   [isOpen]="postModalOpen"
   (save)="handlePostSave($event)"
-  (close)="closePostModal()"
->
+  (close)="closePostModal()">
 </app-post-component>

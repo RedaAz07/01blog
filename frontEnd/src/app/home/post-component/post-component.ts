@@ -7,6 +7,7 @@ import { MatIcon, MatIconModule } from '@angular/material/icon';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import ImageTool from '@editorjs/image';
+import VideoTool from '@weekwood/editorjs-video';
 import { AuthService } from '../../core/services/auth';
 @Component({
   selector: 'app-post-component',
@@ -25,9 +26,7 @@ export class PostComponent {
   editor!: EditorJS;
   constructor(public authService: AuthService) {}
 
-
-
-ngAfterViewInit() {
+  ngAfterViewInit() {
     // Grab the token manually!
     const token = localStorage.getItem('jwt_token');
 
@@ -42,9 +41,25 @@ ngAfterViewInit() {
             endpoints: {
               byFile: 'http://localhost:8080/api/media/editor-upload',
             },
-            field: 'image',
+            field: 'file',
             additionalRequestHeaders: {
-              'Authorization': `Bearer ${token}` 
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        },
+        video: {
+          class: VideoTool,
+          config: {
+            endpoints: {
+              byFile: 'http://localhost:8080/api/media/editor-upload',
+            },
+            field: 'file',
+            additionalRequestHeaders: {
+              Authorization: `Bearer ${token}`,
+            },
+            player: {
+              controls: true,
+              autoplay: false,
             }
           },
         },

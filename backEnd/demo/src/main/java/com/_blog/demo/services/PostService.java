@@ -68,11 +68,13 @@ public class PostService {
         Page<Post> postPage = postRepository.findAll(pageable);
 
         return postPage.map(p -> {
+            System.err.println(">>>>>>>>>>>>>>>>>>>>>>>><<"+p.getUser().getUsername());
             PostResponseDTO postDto = new PostResponseDTO(
                     p.getId(),
                     p.getTitle(),
                     p.getContent(),
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
+                    
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                     likeRepository.existsByUserAndPost(auth, p),
                     commentRepository.countByPost(p),
