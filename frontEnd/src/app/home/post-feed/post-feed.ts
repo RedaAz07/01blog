@@ -16,17 +16,23 @@ import { Like } from '../../core/services/like';
 })
 export class PostFeed implements OnInit {
   @Input() post: any;
-
   @Input() currentUser: any;
 
-  @Output() edit = new EventEmitter<any>();
+  @Output() edit   = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() report = new EventEmitter<any>();
 
   constructor(private likeService: Like) {}
+
   parsedBlocks: any[] = [];
-  showComments = false;
+  showComments  = false;
   newCommentText = '';
+
+  // ── ADDED for slider ──
+  mediaBlocks: any[] = [];
+  textBlocks:  any[] = [];
+  currentSlide = 0;
+  // ─────────────────────
 
   ngOnInit() {
     console.log(this.post);
@@ -36,11 +42,14 @@ export class PostFeed implements OnInit {
         this.parsedBlocks = editorData.blocks || [];
       } catch (e) {}
     }
+
+    // ── ADDED: split blocks into media vs text ──
+    this.mediaBlocks = this.parsedBlocks.filter(b => ['image', 'video'].includes(b.type));
+    this.textBlocks  = this.parsedBlocks.filter(b => !['image', 'video'].includes(b.type));
+    // ───────────────────────────────────────────
   }
 
-  toggleComments(post: any) {
-    this.showComments = !this.showComments;
-  }
+  toggleComments(post: any) { this.showComments = !this.showComments; }
 
   toggleLike(post: any) {
     this.likeService.likePost(post.id).subscribe((res) => {
@@ -49,28 +58,15 @@ export class PostFeed implements OnInit {
     });
   }
 
-  addComment(post: any) {
-    /*   if (!this.newCommentText.trim()) return;
+  addComment(post: any) { /* your existing commented code */ }
 
-    if (!post.commentsList) post.commentsList = [];
-    post.commentsList.push({
-      id: Date.now(),
-      author: this.currentUser?.username || 'Me',
-      avatar: this.currentUser?.avatar || 'assets/default-avatar.png',
-      text: this.newCommentText.trim(),
-    });
-    this.newCommentText = ''; */
-  }
+  editPost(post: any)   { this.edit.emit(post); }
+  deletePost(post: any) { this.delete.emit(post); }
+  reportPost(post: any) { this.report.emit(post); }
 
-  editPost(post: any) {
-    this.edit.emit(post);
-  }
-
-  deletePost(post: any) {
-    this.delete.emit(post);
-  }
-
-  reportPost(post: any) {
-    this.report.emit(post);
-  }
+  // ── ADDED: slider controls ──
+  prevSlide() { if (this.currentSlide > 0) this.currentSlide--; }
+  nextSlide() { if (this.currentSlide < this.mediaBlocks.length - 1) this.currentSlide++; }
+  goToSlide(i: number) { this.currentSlide = i; }
+  // ───────────────────────────
 }

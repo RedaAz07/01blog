@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class FileValidator {
 
+  
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(
         "jpg", "jpeg", "png", "webp", "gif", "mp4", "mov", "webm"
     );

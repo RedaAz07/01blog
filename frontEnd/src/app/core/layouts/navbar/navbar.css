@@ -524,6 +524,7 @@
   background: #f0f5f3;
   border-radius: 12px;
   padding: 14px 15px;
+  gap: 7px;
 }
 
 .ps-stat {

@@ -24,7 +24,6 @@ public class LikeController {
         
         String username = principal.getName();
         
-        // 3. The service should handle the logic and return the total like count
         int newLikeCount = LikeService.likeReq(postId, username);
         
         return ResponseEntity.ok(newLikeCount);

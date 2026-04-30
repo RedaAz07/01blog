@@ -1,6 +1,7 @@
 <article class="blog-card">
   <div class="blog-card-header">
     <div class="pp-circle1">{{ post.authorUsername.charAt(0) | uppercase }}</div>
+
     <div class="blog-meta">
       <span class="blog-author">{{ post.authorUsername }}</span>
       <span class="blog-time">{{ post.timestamp | date: 'MMM d, y · h:mm a' }}</span>
@@ -12,7 +13,9 @@
 
     <mat-menu #postMenu="matMenu" class="post-menu">
       <ng-container *ngIf="post.authorUsername === currentUser.username; else reportTpl">
-        <button mat-menu-item (click)="editPost(post)"><mat-icon>edit</mat-icon> Edit Post</button>
+        <button mat-menu-item (click)="editPost(post)">
+          <mat-icon>edit</mat-icon> Edit Post
+        </button>
         <button mat-menu-item class="delete-item" (click)="deletePost(post)">
           <mat-icon>delete</mat-icon> Delete Post
         </button>
@@ -24,28 +27,78 @@
       </ng-template>
     </mat-menu>
   </div>
+  <!-- ══════════════════════════════
+       MEDIA SLIDER
+  ══════════════════════════════════ -->
+  
 
-  <h2 class="blog-title">{{ post.title }}</h2>
+  <!-- ══════════════════════════════
+       HEADER
+  ══════════════════════════════════ -->
 
-  <div class="blog-content">
-    <ng-container *ngFor="let block of parsedBlocks">
-      <p class="blog-text" *ngIf="block.type === 'paragraph'" [innerHTML]="block.data.text"></p>
 
-      <h3 class="blog-heading" *ngIf="block.type === 'header'" [innerHTML]="block.data.text"></h3>
+  <!-- ══════════════════════════════
+       TITLE + TEXT CONTENT
+  ══════════════════════════════════ -->
+  <div class="blog-body">
 
-      <div class="blog-media" *ngIf="block.type === 'image'">
-        <img [src]="block.data.file.url" class="blog-img" />
-        <span class="img-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
-      </div>
-      <div class="blog-media" *ngIf="block.type === 'video'">
-        <video controls class="blog-video" style="width: 100%; border-radius: 8px">
-          <source [src]="block.data.file.url" type="video/mp4" />
-        </video>
-        <span class="img-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
-      </div>
-    </ng-container>
+    <h2 class="blog-title">{{ post.title }}</h2>
+
+    <div class="blog-content">
+      <ng-container *ngFor="let block of textBlocks">
+        <p class="blog-text"    *ngIf="block.type === 'paragraph'" [innerHTML]="block.data.text"></p>
+        <h3 class="blog-heading" *ngIf="block.type === 'header'"    [innerHTML]="block.data.text"></h3>
+      </ng-container>
+    </div>
+
   </div>
 
+
+
+  <div class="media-slider" *ngIf="mediaBlocks.length > 0">
+
+    <div class="slide-counter" *ngIf="mediaBlocks.length > 1">
+      <mat-icon>photo_library</mat-icon>
+      {{ currentSlide + 1 }} / {{ mediaBlocks.length }}
+    </div>
+
+    <div class="slider-track" [style.transform]="'translateX(-' + currentSlide * 100 + '%)'">
+      <div class="slide" *ngFor="let block of mediaBlocks">
+
+        <ng-container *ngIf="block.type === 'image'">
+          <img [src]="block.data.file.url" class="slide-img" [alt]="block.data.caption || ''">
+          <span class="slide-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
+        </ng-container>
+
+        <ng-container *ngIf="block.type === 'video'">
+          <div class="video-badge"><mat-icon>videocam</mat-icon> Video</div>
+          <video controls class="slide-video">
+            <source [src]="block.data.file.url" type="video/mp4">
+          </video>
+          <span class="slide-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
+        </ng-container>
+
+      </div>
+    </div>
+
+    <ng-container *ngIf="mediaBlocks.length > 1">
+      <button class="slider-arrow prev" (click)="prevSlide()" [disabled]="currentSlide === 0">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button class="slider-arrow next" (click)="nextSlide()" [disabled]="currentSlide === mediaBlocks.length - 1">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <div class="slider-dots">
+        <button class="dot" *ngFor="let b of mediaBlocks; let i = index"
+          [class.active]="i === currentSlide" (click)="goToSlide(i)"></button>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- ══════════════════════════════
+       ACTIONS
+  ══════════════════════════════════ -->
   <div class="blog-actions">
     <button class="action-btn like-btn" [class.liked]="post.liked" (click)="toggleLike(post)">
       <mat-icon>{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
@@ -58,30 +111,30 @@
     </button>
   </div>
 
+  <!-- ══════════════════════════════
+       COMMENTS
+  ══════════════════════════════════ -->
   <div class="comments-section" *ngIf="showComments">
-    <!-- comment -->
-    <!--  <div class="comment" *ngFor="let c of post.commentsList">
-      <div class="pp-circle1">A</div>
+
+    <div class="comment" *ngFor="let c of post.commentsList">
+      <div class="pp-circle1 pp-sm">{{ c.author.charAt(0) | uppercase }}</div>
       <div class="comment-body">
-        <span class="comment-author">author</span>
-        <p class="comment-text">text</p>
+        <span class="comment-author">{{ c.author }}</span>
+        <p class="comment-text">{{ c.text }}</p>
       </div>
-    </div> -->
+    </div>
 
     <div class="comment-form">
-      <div class="pp-circle1">{{ currentUser.username.charAt(0) | uppercase }}</div>
+      <div class="pp-circle1 pp-sm">{{ currentUser.username.charAt(0) | uppercase }}</div>
       <div class="comment-input-wrap">
-        <input
-          type="text"
-          class="comment-input"
-          placeholder="Write a comment…"
-          [(ngModel)]="newCommentText"
-          (keyup.enter)="addComment(post)"
-        />
+        <input type="text" class="comment-input" placeholder="Write a comment…"
+          [(ngModel)]="newCommentText" (keyup.enter)="addComment(post)">
         <button class="comment-send" (click)="addComment(post)">
           <mat-icon>send</mat-icon>
         </button>
       </div>
     </div>
+
   </div>
+
 </article>

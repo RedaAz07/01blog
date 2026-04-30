@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,7 @@ import Header from '@editorjs/header';
 import ImageTool from '@editorjs/image';
 import VideoTool from '@weekwood/editorjs-video';
 import { AuthService } from '../../core/services/auth';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-post-component',
   imports: [MatIconModule, CommonModule, FormsModule],
@@ -16,6 +17,8 @@ import { AuthService } from '../../core/services/auth';
   styleUrl: './post-component.css',
 })
 export class PostComponent {
+  snackBar = inject(MatSnackBar);
+
   @Input() isOpen = false;
   @Input() editingPost = false;
   @Output() close = new EventEmitter<void>();
@@ -60,7 +63,7 @@ export class PostComponent {
             player: {
               controls: true,
               autoplay: false,
-            }
+            },
           },
         },
       },
@@ -74,7 +77,14 @@ export class PostComponent {
   async submitPost() {
     try {
       const outputData = await this.editor.save();
-
+      if (!outputData.blocks.length) {
+        this.snackBar.open('Post content cannot be empty!', 'Close', { duration: 3000 });
+        return;
+      }
+      if (!this.postTitle.trim() || this.postTitle.length <5) {
+        this.snackBar.open('Post title must be at least 5 characters long!', 'Close', { duration: 3000 });
+        return;
+      }
       const postData = {
         title: this.postTitle,
         content: JSON.stringify(outputData),
