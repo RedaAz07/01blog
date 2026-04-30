@@ -57,7 +57,7 @@ public class UserService {
         }
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
         newUser.setRole("USER");
-        newUser.setStatus(true );
+        newUser.setStatus(true);
         userRepository.save(newUser);
         return "User registered successfully!";
     }
@@ -80,5 +80,27 @@ public class UserService {
         return dto;
     }
 
-    
+    public List<userDTO> getSuggestions(String username) {
+        List<User> suggestedUsers = userRepository.findRandomUsers(
+                userRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("User not found with username: " + username))
+                        .getId());
+        return suggestedUsers.stream().map(user -> {
+            userDTO dto = new userDTO();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setEmail(user.getEmail());
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
+            dto.setBirthDate(user.getBirthDate());
+            dto.setProfilePictureUrl(user.getProfilePictureUrl());
+            dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
+                    userRepository.findByUsername(username)
+                            .orElseThrow(() -> new RuntimeException("User not found with username: " + username))
+                            .getId())));
+            return dto;
+        }).toList();
+
+    }
+
 }

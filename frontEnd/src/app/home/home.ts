@@ -6,10 +6,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { AuthService } from '../core/services/auth';
+import { AuthService, UserProfileDTO } from '../core/services/auth';
 import { PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
 import { PostComponent } from './post-component/post-component';
 import { PostFeed } from './post-feed/post-feed';
+import { Observable } from 'rxjs/internal/Observable';
+import { Follow } from '../core/services/follow';
 
 export interface Post {
   id: number;
@@ -53,15 +55,18 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       this.observer.observe(element.nativeElement);
     }
   }
-  
+  suggestedUsers$!: Observable<UserProfileDTO[]>;
   private observer!: IntersectionObserver;
   currentPage = 0;
   isLoading = false;
   constructor(
     public authservice: AuthService,
     public postService: PostService,
+    public followService: Follow,
   ) {}
   toggleFollow(user: any): void {
+    console.log(1);
+    
     user.following = !user.following;
   }
   postModalOpen = false;
@@ -121,82 +126,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ── Suggested Users ── */
-  suggestedUsers: SuggestedUser[] = [
-    {
-      id: 10,
-      name: 'Alex Rivera',
-      username: 'alexr',
-      avatar: 'https://i.pravatar.cc/150?img=12',
-      following: false,
-    },
-    {
-      id: 11,
-      name: 'Maya Chen',
-      username: 'mayac',
-      avatar: 'https://i.pravatar.cc/150?img=25',
-      following: true,
-    },
-    {
-      id: 12,
-      name: 'Emma Walsh',
-      username: 'emmaw',
-      avatar: 'https://i.pravatar.cc/150?img=32',
-      following: false,
-    },
-    {
-      id: 13,
-      name: 'Carlos Vega',
-      username: 'carlosv',
-      avatar: 'https://i.pravatar.cc/150?img=53',
-      following: false,
-    },
-    {
-      id: 14,
-      name: 'Priya Sharma',
-      username: 'priyas',
-      avatar: 'https://i.pravatar.cc/150?img=60',
-      following: false,
-    },
-    {
-      id: 15,
-      name: 'Tom Nguyen',
-      username: 'tomn',
-      avatar: 'https://i.pravatar.cc/150?img=65',
-      following: true,
-    },
-    {
-      id: 16,
-      name: 'Sofia Rossi',
-      username: 'sofiar',
-      avatar: 'https://i.pravatar.cc/150?img=49',
-      following: false,
-    },
-    {
-      id: 17,
-      name: 'Daniel Park',
-      username: 'danielp',
-      avatar: 'https://i.pravatar.cc/150?img=67',
-      following: false,
-    },
-    {
-      id: 18,
-      name: 'Isla Morgan',
-      username: 'islam',
-      avatar: 'https://i.pravatar.cc/150?img=56',
-      following: false,
-    },
-    {
-      id: 19,
-      name: 'Omar Farouq',
-      username: 'omarf',
-      avatar: 'https://i.pravatar.cc/150?img=70',
-      following: false,
-    },
-  ];
+  
   private profileSidebarOpen = false;
   private showComments = false;
   ngOnInit(): void {
     this.loadMorePosts();
+    this.suggestedUsers$ = this.followService.suggestedUsers();
   }
 
   ngAfterViewInit(): void {
@@ -266,10 +201,13 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.showComments = !this.showComments;
   }
 
-  /* 
-  toggleFollow(user: SuggestedUser): void {
+/*   toggleFollow(user: SuggestedUser): void {
     user.following = !user.following;
     if (user.following) this.currentUser.following++;
     else this.currentUser.following = Math.max(0, this.currentUser.following - 1);
-  } */
+  }  */
+
+
+
+    
 }

@@ -31,15 +31,15 @@
     <aside class="suggestions-col">
     <div class="suggestions-card">
       <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
-      <div class="sug-user" *ngFor="let u of suggestedUsers">
-        <img [src]="u.avatar" class="sug-avatar" />
+      <div class="sug-user" *ngFor="let u of suggestedUsers$| async">
+        <div class="pp-circle1">{{ u.username.charAt(0) | uppercase }}</div>
         <div class="sug-info">
-          <span class="sug-name">{{ u.name }}</span>
+          <span class="sug-name">{{ u.username }}</span>
           <span class="sug-handle">@{{ u.username }}</span>
         </div>
-        <button class="follow-btn" [class.following]="u.following" (click)="toggleFollow(u)">
-          {{ u.following ? 'Following' : 'Follow' }}
-        </button>
+        <button class="follow-btn" [class.following]="u.followingBYMe" (click)="toggleFollow(u)">
+        {{ u.followingBYMe ? 'Following' : 'Follow' }}
+      </button>
       </div>
     </div>
   </aside>

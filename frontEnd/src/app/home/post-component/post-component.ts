@@ -77,12 +77,12 @@ export class PostComponent {
   async submitPost() {
     try {
       const outputData = await this.editor.save();
-      if (!outputData.blocks.length) {
-        this.snackBar.open('Post content cannot be empty!', 'Close', { duration: 3000 });
+      if (outputData.blocks.length<5 || outputData.blocks.length>5000) {
+        this.snackBar.open('Post content must be between 5 and 5000 characters!', 'Close', { duration: 3000 });
         return;
       }
-      if (!this.postTitle.trim() || this.postTitle.length <5) {
-        this.snackBar.open('Post title must be at least 5 characters long!', 'Close', { duration: 3000 });
+      if (!this.postTitle.trim() || this.postTitle.length <5 || this.postTitle.length > 100) {
+        this.snackBar.open('Post title must be between 5 and 100 characters!', 'Close', { duration: 3000 });
         return;
       }
       const postData = {

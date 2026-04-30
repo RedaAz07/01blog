@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class userDTO {
+    Long id;
     String username;
     String role;    
     String email;
@@ -19,4 +20,6 @@ public class userDTO {
     int followers;
     int following;
     int notifications;
+    boolean FollowingBYMe;
+
 }

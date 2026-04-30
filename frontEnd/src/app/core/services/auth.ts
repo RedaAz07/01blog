@@ -10,12 +10,14 @@ export interface registerDTO {
   response: string;
 }
 export interface registerReqDTO {
+  id: number;
   username: string;
   email: string;
   password: string;
   firstName: string;
   lastName: string;
   birthDate: Date;
+  followingBYMe: boolean;
 }
 export interface UserProfileDTO {
   id: number;
@@ -28,7 +30,7 @@ export interface UserProfileDTO {
   followers: number;
   following: number;
   notifications: number;
-
+  followingBYMe: boolean;
 }
 
 @Injectable({
@@ -50,8 +52,8 @@ export class AuthService {
       this.loggedInSubject.next(true);
       this.loadCurrentUser().subscribe({
         error: () => {
-          this.logout(); 
-        }
+          this.logout();
+        },
       });
     }
   }
@@ -79,7 +81,8 @@ export class AuthService {
     return this.http.get<UserProfileDTO>(`http://localhost:8080/api/users/me`).pipe(
       tap((user) => {
         this.currentUserSubject.next(user);
-      })
+      }),
     );
   }
+
 }
