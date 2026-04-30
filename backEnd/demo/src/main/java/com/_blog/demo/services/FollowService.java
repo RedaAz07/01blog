@@ -17,7 +17,7 @@ public class FollowService {
     private UserRepository userRepository;
 
     @Transactional
-    public String toggleFollow(String myUsername, String targetUsername) {
+    public boolean toggleFollow(String myUsername, String targetUsername) {
 
         if (myUsername.equals(targetUsername)) {
             throw new RuntimeException("Bro, you cannot follow yourself!");
@@ -32,11 +32,11 @@ public class FollowService {
         if (me.getFollowing().contains(targetUser)) {
             me.getFollowing().remove(targetUser);
             userRepository.save(me);
-            return "You unfollowed " + targetUsername;
+            return false;
         } else {
             me.getFollowing().add(targetUser);
             userRepository.save(me);
-            return "You are now following " + targetUsername;
+            return true;
         }
     }
 

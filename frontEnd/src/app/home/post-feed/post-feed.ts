@@ -35,7 +35,6 @@ export class PostFeed implements OnInit {
   // ─────────────────────
 
   ngOnInit() {
-    console.log(this.post);
     if (this.post && this.post.content) {
       try {
         const editorData = JSON.parse(this.post.content);

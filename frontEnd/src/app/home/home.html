@@ -34,7 +34,7 @@
       <div class="sug-user" *ngFor="let u of suggestedUsers$| async">
         <div class="pp-circle1">{{ u.username.charAt(0) | uppercase }}</div>
         <div class="sug-info">
-          <span class="sug-name">{{ u.username }}</span>
+          <span class="sug-name">{{ u.firstName }} {{ u.lastName }}</span>
           <span class="sug-handle">@{{ u.username }}</span>
         </div>
         <button class="follow-btn" [class.following]="u.followingBYMe" (click)="toggleFollow(u)">

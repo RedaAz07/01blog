@@ -77,7 +77,10 @@ export class AuthService {
   register(userData: registerReqDTO): Observable<registerDTO> {
     return this.http.post<registerDTO>(`${this.apiUrl}/register`, userData);
   }
+
+
   loadCurrentUser(): Observable<UserProfileDTO> {
+    
     return this.http.get<UserProfileDTO>(`http://localhost:8080/api/users/me`).pipe(
       tap((user) => {
         this.currentUserSubject.next(user);

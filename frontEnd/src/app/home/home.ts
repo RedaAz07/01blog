@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { PostComponent } from './post-component/post-component';
 import { PostFeed } from './post-feed/post-feed';
 import { Observable } from 'rxjs/internal/Observable';
 import { Follow } from '../core/services/follow';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface Post {
   id: number;
@@ -49,12 +50,14 @@ export interface SuggestedUser {
   styleUrls: ['./home.css'],
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
-@ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
+  suggestedUsers = signal<any[]>([]);
+  @ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
     if (element && this.observer) {
       // The exact moment the div appears on screen, attach the camera!
       this.observer.observe(element.nativeElement);
     }
   }
+  snackbar = inject(MatSnackBar);
   suggestedUsers$!: Observable<UserProfileDTO[]>;
   private observer!: IntersectionObserver;
   currentPage = 0;
@@ -64,10 +67,33 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     public postService: PostService,
     public followService: Follow,
   ) {}
+ 
+
+
   toggleFollow(user: any): void {
-    console.log(1);
-    
-    user.following = !user.following;
+.
+    user.followingBYMe = !user.followingBYMe;
+
+    this.followService.toggleFollow(user.username).subscribe({
+      next: () => {
+        this.snackbar.open(
+          user.followingBYMe
+            ? `You are now following ${user.username}`
+            : `You have unfollowed ${user.username}`,
+          'Close',
+          { duration: 3000 }
+        );
+      },
+      error: (err) => {
+        console.error('Failed to toggle follow', err);
+        
+        user.followingBYMe = !user.followingBYMe;
+        
+        this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
+          duration: 3000,
+        });
+      },
+    });
   }
   postModalOpen = false;
   editingPost: Post | null = null;
@@ -126,7 +152,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ── Suggested Users ── */
-  
+
   private profileSidebarOpen = false;
   private showComments = false;
   ngOnInit(): void {
@@ -147,8 +173,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
         this.loadMorePosts();
       }
     }, options);
-
-
   }
 
   loadMorePosts(): void {
@@ -201,13 +225,9 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.showComments = !this.showComments;
   }
 
-/*   toggleFollow(user: SuggestedUser): void {
+  /*   toggleFollow(user: SuggestedUser): void {
     user.following = !user.following;
     if (user.following) this.currentUser.following++;
     else this.currentUser.following = Math.max(0, this.currentUser.following - 1);
   }  */
-
-
-
-    
 }

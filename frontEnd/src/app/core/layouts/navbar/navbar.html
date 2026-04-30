@@ -98,8 +98,8 @@
       <!-- Profile mini-popup (shows on hover) -->
       <div class="profile-popup" (click)="$event.stopPropagation()">
         <div class="pp-circle">{{ user.username.charAt(0) | uppercase }}</div>
-        <span class="pp-name">{{ user.username | titlecase }}</span>
-        <span class="pp-username">@{{ user.username }}</span>
+        <span class="pp-name">{{ user.firstName }} {{ user.lastName }}</span>
+        <span class="pp-username">@{{ user.username | titlecase }}</span>
 
         <div class="ps-stats" *ngIf="authService.currentUser$ | async as currentUser">
           <div class="ps-stat">

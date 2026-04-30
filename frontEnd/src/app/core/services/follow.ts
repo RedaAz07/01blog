@@ -13,6 +13,6 @@ export class Follow {
   }
 
   toggleFollow(username: string): Observable<any> {
-    return this.http.post(`http://localhost:8080/api/follow/${username}`, {});
+    return this.http.post(`http://localhost:8080/api/users/follow/${username}`, {});
   }
 }

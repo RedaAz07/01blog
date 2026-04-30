@@ -24,12 +24,12 @@ public class FollowController {
     private FollowService followService;
 
     @PostMapping("/follow/{targetUsername}")
-    public ResponseEntity<Response> followUser(@PathVariable String targetUsername, Principal principal) {
+    public ResponseEntity<Boolean> followUser(@PathVariable String targetUsername, Principal principal) {
         String myUsername = principal.getName();    
         
-        String response = followService.toggleFollow(myUsername, targetUsername);
+        boolean response = followService.toggleFollow(myUsername, targetUsername);
         
-        return ResponseEntity.ok(new Response(response));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/following/{username}")
