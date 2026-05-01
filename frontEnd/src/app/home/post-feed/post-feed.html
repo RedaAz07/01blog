@@ -4,7 +4,7 @@
 
     <div class="blog-meta">
       <span class="blog-author">{{ post.authorUsername }}</span>
-      <span class="blog-time">{{ post.timestamp | date: 'MMM d, y · h:mm a' }}</span>
+        <span class="blog-time">{{ post.timestamp | timeAgo }}</span>
     </div>
 
     <button class="more-btn" [matMenuTriggerFor]="postMenu">

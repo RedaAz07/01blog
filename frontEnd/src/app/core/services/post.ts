@@ -46,10 +46,9 @@ export class PostService {
 
     return this.http.get<PageResponse>(`${this.apiUrl}all`, { params }).pipe(
       tap((response) => {
-        const currentPost = this.postSubject.value;
-        const combinedList = [...currentPost, ...response.content];
-        this.postSubject.next(combinedList);
-      }),
+        const currentPosts = this.postSubject.value;
+        this.postSubject.next([...currentPosts, ...response.content]);
+      })
     );
   }
 }

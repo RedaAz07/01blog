@@ -77,7 +77,12 @@ export class PostComponent {
   async submitPost() {
     try {
       const outputData = await this.editor.save();
-      if (outputData.blocks.length<5 || outputData.blocks.length>5000) {
+      console.log(outputData.blocks);
+      
+      if (outputData.blocks.length
+        === 0 || JSON.stringify(outputData).length < 5
+        || JSON.stringify(outputData).length > 5000
+      ) {
         this.snackBar.open('Post content must be between 5 and 5000 characters!', 'Close', { duration: 3000 });
         return;
       }

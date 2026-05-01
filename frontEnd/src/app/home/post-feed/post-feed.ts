@@ -20,11 +20,12 @@ import { Like } from '../../core/services/like';
 import { Comment, CommentResponseDTO } from '../../core/services/comment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentRequestDTO } from '../../core/services/comment';
+import { TimeAgoPipe } from '../../time-ago-pipe';
 
 @Component({
   selector: 'app-post-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, DatePipe],
+  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, DatePipe, TimeAgoPipe],
   templateUrl: './post-feed.html',
   styleUrls: ['./post-feed.css'],
 })

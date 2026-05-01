@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { AuthService, UserProfileDTO } from '../core/services/auth';
-import { PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
+import { PageResponse, PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
 import { PostComponent } from './post-component/post-component';
 import { PostFeed } from './post-feed/post-feed';
 import { Observable } from 'rxjs/internal/Observable';
@@ -50,6 +59,7 @@ export interface SuggestedUser {
   styleUrls: ['./home.css'],
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
+  Posts = signal<PostResponseDTO[]>([]);
   suggestedUsers = signal<any[]>([]);
   @ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
     if (element && this.observer) {
@@ -66,11 +76,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     public postService: PostService,
     public followService: Follow,
   ) {}
- 
-
 
   toggleFollow(user: any): void {
-
     user.followingBYMe = !user.followingBYMe;
 
     this.followService.toggleFollow(user.username).subscribe({
@@ -80,14 +87,14 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
             ? `You are now following ${user.username}`
             : `You have unfollowed ${user.username}`,
           'Close',
-          { duration: 3000 }
+          { duration: 3000 },
         );
       },
       error: (err) => {
         console.error('Failed to toggle follow', err);
-        
+
         user.followingBYMe = !user.followingBYMe;
-        
+
         this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
           duration: 3000,
         });
@@ -115,32 +122,19 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   handlePostSave(postData: any): void {
     const requestPayload: PostRequestDTO = {
       title: postData.title,
-      content: postData.content, // This is the Editor.js JSON string!
+      content: postData.content,
     };
 
     if (this.editingPost) {
     } else {
       this.postService.createPost(requestPayload).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
-          // Map the Database response to your Frontend Feed structure
-          const newPost: Post = {
-            id: savedPostFromDB.id,
-            authorName: savedPostFromDB.author,
-            title: savedPostFromDB.title,
-            likes: savedPostFromDB.likesCount,
-            liked: savedPostFromDB.liked,
-            createdAt: new Date(savedPostFromDB.timestamp),
-            comments: savedPostFromDB.commentsCount,
-            content: savedPostFromDB.content,
-          };
-
-          /*    this.posts.unshift(newPost);
-          this.currentUser.posts++; */
+          
+          this.Posts.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
 
           this.closePostModal();
         },
         error: (err) => {
-          console.error('Failed to save post:', err);
           alert('Sorry, something went wrong while saving your post. Please try again.');
         },
       });
@@ -149,7 +143,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     // Close the modal when done!
     this.closePostModal();
   }
-
 
   private profileSidebarOpen = false;
   private showComments = false;
@@ -178,12 +171,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true; // Lock the door
 
     this.postService.fetchPosts(this.currentPage, 10).subscribe({
-      next: () => {
-        this.currentPage++; // Prep for the next time they hit the bottom
-        this.isLoading = false; // Unlock the door
+      next: (newPosts: any) => {
+        this.Posts.update((currentPosts) => [...currentPosts, ...newPosts.content]);
+        this.currentPage++;
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to fetch posts', err);
         this.isLoading = false; // Unlock the door even on error!
       },
     });
@@ -217,11 +210,4 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     post.liked = !post.liked;
     post.likes += post.liked ? 1 : -1;
   }
-
-  
-  /*   toggleFollow(user: SuggestedUser): void {
-    user.following = !user.following;
-    if (user.following) this.currentUser.following++;
-    else this.currentUser.following = Math.max(0, this.currentUser.following - 1);
-  }  */
 }

@@ -15,7 +15,7 @@
       </div>
 
       <app-post-feed
-        *ngFor="let p of postService.posts$ | async"
+        *ngFor="let p of Posts()"
         [post]="p"
         [currentUser]="cUser" 
         (edit)="editPost($event)"
