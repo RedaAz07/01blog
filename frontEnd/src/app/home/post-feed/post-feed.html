@@ -101,33 +101,42 @@
        COMMENTS
   ══════════════════════════════════ -->
   <div class="comments-section" *ngIf="showComments">
+
+  <!-- comments list (scrollable) -->
+  <div class="comments-list">
     <div class="comment" *ngFor="let c of Comments()">
-      <div class="pp-circle1 pp-sm">{{ c.author.charAt(0) | uppercase }}</div>
+      <div class="pp-circle1 pp-sm">{{ c.authorUsername.charAt(0) | uppercase }}</div>
       <div class="comment-body">
-        <span class="comment-author">{{ c.author }}</span>
+        <span class="comment-author">{{ c.authorUsername }}</span>
         <p class="comment-text">{{ c.content }}</p>
         <span class="comment-time">{{ c.timestamp | date: 'MMM d, y · h:mm a' }}</span>
       </div>
     </div>
-    <div #commentScrollAnchor class="scroll-anchor" style="height: 20px; text-align: center">
-      <span *ngIf="isCommentsLoading" style="color: #888; font-size: 12px"
-        >Loading older comments...</span
-      >
-    </div>
-    <div class="comment-form">
-      <div class="pp-circle1 pp-sm">{{ currentUser.username.charAt(0) | uppercase }}</div>
-      <div class="comment-input-wrap">
-        <input
-          type="text"
-          class="comment-input"
-          placeholder="Write a comment…"
-          [(ngModel)]="newCommentText"
-          (keyup.enter)="addComment(post)"
-        />
-        <button class="comment-send" (click)="addComment(post)">
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
+
+    <div #commentScrollAnchor class="scroll-anchor">
+      <span *ngIf="isCommentsLoading">Loading older comments...</span>
     </div>
   </div>
+
+  <!-- form (fixed) -->
+  <div class="comment-form">
+    <div class="pp-circle1 pp-sm">
+      {{ currentUser.username.charAt(0) | uppercase }}
+    </div>
+
+    <div class="comment-input-wrap">
+      <input
+        type="text"
+        class="comment-input"
+        placeholder="Write a comment…"
+        [(ngModel)]="newCommentText"
+        (keyup.enter)="addComment(post)"
+      />
+      <button class="comment-send" (click)="addComment(post)">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</div>
 </article>

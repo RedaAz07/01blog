@@ -218,10 +218,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     post.likes += post.liked ? 1 : -1;
   }
 
-  toggleComments(post: Post): void {
-    this.showComments = !this.showComments;
-  }
-
+  
   /*   toggleFollow(user: SuggestedUser): void {
     user.following = !user.following;
     if (user.following) this.currentUser.following++;

@@ -107,7 +107,8 @@ export class PostFeed implements OnInit, OnDestroy {
     });
   }
 
-  toggleComments(post: any) {
+  toggleComments(post: any): void {
+    
     this.showComments = !this.showComments;
     if (this.showComments) {
       this.loadComments();
@@ -119,6 +120,8 @@ export class PostFeed implements OnInit, OnDestroy {
     this.isCommentsLoading = true;
     this.commentService.fetchComments(this.currentCommentPage, 5, this.post.id).subscribe({
       next: (response) => {
+        console.log(response);
+        
         this.currentCommentPage++;
         this.Comments.update((currentList) => [...currentList, ...response.content]);
         this.isCommentsLoading = false;
@@ -134,6 +137,7 @@ export class PostFeed implements OnInit, OnDestroy {
     }
   }
   addComment(post: any) {
+
     const commentData: CommentRequestDTO = {
       content: this.newCommentText,
       postId: post.id,
@@ -142,6 +146,7 @@ export class PostFeed implements OnInit, OnDestroy {
       next: (createdComment) => {
         this.localCommentsCount.update((count) => count + 1);
         this.newCommentText = '';
+        this.Comments.update((currentList) => [createdComment, ...currentList]);
         this.snackbar.open('Comment added!', 'Close', { duration: 2000 });
       },
       error: (error) => {

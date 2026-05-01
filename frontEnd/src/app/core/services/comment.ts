@@ -11,7 +11,7 @@ export interface CommentRequestDTO {
 export interface CommentResponseDTO {
   id: number;
   content: string;
-  author: string;
+  authorUsername: string;
   timestamp: string;
 }
 
