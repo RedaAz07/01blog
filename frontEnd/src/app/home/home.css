@@ -8,19 +8,21 @@
      --mint    : #b0e4cc
 ════════════════════════════════════════ */
 
-:root {
-  --white  : rgb(255, 255, 255);
-  --ink    : rgb(9, 20, 19);
-  --forest : rgb(40, 90, 72);
-  --teal   : rgb(64, 138, 113);
-  --mint   : rgb(176, 228, 204);
-  --bg     : #f0f5f3;
-  --card   : #ffffff;
-  --border : rgba(40, 90, 72, 0.15);
-  --muted  : #6b8f82;
+:host {
+  display: block;
+  --white  : var(--theme-white);
+  --ink    : var(--theme-ink);
+  --forest : var(--theme-forest);
+  --teal   : var(--theme-teal);
+  --mint   : var(--theme-mint);
+  --bg     : var(--theme-bg);
+  --card   : var(--theme-card);
+  --border : var(--theme-border);
+  --muted  : var(--theme-muted);
+  --text-soft: var(--theme-text-soft);
   --radius : 14px;
-  --shadow : 0 2px 16px rgba(9, 20, 19, 0.08);
-  --mint40 : rgba(176, 228, 204, 0.4);
+  --shadow : var(--theme-shadow);
+  --mint40 : var(--theme-mint40);
 
 }
 
@@ -324,7 +326,7 @@ body {
 
 .ct-input {
   flex: 1;
-  background: #f0f5f3;
+  background: var(--bg);
   border-radius: 50px;
   padding: 10px 18px;
   font-size: 14px;
@@ -375,7 +377,7 @@ body {
 
   mat-icon { font-size: 20px; height: 20px; width: 20px; }
 
-  &:hover { background: #f0f5f3; color: var(--ink); }
+  &:hover { background: var(--bg); color: var(--ink); }
 
   &.liked {
     color: #e11d48;
@@ -408,7 +410,7 @@ body {
 }
 
 .comment-body {
-  background: #f0f5f3;
+  background: var(--bg);
   border-radius: 12px;
   padding: 8px 12px;
   flex: 1;
@@ -424,7 +426,7 @@ body {
 
 .comment-text {
   font-size: 13px;
-  color: #374151;
+  color: var(--text-soft);
   line-height: 1.5;
 }
 
@@ -438,7 +440,7 @@ body {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #f0f5f3;
+  background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: 50px;
   padding: 6px 6px 6px 14px;
@@ -622,7 +624,7 @@ body {
   padding: 4px;
   border-radius: 6px;
 
-  &:hover { background: #f0f5f3; color: var(--ink); }
+  &:hover { background: var(--bg); color: var(--ink); }
 }
 
 .modal-body {
@@ -738,7 +740,7 @@ body {
 
   mat-icon { font-size: 18px; height: 18px; width: 18px; }
 
-  &:hover { background: #f0f5f3; }
+  &:hover { background: var(--bg); }
 }
 
 .submit-post-btn {
@@ -780,14 +782,14 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgb(176, 228, 204);
-  border: 2px solid  rgb(64, 138, 113);
+  background: var(--mint);
+  border: 2px solid  var(--teal);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 800;
-  color:  rgb(64, 138, 113);
+  color:  var(--teal);
   text-transform: uppercase;
 }
 
@@ -805,5 +807,5 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #888;
+  color: var(--muted);
 }

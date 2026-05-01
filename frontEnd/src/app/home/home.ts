@@ -53,7 +53,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   suggestedUsers = signal<any[]>([]);
   @ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
     if (element && this.observer) {
-      // The exact moment the div appears on screen, attach the camera!
       this.observer.observe(element.nativeElement);
     }
   }
@@ -71,7 +70,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
 
   toggleFollow(user: any): void {
-.
+
     user.followingBYMe = !user.followingBYMe;
 
     this.followService.toggleFollow(user.username).subscribe({
@@ -151,7 +150,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.closePostModal();
   }
 
-  /* ── Suggested Users ── */
 
   private profileSidebarOpen = false;
   private showComments = false;
@@ -168,7 +166,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.observer = new IntersectionObserver(([entry]) => {
-      // If the tripwire crosses into the screen, and we aren't already loading...
       if (entry.isIntersecting && !this.isLoading) {
         this.loadMorePosts();
       }

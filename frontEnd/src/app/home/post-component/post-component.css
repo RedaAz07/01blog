@@ -9,17 +9,17 @@
 =========================================== */
 
 :host {
-  --white  : #ffffff;
-  --ink    : rgb(9, 20, 19);
-  --forest : rgb(40, 90, 72);
-  --teal   : rgb(64, 138, 113);
-  --mint   : rgb(176, 228, 204);
-  --mint10 : rgba(176, 228, 204, 0.1);
-  --mint20 : rgba(176, 228, 204, 0.2);
-  --mint40 : rgba(176, 228, 204, 0.4);
-  --border : rgba(40, 90, 72, 0.15);
-  --bg     : #f0f7f4;
-  --muted  : #6b8f82;
+  --white  : var(--theme-white);
+  --ink    : var(--theme-ink);
+  --forest : var(--theme-forest);
+  --teal   : var(--theme-teal);
+  --mint   : var(--theme-mint);
+  --mint10 : var(--theme-mint10);
+  --mint20 : var(--theme-mint20);
+  --mint40 : var(--theme-mint40);
+  --border : var(--theme-border);
+  --bg     : var(--theme-bg);
+  --muted  : var(--theme-muted);
 }
 
 /* =========================================

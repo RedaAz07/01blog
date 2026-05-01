@@ -7,6 +7,7 @@ import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, ma
 import { AuthService } from '../../services/auth';
 import { NotificationDTO, NotificationService } from '../../services/notification';
 import { GlobalSearchDTO, SearchService } from '../../services/search';
+import { ThemeService } from '../../services/theme';
 
 
 @Component({
@@ -27,7 +28,8 @@ export class Navbar implements OnInit {
   constructor(
     public authService: AuthService,
     public notificationService: NotificationService,
-    private searchService: SearchService 
+    private searchService: SearchService,
+    public themeService: ThemeService
   ) {
     this.unreadCount$ = this.notificationService.notifications$.pipe(
       map(notifs => notifs.filter(n => !n.isRead).length)
@@ -55,6 +57,7 @@ export class Navbar implements OnInit {
  
   toggleNotifications(): void { this.notifOpen = !this.notifOpen; }
   closeNotifications(): void  { this.notifOpen = false; }
+  toggleTheme(): void { this.themeService.toggleTheme(); }
 
   loadMore(): void {
     if (this.isLoading || this.isLastPage) return;

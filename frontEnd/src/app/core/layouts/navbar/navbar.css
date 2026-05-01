@@ -9,14 +9,16 @@
 =========================================== */
 
 :host {
-  --white  : #ffffff;
-  --ink    : rgb(9, 20, 19);
-  --forest : rgb(40, 90, 72);
-  --teal   : rgb(64, 138, 113);
-  --mint   : rgb(176, 228, 204);
-  --mint20 : rgba(176, 228, 204, 0.2);
-  --mint40 : rgba(176, 228, 204, 0.4);
-  --border : rgba(40, 90, 72, 0.12);
+  --white  : var(--theme-white);
+  --ink    : var(--theme-ink);
+  --forest : var(--theme-forest);
+  --teal   : var(--theme-teal);
+  --mint   : var(--theme-mint);
+  --mint20 : var(--theme-mint20);
+  --mint40 : var(--theme-mint40);
+  --border : var(--theme-border);
+  --bg     : var(--theme-bg);
+  --muted  : var(--theme-muted);
 }
 
 /* =========================================
@@ -165,6 +167,34 @@
   &:hover { background: var(--mint20); }
 }
 
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--mint40);
+  color: var(--white);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    color: var(--mint);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--mint);
+    transform: translateY(-1px);
+  }
+}
+
 /* =========================================
    NOTIFICATIONS
 ========================================= */
@@ -282,7 +312,7 @@
   border-bottom: 1px solid rgba(40, 90, 72, 0.07);
 
   &:last-child { border-bottom: none; }
-  &:hover      { background: #f0f7f4; }
+  &:hover      { background: var(--bg); }
   &.unread     { background: rgba(176, 228, 204, 0.15); }
 }
 
@@ -310,7 +340,7 @@
 
 .notif-time {
   font-size: 11px;
-  color: #6b8f82;
+  color: var(--muted);
 }
 
 .notif-dot {
@@ -328,7 +358,7 @@
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
-  color: #6b8f82;
+  color: var(--muted);
   gap: 8px;
 
   mat-icon { font-size: 36px; height: 36px; width: 36px; opacity: 0.4; }
@@ -359,7 +389,7 @@
   mat-icon { font-size: 16px; height: 16px; width: 16px; }
 
   &:hover:not(:disabled) {
-    background: #f0f7f4;
+    background: var(--bg);
     border-color: var(--teal);
   }
   &:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -487,7 +517,7 @@
 
 .pp-username {
   font-size: 12px;
-  color: #6b8f82;
+  color: var(--muted);
   text-align: center;
   margin-bottom: 12px;
 }
@@ -521,7 +551,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   text-align: center;
-  background: #f0f5f3;
+  background: var(--bg);
   border-radius: 12px;
   padding: 14px 15px;
   gap: 7px;

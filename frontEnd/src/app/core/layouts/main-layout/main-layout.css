@@ -1,0 +1,9 @@
+.app-wrapper {
+  min-height: 100vh;
+  background: var(--theme-bg);
+  transition: background-color 0.2s ease;
+}
+
+.main-content {
+  min-height: calc(100vh - 64px);
+}

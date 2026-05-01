@@ -1,22 +1,15 @@
-/* ===========================================
-   01blog — Post Feed Card  (post-feed.css)
-   white  : #ffffff
-   ink    : rgb(9,20,19)
-   forest : rgb(40,90,72)
-   teal   : rgb(64,138,113)
-   mint   : rgb(176,228,204)
-=========================================== */
 
 :host {
-  --white  : #ffffff;
-  --ink    : rgb(9, 20, 19);
-  --forest : rgb(40, 90, 72);
-  --teal   : rgb(64, 138, 113);
-  --mint   : rgb(176, 228, 204);
-  --mint20 : rgba(176, 228, 204, 0.2);
-  --border : rgba(40, 90, 72, 0.12);
-  --bg     : #f0f7f4;
-  --muted  : #6b8f82;
+  --white  : var(--theme-white);
+  --ink    : var(--theme-ink);
+  --forest : var(--theme-forest);
+  --teal   : var(--theme-teal);
+  --mint   : var(--theme-mint);
+  --mint20 : var(--theme-mint20);
+  --border : var(--theme-border);
+  --bg     : var(--theme-bg);
+  --muted  : var(--theme-muted);
+  --text-soft: var(--theme-text-soft);
 }
 
 /* =========================================
@@ -268,6 +261,7 @@
 
 /* mat-menu */
 ::ng-deep .post-menu .mat-mdc-menu-panel {
+  background: var(--white) !important;
   border-radius: 10px !important;
   box-shadow: 0 6px 24px rgba(9, 20, 19, 0.14) !important;
   border: 1px solid var(--border);
@@ -319,7 +313,7 @@
 .blog-text {
   font-size: 14px;
   line-height: 1.7;
-  color: #2d3a35;
+  color: var(--text-soft);
   margin: 0;
 }
 
@@ -437,7 +431,7 @@
 
 .comment-text {
   font-size: 13px;
-  color: #2d3a35;
+  color: var(--text-soft);
   line-height: 1.55;
   margin: 0;
 }

@@ -3,6 +3,10 @@ package com._blog.demo.services;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.comment.CommentRequestDTO;
@@ -40,5 +44,19 @@ public class CommentService {
         response.setAuthorUsername(savedComment.getUser().getUsername());
         return response;
     }
+
+    public Page<CommentResponseDTO> getComments(int page, int size, Long postId) {
+      Pageable pageable =PageRequest.of(page, size, Sort.by("id").descending());
+      
+        Page<Comment> commentsPage = commentRepository.findByPostId(postId, pageable);
+        return commentsPage.map(comment -> {
+            CommentResponseDTO dto = new CommentResponseDTO();
+            dto.setId(comment.getId());
+            dto.setContent(comment.getContent());
+            dto.setAuthorUsername(comment.getUser().getUsername());
+            dto.setTimestamp(comment.getTimestamp());
+            return dto;
+        });
+    }   
     
 }
