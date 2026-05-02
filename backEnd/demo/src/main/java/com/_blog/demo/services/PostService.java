@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com._blog.demo.dto.post.PostDeleteReqDTO;
 import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
@@ -113,9 +112,9 @@ public class PostService {
         return updatedPost;
     }
 
-    public String deletePost(PostDeleteReqDTO request, String author) {
+    public String deletePost(Long id, String author) {
         User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
-        Post existingPost = postRepository.findById(request.getId())
+        Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         if (!existingPost.getUser().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw new RuntimeException("You are not authorized to delete this post");

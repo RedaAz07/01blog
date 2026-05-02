@@ -20,6 +20,7 @@
         [currentUser]="cUser" 
         (edit)="editPost($event)"
         (report)="reportPost($event)"
+        (delete)="deletePost($event)"
       >
       </app-post-feed>
 
@@ -48,6 +49,7 @@
 
 <app-post-component
   [isOpen]="postModalOpen"
+  [editingPost]="editingPost" 
   (save)="handlePostSave($event)"
   (close)="closePostModal()">
 </app-post-component>

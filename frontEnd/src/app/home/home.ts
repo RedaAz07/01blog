@@ -9,6 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -67,6 +68,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   snackbar = inject(MatSnackBar);
+  dialog = inject(MatDialog);
   suggestedUsers$!: Observable<UserProfileDTO[]>;
   private observer!: IntersectionObserver;
   currentPage = 0;
@@ -109,10 +111,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.postModalOpen = true;
   }
 
-  editPost(post: Post): void {
-    this.editingPost = post;
-    this.postModalOpen = true;
-  }
+ 
 
   closePostModal(): void {
     this.postModalOpen = false;
@@ -129,7 +128,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.postService.createPost(requestPayload).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
-          
           this.Posts.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
 
           this.closePostModal();
@@ -193,17 +191,37 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   closeProfileSidebar(): void {
     this.profileSidebarOpen = false;
   }
-  onSearch(): void {
-    /* wire to search service */
-  }
 
-  /*   deletePost(post: Post): void {
-    this.posts = this.posts.filter((p) => p.id !== post.id);
-    this.currentUser.posts = Math.max(0, this.currentUser.posts - 1);
-  }
- */
   reportPost(post: Post): void {
     alert(`Post "${post.title}" has been reported. Thank you!`);
+  }
+
+  editPost(post: Post): void {
+    this.editingPost = post;
+    this.postModalOpen = true;    
+    console.log(post);
+  }
+  deletePost(post: Post): void {
+    if (
+      confirm(
+        `Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`,
+      )
+    ) {
+      this.postService.deletePost(post.id).subscribe({
+        next: () => {
+          this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
+          this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
+            duration: 3000,
+          });
+        },
+      });
+      this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
+
+      this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
+    }
   }
 
   toggleLike(post: Post): void {

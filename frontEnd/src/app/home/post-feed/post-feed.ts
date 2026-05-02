@@ -25,7 +25,7 @@ import { TimeAgoPipe } from '../../time-ago-pipe';
 @Component({
   selector: 'app-post-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, DatePipe, TimeAgoPipe],
+  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, TimeAgoPipe],
   templateUrl: './post-feed.html',
   styleUrls: ['./post-feed.css'],
 })
@@ -98,8 +98,6 @@ export class PostFeed implements OnInit, OnDestroy {
         this.localLikeCount.set(realCount);
       },
       error: (error) => {
-        console.error('Error liking post:', error);
-
         this.localIsLiked.update((liked) => !liked);
         this.localLikeCount.update((count) => (this.localIsLiked() ? count + 1 : count - 1));
 
@@ -109,7 +107,6 @@ export class PostFeed implements OnInit, OnDestroy {
   }
 
   toggleComments(post: any): void {
-    
     this.showComments = !this.showComments;
     if (this.showComments) {
       this.loadComments();
@@ -122,7 +119,7 @@ export class PostFeed implements OnInit, OnDestroy {
     this.commentService.fetchComments(this.currentCommentPage, 5, this.post.id).subscribe({
       next: (response) => {
         console.log(response);
-        
+
         this.currentCommentPage++;
         this.Comments.update((currentList) => [...currentList, ...response.content]);
         this.isCommentsLoading = false;
@@ -138,7 +135,6 @@ export class PostFeed implements OnInit, OnDestroy {
     }
   }
   addComment(post: any) {
-
     const commentData: CommentRequestDTO = {
       content: this.newCommentText,
       postId: post.id,

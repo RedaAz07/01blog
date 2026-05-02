@@ -62,10 +62,10 @@ class PostController {
         return ResponseEntity.ok(post);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<Response> deletePost(@Valid @RequestBody PostDeleteReqDTO request, Principal principal) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Response> deletePost(@Valid @PathVariable Long id, Principal principal) {
         String username = principal.getName();
-        String result = PostService.deletePost(request, username);
+        String result = PostService.deletePost(id, username);
         return ResponseEntity.ok(new Response(result));
     }
 

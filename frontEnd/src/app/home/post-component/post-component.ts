@@ -1,4 +1,12 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
@@ -10,6 +18,7 @@ import ImageTool from '@editorjs/image';
 import VideoTool from '@weekwood/editorjs-video';
 import { AuthService } from '../../core/services/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Post } from '../home';
 @Component({
   selector: 'app-post-component',
   imports: [MatIconModule, CommonModule, FormsModule],
@@ -18,21 +27,44 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class PostComponent {
   snackBar = inject(MatSnackBar);
-
+  @Input() editingPost: Post | null = null;
   @Input() isOpen = false;
-  @Input() editingPost = false;
   @Output() close = new EventEmitter<void>();
-
-  // 3. Sends the final data back to Home to be saved
   @Output() save = new EventEmitter<any>();
   postTitle = '';
   editor!: EditorJS;
   constructor(public authService: AuthService) {}
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
+      
+      if (this.editingPost) {
 
+        this.postTitle = this.editingPost.title;
+
+        if (this.editor && this.editingPost.content) {
+          try {
+            const parsedContent = JSON.parse(this.editingPost.content);
+            
+            this.editor.isReady.then(() => {
+              this.editor.render(parsedContent);
+            });
+          } catch (error) {
+            console.error('Failed to parse Editor.js content', error);
+          }
+        }
+      } else {
+        this.postTitle = '';
+        
+        if (this.editor) {
+          this.editor.isReady.then(() => {
+            this.editor.clear();
+          });
+        }
+      }
+    }
+  }
   ngAfterViewInit() {
-    // Grab the token manually!
     const token = localStorage.getItem('jwt_token');
-
     this.editor = new EditorJS({
       holder: 'editorjs',
       placeholder: 'What is on your mind, bro? Type here or click + for images...',
@@ -78,16 +110,21 @@ export class PostComponent {
     try {
       const outputData = await this.editor.save();
       console.log(outputData.blocks);
-      
-      if (outputData.blocks.length
-        === 0 || JSON.stringify(outputData).length < 5
-        || JSON.stringify(outputData).length > 5000
+
+      if (
+        outputData.blocks.length === 0 ||
+        JSON.stringify(outputData).length < 5 ||
+        JSON.stringify(outputData).length > 5000
       ) {
-        this.snackBar.open('Post content must be between 5 and 5000 characters!', 'Close', { duration: 3000 });
+        this.snackBar.open('Post content must be between 5 and 5000 characters!', 'Close', {
+          duration: 3000,
+        });
         return;
       }
-      if (!this.postTitle.trim() || this.postTitle.length <5 || this.postTitle.length > 100) {
-        this.snackBar.open('Post title must be between 5 and 100 characters!', 'Close', { duration: 3000 });
+      if (!this.postTitle.trim() || this.postTitle.length < 5 || this.postTitle.length > 100) {
+        this.snackBar.open('Post title must be between 5 and 100 characters!', 'Close', {
+          duration: 3000,
+        });
         return;
       }
       const postData = {

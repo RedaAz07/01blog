@@ -38,6 +38,9 @@ export class PostService {
     return this.http.post<PostResponseDTO>(`${this.apiUrl}create`, data);
   }
 
+  deletePost(postId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}delete/${postId}`);
+  }
 
   fetchPosts(pageNumber: number, pageSize: number = 10): Observable<PageResponse> {
     let params = new HttpParams()
@@ -48,7 +51,7 @@ export class PostService {
       tap((response) => {
         const currentPosts = this.postSubject.value;
         this.postSubject.next([...currentPosts, ...response.content]);
-      })
+      }),
     );
   }
 }
