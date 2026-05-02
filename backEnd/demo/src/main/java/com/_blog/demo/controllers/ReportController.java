@@ -27,7 +27,6 @@ public class ReportController {
     public ResponseEntity<Response> postMethodName(@Valid @RequestBody ReportRequestDTO entity, Principal principal) {
         String username = principal.getName();
         String response = ReportService.createReport(entity, username);
-
         return ResponseEntity.ok(new Response(response));
     }
 

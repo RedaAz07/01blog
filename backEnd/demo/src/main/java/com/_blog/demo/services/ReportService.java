@@ -26,7 +26,7 @@ public class ReportService {
     public String createReport(ReportRequestDTO entity, String username) {
 
         User reporter = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Reporter not found"));
-        User reportedUser = UserRepository.findById(entity.getReported()).orElseThrow(() -> new RuntimeException("Reported user not found"));
+        User reportedUser = UserRepository.findByUsername(entity.getReported()).orElseThrow(() -> new RuntimeException("Reported user not found"));
         if (reportedUser.getId().equals(reporter.getId())) {
             throw new RuntimeException("You cannot report yourself");
         }

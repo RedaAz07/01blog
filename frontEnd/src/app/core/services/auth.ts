@@ -51,9 +51,7 @@ export class AuthService {
     if (token) {
       this.loggedInSubject.next(true);
       this.loadCurrentUser().subscribe({
-        error: () => {
-          this.logout();
-        },
+      
       });
     }
   }

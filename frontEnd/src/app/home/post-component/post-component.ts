@@ -38,16 +38,15 @@ export class PostComponent {
     if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
       
       if (this.editingPost) {
-
         this.postTitle = this.editingPost.title;
 
         if (this.editor && this.editingPost.content) {
           try {
             const parsedContent = JSON.parse(this.editingPost.content);
-            
             this.editor.isReady.then(() => {
               this.editor.render(parsedContent);
             });
+            
           } catch (error) {
             console.error('Failed to parse Editor.js content', error);
           }

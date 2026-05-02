@@ -93,16 +93,11 @@ public class PostService {
 
         existingPost.setTitle(request.getTitle());
         existingPost.setContent(request.getContent());
-
-        if (request.getMediaFile() != null && !request.getMediaFile().isEmpty()) {
-        }
-
         postRepository.save(existingPost);
         PostResponseDTO updatedPost = new PostResponseDTO(
                 existingPost.getId(),
                 existingPost.getTitle(),
                 existingPost.getContent(),
-     
                 existingPost.getUser() != null ? existingPost.getUser().getUsername() : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, existingPost),

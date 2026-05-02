@@ -12,7 +12,7 @@ public class ReportRequestDTO {
     @Size(min = 1, max = 100, message = "Reason must be between 1 and 100 characters")
     private String reason;
     @NotNull(message = "Reporter ID cannot be null")
-    private Long reported; 
+    private String reported; 
 
     private Long reportedPost; // Optional, can be null
 }

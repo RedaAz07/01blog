@@ -8,6 +8,17 @@ export interface PostRequestDTO {
   content: string;
 }
 
+export interface PostUpdateRequestDTO {
+  id: number;
+  title: string;
+  content: string;
+}
+export interface PostReportRequestDTO {
+  reported: string;
+  reportedPost: number;
+  reason: string;
+}
+
 // 2. Matches your Spring Boot PostResponseDTO
 export interface PostResponseDTO {
   id: number;
@@ -53,5 +64,12 @@ export class PostService {
         this.postSubject.next([...currentPosts, ...response.content]);
       }),
     );
+  }
+  updatePost(data: PostUpdateRequestDTO): Observable<PostResponseDTO> {
+    return this.http.put<PostResponseDTO>(`${this.apiUrl}update`, data);
+  }
+
+  reportPost(data : PostReportRequestDTO): Observable<void> {
+    return this.http.post<void>(`http://localhost:8080/api/reports/`, data);
   }
 }

@@ -17,7 +17,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { AuthService, UserProfileDTO } from '../core/services/auth';
-import { PageResponse, PostRequestDTO, PostResponseDTO, PostService } from '../core/services/post';
+import {
+  PageResponse,
+  PostRequestDTO,
+  PostResponseDTO,
+  PostService,
+  PostUpdateRequestDTO,
+} from '../core/services/post';
 import { PostComponent } from './post-component/post-component';
 import { PostFeed } from './post-feed/post-feed';
 import { Observable } from 'rxjs/internal/Observable';
@@ -111,8 +117,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.postModalOpen = true;
   }
 
- 
-
   closePostModal(): void {
     this.postModalOpen = false;
     this.editingPost = null;
@@ -125,6 +129,23 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     };
 
     if (this.editingPost) {
+      const updatePayload: PostUpdateRequestDTO = {
+        id: this.editingPost.id,
+        title: postData.title,
+        content: postData.content,
+      };
+      this.postService.updatePost(updatePayload).subscribe({
+        next: (updatedPostFromDB: PostResponseDTO) => {
+          this.Posts.update((currentPosts) =>
+            currentPosts.map((p) => (p.id === updatedPostFromDB.id ? updatedPostFromDB : p)),
+          );
+          this.snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
+          this.closePostModal();
+        },
+        error: (err) => {
+          this.snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
+        },
+      });
     } else {
       this.postService.createPost(requestPayload).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
@@ -192,13 +213,37 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.profileSidebarOpen = false;
   }
 
-  reportPost(post: Post): void {
-    alert(`Post "${post.title}" has been reported. Thank you!`);
+  reportPost(post: any): void {
+    const reason = prompt('Please enter the reason for reporting this post:');
+    if (!reason) {
+      this.snackbar.open('Report cancelled. Reason is required.', 'Close', { duration: 3000 });
+      return;
+    }
+console.log(post);
+
+    const reportData = {
+      reported: post.authorUsername,
+      reportedPost: post.id,
+      reason: reason,
+    };
+
+    this.postService.reportPost(reportData).subscribe({
+      next: () => {
+        this.snackbar.open('Post reported successfully. Thank you for your feedback.', 'Close', {
+          duration: 3000,
+        });
+      },
+      error: (err) => {
+        this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
+          duration: 3000,
+        });
+      },
+    });
   }
 
   editPost(post: Post): void {
     this.editingPost = post;
-    this.postModalOpen = true;    
+    this.postModalOpen = true;
     console.log(post);
   }
   deletePost(post: Post): void {
