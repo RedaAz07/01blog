@@ -36,6 +36,13 @@ export class Comment {
   fetchComments(page: number, size: number = 5, postId: number): Observable<PageResponse> {
     let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
 
-    return this.http.get<PageResponse>(`http://localhost:8080/api/comment/${postId}/list`, { params });
+    return this.http.get<PageResponse>(`http://localhost:8080/api/comment/${postId}/list`, {
+      params,
+    });
+  }
+  deleteComment(commentId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `http://localhost:8080/api/comment/${commentId}/delete`,
+    );
   }
 }

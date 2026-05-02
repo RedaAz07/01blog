@@ -161,6 +161,21 @@ export class PostFeed implements OnInit, OnDestroy {
   reportPost(post: any) {
     this.report.emit(post);
   }
+  deleteComment(comment: CommentResponseDTO) {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+    this.commentService.deleteComment(comment.id).subscribe({
+      next: () => {
+        this.localCommentsCount.update((count) => count - 1);
+        this.Comments.update((currentList) => currentList.filter((c) => c.id !== comment.id));
+        this.snackbar.open('Comment deleted!', 'Close', { duration: 2000 });
+      },
+      error: (error) => {
+        this.snackbar.open('Error deleting comment', 'Close', { duration: 3000 });
+      },
+    });
+  }
 
   prevSlide() {
     if (this.currentSlide > 0) this.currentSlide--;

@@ -7,8 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com._blog.demo.dto.Response;
 import com._blog.demo.dto.comment.CommentRequestDTO;
 import com._blog.demo.dto.comment.CommentResponseDTO;
 import com._blog.demo.entities.Comment;
@@ -30,7 +32,8 @@ public class CommentService {
 
     public CommentResponseDTO createComment(CommentRequestDTO request, String username) {
         User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        Post post = postRepository.findById(request.getPostId()).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(request.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
         Comment newComment = new Comment();
         newComment.setContent(request.getContent());
         newComment.setUser(auth);
@@ -46,8 +49,8 @@ public class CommentService {
     }
 
     public Page<CommentResponseDTO> getComments(int page, int size, Long postId) {
-      Pageable pageable =PageRequest.of(page, size, Sort.by("id").descending());
-      
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
         Page<Comment> commentsPage = commentRepository.findByPostId(postId, pageable);
         return commentsPage.map(comment -> {
             CommentResponseDTO dto = new CommentResponseDTO();
@@ -57,6 +60,18 @@ public class CommentService {
             dto.setTimestamp(comment.getTimestamp());
             return dto;
         });
-    }   
+    }
     
+
+    public ResponseEntity<Response> deleteComment(Long commentId, String username) {
+        User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        if (!comment.getUser().getId().equals(auth.getId())) {
+            return ResponseEntity.status(403).body(new Response("You can only delete your own comments"));
+        }
+        commentRepository.delete(comment);
+        return ResponseEntity.ok(new Response("Comment deleted successfully"));
+    }
+
 }

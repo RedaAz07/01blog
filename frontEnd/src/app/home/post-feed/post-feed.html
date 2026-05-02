@@ -4,7 +4,7 @@
 
     <div class="blog-meta">
       <span class="blog-author">{{ post.authorUsername }}</span>
-        <span class="blog-time">{{ post.timestamp | timeAgo }}</span>
+      <span class="blog-time">{{ post.timestamp | timeAgo }}</span>
     </div>
 
     <button class="more-btn" [matMenuTriggerFor]="postMenu">
@@ -46,7 +46,7 @@
     <div class="slider-track" [style.transform]="'translateX(-' + currentSlide * 100 + '%)'">
       <div class="slide" *ngFor="let block of mediaBlocks">
         <ng-container *ngIf="block.type === 'image'">
-          <img  [src]="block.data.file.url"  class="slide-img" [alt]="block.data.caption" />
+          <img [src]="block.data.file.url" class="slide-img" [alt]="block.data.caption" />
           <span class="slide-caption" *ngIf="block.data.caption">{{ block.data.caption }}</span>
         </ng-container>
 
@@ -101,43 +101,48 @@
        COMMENTS
   ══════════════════════════════════ -->
   <div class="comments-section" *ngIf="showComments">
+    <!-- comments list (scrollable) -->
+    <div class="comments-list">
+      <div class="comment" *ngFor="let c of Comments()">
+        <div class="pp-circle1 pp-sm">{{ c.authorUsername.charAt(0) | uppercase }}</div>
+        <div class="comment-body">
+          <span>
 
-  <!-- comments list (scrollable) -->
-  <div class="comments-list">
-    <div class="comment" *ngFor="let c of Comments()">
-      <div class="pp-circle1 pp-sm">{{ c.authorUsername.charAt(0) | uppercase }}</div>
-      <div class="comment-body">
-        <span class="comment-author">{{ c.authorUsername }}</span>
-        <p class="comment-text">{{ c.content }}</p>
-                <span class="blog-time">{{ c.timestamp | timeAgo }}</span>
+            <span class="comment-author">{{ c.authorUsername }}</span>
+            <p class="comment-text">{{ c.content }}</p>
+            <span class="blog-time">{{ c.timestamp | timeAgo }}</span>
+          </span>
+          <span class="comment-actions">
+            <button class="delete-comment-btn" *ngIf="c.authorUsername === currentUser.username"
+            (click)="deleteComment(c)">       <mat-icon>delete</mat-icon></button>
+     
+          </span>
+        </div>
+      </div>
 
+      <div #commentScrollAnchor class="scroll-anchor">
+        <span *ngIf="isCommentsLoading">Loading older comments...</span>
       </div>
     </div>
 
-    <div #commentScrollAnchor class="scroll-anchor">
-      <span *ngIf="isCommentsLoading">Loading older comments...</span>
+    <!-- form (fixed) -->
+    <div class="comment-form">
+      <div class="pp-circle1 pp-sm">
+        {{ currentUser.username.charAt(0) | uppercase }}
+      </div>
+
+      <div class="comment-input-wrap">
+        <input
+          type="text"
+          class="comment-input"
+          placeholder="Write a comment…"
+          [(ngModel)]="newCommentText"
+          (keyup.enter)="addComment(post)"
+        />
+        <button class="comment-send" (click)="addComment(post)">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
-
-  <!-- form (fixed) -->
-  <div class="comment-form">
-    <div class="pp-circle1 pp-sm">
-      {{ currentUser.username.charAt(0) | uppercase }}
-    </div>
-
-    <div class="comment-input-wrap">
-      <input
-        type="text"
-        class="comment-input"
-        placeholder="Write a comment…"
-        [(ngModel)]="newCommentText"
-        (keyup.enter)="addComment(post)"
-      />
-      <button class="comment-send" (click)="addComment(post)">
-        <mat-icon>send</mat-icon>
-      </button>
-    </div>
-  </div>
-
-</div>
 </article>
