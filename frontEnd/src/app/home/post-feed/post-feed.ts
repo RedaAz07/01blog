@@ -21,11 +21,13 @@ import { Comment, CommentResponseDTO } from '../../core/services/comment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentRequestDTO } from '../../core/services/comment';
 import { TimeAgoPipe } from '../../time-ago-pipe';
+import { R } from '@angular/cdk/keycodes';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-post-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, TimeAgoPipe],
+  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, TimeAgoPipe,RouterLink],
   templateUrl: './post-feed.html',
   styleUrls: ['./post-feed.css'],
 })

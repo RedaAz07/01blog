@@ -21,5 +21,7 @@ public class userDTO {
     int following;
     int notifications;
     boolean FollowingBYMe;
+    String bio;
+    boolean status;
 
 }

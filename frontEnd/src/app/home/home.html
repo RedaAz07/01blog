@@ -33,7 +33,9 @@
     <div class="suggestions-card">
       <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
       <div class="sug-user" *ngFor="let u of suggestedUsers$| async">
+       <a class="href" [routerLink]="['/profile', u.username]">
         <div class="pp-circle1">{{ u.username.charAt(0) | uppercase }}</div>
+       </a>
         <div class="sug-info">
           <span class="sug-name">{{ u.firstName }} {{ u.lastName }}</span>
           <span class="sug-handle">@{{ u.username }}</span>

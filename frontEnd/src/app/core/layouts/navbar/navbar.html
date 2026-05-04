@@ -1,6 +1,6 @@
 <header class="navbar" *ngIf="authService.currentUser$ | async as user">
   <div class="nav-left">
-    <span class="brand">01<span class="brand-accent">blog</span></span>
+   <a class="homeRoute"   [routerLink]="['home']"><span class="brand">01<span class="brand-accent">blog</span></span></a> 
   </div>
 
   <div class="nav-center">
@@ -126,7 +126,7 @@
             <span class="ps-stat-lbl">Following</span>
           </div>
         </div>
-        <a class="pp-btn" [routerLink]="['/profile']"> <mat-icon>person</mat-icon> View Profile </a>
+        <a class="pp-btn" [routerLink]="['/profile/', user.username]"> <mat-icon>person</mat-icon> View Profile </a>
         <button class="pp-btn" (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
       </div>
     </button>

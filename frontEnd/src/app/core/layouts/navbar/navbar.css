@@ -575,3 +575,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+.homeRoute {
+  text-decoration: none;
+}

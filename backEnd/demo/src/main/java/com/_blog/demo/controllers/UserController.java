@@ -6,14 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.userDTO;
 import com._blog.demo.services.UserService;
-
-import jakarta.websocket.MessageHandler;
 
 
 
@@ -44,7 +42,15 @@ public class UserController {
         return ResponseEntity.ok(suggestions);
     }
     
-  
+    @GetMapping("/profile/{username}")
+    public ResponseEntity<userDTO> getMethodName(@PathVariable String username) {
+        userDTO user = userService.getUserByUsername(username);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user);
+    }
+
     
 
 }

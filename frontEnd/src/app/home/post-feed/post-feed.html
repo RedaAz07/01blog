@@ -1,9 +1,11 @@
 <article class="blog-card">
   <div class="blog-card-header">
-    <div class="pp-circle1">{{ post.authorUsername.charAt(0) | uppercase }}</div>
-
+     <a  class="href" [routerLink]="['/profile', post.authorUsername]">
+      <div class="pp-circle1">{{ post.authorUsername.charAt(0) | uppercase }}</div>
+     </a>
     <div class="blog-meta">
-      <span class="blog-author">{{ post.authorUsername }}</span>
+     <a  class="href" [routerLink]="['/profile', post.authorUsername]">
+      <span class="blog-author">{{ post.authorUsername }}</span></a>
       <span class="blog-time">{{ post.timestamp | timeAgo }}</span>
     </div>
 
@@ -107,15 +109,18 @@
         <div class="pp-circle1 pp-sm">{{ c.authorUsername.charAt(0) | uppercase }}</div>
         <div class="comment-body">
           <span>
-
             <span class="comment-author">{{ c.authorUsername }}</span>
             <p class="comment-text">{{ c.content }}</p>
             <span class="blog-time">{{ c.timestamp | timeAgo }}</span>
           </span>
           <span class="comment-actions">
-            <button class="delete-comment-btn" *ngIf="c.authorUsername === currentUser.username"
-            (click)="deleteComment(c)">       <mat-icon>delete</mat-icon></button>
-     
+            <button
+              class="delete-comment-btn"
+              *ngIf="c.authorUsername === currentUser.username"
+              (click)="deleteComment(c)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
           </span>
         </div>
       </div>

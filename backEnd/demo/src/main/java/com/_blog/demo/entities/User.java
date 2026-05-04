@@ -43,6 +43,9 @@ public class User {
     private Date   birthDate;
     @Column(name = "profilePictureUrl")
     private String profilePictureUrl;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
     @Column(name = "status", nullable = false)
     private boolean status;
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)

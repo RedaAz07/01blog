@@ -34,4 +34,7 @@ public class RegisterRequestDTO {
     private Date birthDate;
     private String profilePictureUrl;
 
+    @Size(max = 500, message = "Bio must be less than 500 characters")
+    private String bio;
+
 }

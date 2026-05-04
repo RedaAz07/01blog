@@ -31,6 +31,8 @@ export interface UserProfileDTO {
   following: number;
   notifications: number;
   followingBYMe: boolean;
+  bio: string;
+  status: boolean;
 }
 
 @Injectable({
@@ -50,9 +52,7 @@ export class AuthService {
     const token = localStorage.getItem('jwt_token');
     if (token) {
       this.loggedInSubject.next(true);
-      this.loadCurrentUser().subscribe({
-      
-      });
+      this.loadCurrentUser().subscribe({});
     }
   }
 
@@ -76,9 +76,7 @@ export class AuthService {
     return this.http.post<registerDTO>(`${this.apiUrl}/register`, userData);
   }
 
-
   loadCurrentUser(): Observable<UserProfileDTO> {
-    
     return this.http.get<UserProfileDTO>(`http://localhost:8080/api/users/me`).pipe(
       tap((user) => {
         this.currentUserSubject.next(user);
@@ -86,4 +84,17 @@ export class AuthService {
     );
   }
 
+  profile(username: string): Observable<UserProfileDTO> {
+    return this.http.get<UserProfileDTO>(`http://localhost:8080/api/users/profile/${username}`);
+  }
+  followers(username: string): Observable<{ username: string; avatar: string }[]> {
+    return this.http.get<{ username: string; avatar: string }[]>(
+      `http://localhost:8080/api/users/followers/${username}`,
+    );
+  }
+  following(username: string): Observable<{ username: string; avatar: string }[]> {
+    return this.http.get<{ username: string; avatar: string }[]>(
+      `http://localhost:8080/api/users/following/${username}`,
+    );
+  }
 }

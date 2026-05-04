@@ -55,6 +55,7 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("all fields are required!");
         }
+        newUser.setBio(request.getBio());
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
         newUser.setRole("USER");
         newUser.setStatus(true);
@@ -101,6 +102,26 @@ public class UserService {
             return dto;
         }).toList();
 
+    }
+
+    public userDTO getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        userDTO dto = new userDTO();
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setBirthDate(user.getBirthDate());
+
+        dto.setPosts(user.getPosts().size());
+        dto.setFollowers(user.getFollowers().size());
+        dto.setFollowing(user.getFollowing().size());
+        dto.setBio(user.getBio());
+        dto.setStatus(user.isStatus());
+        // dto.setNotifications(user.getReceivedNotifications().size());
+        dto.setProfilePictureUrl(user.getProfilePictureUrl());
+        return dto;
     }
 
 }

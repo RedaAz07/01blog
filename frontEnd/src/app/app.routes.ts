@@ -3,6 +3,7 @@
   import { Login } from './login/login';
   import { Home } from './home/home';
   import { Register } from './register/register';
+  import { Profile } from './profile/profile';
   import { MainLayout } from './core/layouts/main-layout/main-layout';
 
   import { authGuard } from './core/guards/auth-guard';
@@ -17,6 +18,7 @@
       canActivate: [authGuard], 
       children: [
         { path: 'home', component: Home },
+        { path: 'profile/:username', component: Profile }
       // { path: 'admin', component: AdminDashboardComponent } 
       ]
     },
