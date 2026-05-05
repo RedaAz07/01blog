@@ -3,6 +3,7 @@ package com._blog.demo.controllers;
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,18 +44,18 @@ class PostController {
     @Autowired
     private PostService PostService;
 
-   @GetMapping("/all")
-    public ResponseEntity<org.springframework.data.domain.Page<PostResponseDTO>> getAllPosts(
-            @RequestParam(defaultValue = "0") int page, 
-            @RequestParam(defaultValue = "10") int size  , Principal principal
-    ) {
+    @GetMapping("/all")
+    public ResponseEntity<Page<PostResponseDTO>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size, Principal principal) {
         String username = principal.getName();
-        org.springframework.data.domain.Page<PostResponseDTO> posts = PostService.getAllPosts(page, size, username);
+        Page<PostResponseDTO> posts = PostService.getAllPosts(page, size, username);
         return ResponseEntity.ok(posts);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<PostResponseDTO> postMethodName(@Valid @RequestBody PostUpdatReqDTO request, Principal principal) {
+    public ResponseEntity<PostResponseDTO> postMethodName(@Valid @RequestBody PostUpdatReqDTO request,
+            Principal principal) {
         String username = principal.getName();
         PostResponseDTO post = PostService.updatePost(request, username);
         return ResponseEntity.ok(post);
@@ -72,6 +73,14 @@ class PostController {
         String username = principal.getName();
         PostResponseDTO post = PostService.findPostById(id, username);
         return ResponseEntity.ok(post);
+    }
+
+    @GetMapping("/owner/{username}")
+    public ResponseEntity<Page<PostResponseDTO>> getAllPostsByOwner(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size, @PathVariable String username) {
+        Page<PostResponseDTO> posts = PostService.getAllPostsByOwner(page, size, username);
+        return ResponseEntity.ok(posts);
     }
 
 }

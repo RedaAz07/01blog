@@ -129,6 +129,9 @@ public class UserService {
     }
 
     public userDTO editProfile(String username, EditProfileRequestDTO request, String currentUsername) {
+        if (username.equals("admin")) {
+            throw new RuntimeException("as an Admin you can't edit  the username ");
+        }
         if (!username.equals(currentUsername)) {
             throw new RuntimeException("You can only edit your own profile!");
         }

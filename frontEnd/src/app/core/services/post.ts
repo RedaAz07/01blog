@@ -65,11 +65,25 @@ export class PostService {
       }),
     );
   }
+
+  fetchPostsByOwner(pageNumber: number, pageSize: number = 10, username: string): Observable<PageResponse> {
+    let params = new HttpParams()
+      .set('page', pageNumber.toString())
+      .set('size', pageSize.toString());
+
+    return this.http.get<PageResponse>(`${this.apiUrl}owner/${username}`, { params }).pipe(
+      tap((response) => {
+        const currentPosts = this.postSubject.value;
+        this.postSubject.next([...currentPosts, ...response.content]);
+      }),
+    );
+  }
+
   updatePost(data: PostUpdateRequestDTO): Observable<PostResponseDTO> {
     return this.http.put<PostResponseDTO>(`${this.apiUrl}update`, data);
   }
 
-  reportPost(data : PostReportRequestDTO): Observable<void> {
+  reportPost(data: PostReportRequestDTO): Observable<void> {
     return this.http.post<void>(`http://localhost:8080/api/reports/`, data);
   }
 }

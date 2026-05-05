@@ -49,13 +49,12 @@ public class PostService {
                 savedPost.getId(),
                 savedPost.getTitle(),
                 savedPost.getContent(),
-            
+
                 savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, savedPost),
                 commentRepository.countByPost(savedPost),
-                likeRepository.countByPost(savedPost)
-        );
+                likeRepository.countByPost(savedPost));
         return postDto;
     }
 
@@ -72,12 +71,11 @@ public class PostService {
                     p.getTitle(),
                     p.getContent(),
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
-                    
+
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                     likeRepository.existsByUserAndPost(auth, p),
                     commentRepository.countByPost(p),
-                    likeRepository.countByPost(p)
-            );
+                    likeRepository.countByPost(p));
             return postDto;
         });
     }
@@ -101,8 +99,7 @@ public class PostService {
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 commentRepository.countByPost(existingPost),
-                likeRepository.countByPost(existingPost)
-        );
+                likeRepository.countByPost(existingPost));
         return updatedPost;
     }
 
@@ -128,12 +125,34 @@ public class PostService {
                 existingPost.getTitle(),
                 existingPost.getContent(),
                 existingPost.getUser() != null ? existingPost.getUser().getUsername()
-                : "Unknown",
+                        : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 commentRepository.countByPost(existingPost),
-                likeRepository.countByPost(existingPost)
-        );
+                likeRepository.countByPost(existingPost));
         return response;
+    }
+
+    public Page<PostResponseDTO> getAllPostsByOwner(int page, int size, String username) {
+        User owner = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<Post> postPage = postRepository.findByUserUsername(username, pageable);
+
+        return postPage.map(p -> {
+            PostResponseDTO postDto = new PostResponseDTO(
+                    p.getId(),
+                    p.getTitle(),
+                    p.getContent(),
+                    p.getUser() != null ? p.getUser().getUsername() : "Unknown",
+
+                    p.getTimestamp() != null ? p.getTimestamp().toString() : null,
+                    likeRepository.existsByUserAndPost(owner, p),
+                    commentRepository.countByPost(p),
+                    likeRepository.countByPost(p));
+            return postDto;
+        });
     }
 }

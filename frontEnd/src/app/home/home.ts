@@ -166,7 +166,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private profileSidebarOpen = false;
   private showComments = false;
   ngOnInit(): void {
-    
     this.loadMorePosts();
     this.suggestedUsers$ = this.followService.suggestedUsers();
   }
@@ -186,7 +185,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadMorePosts(): void {
-    
     if (this.isLoading) return; // Block spam clicks/scrolls
 
     this.isLoading = true; // Lock the door
@@ -221,7 +219,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       this.snackbar.open('Report cancelled. Reason is required.', 'Close', { duration: 3000 });
       return;
     }
-console.log(post);
+    console.log(post);
 
     const reportData = {
       reported: post.authorUsername,
