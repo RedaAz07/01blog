@@ -15,7 +15,7 @@ export interface PostUpdateRequestDTO {
 }
 export interface PostReportRequestDTO {
   reported: string;
-  reportedPost: number;
+  reportedPost?: number;
   reason: string;
 }
 

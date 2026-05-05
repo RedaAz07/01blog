@@ -1,8 +1,11 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, UserProfileDTO } from '../core/services/auth';
 import { PostService } from '../core/services/post';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Follow } from '../core/services/follow';
 
 export interface UserProfile {
   id: number;
@@ -31,17 +34,24 @@ export class Profile implements OnInit {
   constructor(
     public authService: AuthService,
     public postService: PostService,
+    private route: ActivatedRoute,
+    private router: Router,
+    public followService: Follow,
+    public postsService: PostService,
   ) {}
-  
+  snackbar = inject(MatSnackBar);
+
   user = signal<UserProfile | null>(null);
   currentUser = signal<UserProfile | null>(null);
-
+  isCurrentUser = computed(() => {
+    const pUser = this.user();
+    const cUser = this.currentUser();
+    // Return true ONLY if both exist and the usernames match
+    return pUser != null && cUser != null && pUser.username === cUser.username;
+  });
   followersList = signal<{ username: string; avatar: string }[]>([]);
   followingList = signal<{ username: string; avatar: string }[]>([]);
   isFollowing = signal(false);
-
-  isCurrentUser = false;
-
   showEditModal = false;
   showFollowersModal = false;
   showFollowingModal = false;
@@ -61,26 +71,27 @@ export class Profile implements OnInit {
   reportSubmitted = false;
 
   ngOnInit(): void {
+    this.route.params.subscribe((params) => {
+      const username = params['username'];
+      this.loadUserProfile(username);
+    });
+
     this.authService.currentUser$.subscribe((profile) => {
       this.currentUser.set(profile);
-      if (!this.user() && profile) {
+    });
+  }
+
+  loadUserProfile(username: string): void {
+    this.authService.profile(username).subscribe({
+      next: (profile: any) => {
         this.user.set(profile);
-      }
-
-      this.isCurrentUser = this.currentUser()?.username === this.user()?.username;
-      this.isFollowing.set(this.user()?.followingBYMe ?? false);
-
-      const targetUsername = this.user()?.username;
-      
-      // Only fetch the mock data if we actually have a username to look up
-      if (targetUsername) {
-        this.authService.followers(targetUsername).subscribe((followers) => {
-          this.followersList.set(followers);
-        });
-        this.authService.following(targetUsername).subscribe((following) => {
-          this.followingList.set(following);
-        });
-      }
+        this.isFollowing.set(profile.FollowingBYMe);
+        console.log(profile.FollowingBYMe);
+      },
+      error: (err) => {
+        this.router.navigate(['/home']);
+        this.user.set(null);
+      },
     });
   }
 
@@ -97,25 +108,57 @@ export class Profile implements OnInit {
   }
 
   saveEdit(): void {
-    this.user.update((current) => {
-      if (!current) return null;
-      return { ...current, ...this.editForm } as UserProfile;
+    this.authService.editProfile(this.user()?.username ?? '', this.editForm).subscribe({
+      next: (updatedProfile) => {
+        this.user.set(updatedProfile);
+        this.showEditModal = false;
+        this.snackbar.open('Profile updated successfully!', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        let errMsg = err.error?.message || 'Failed to update profile';
+        this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
+      },
     });
-    this.showEditModal = false;
   }
 
   toggleFollow(): void {
-    this.isFollowing.update(status => !status);
+    this.followService.toggleFollow(this.user()?.username ?? '').subscribe({
+      next: (res) => {
+        console.log(res);
+
+        this.isFollowing.set(res);
+        const userData = this.user();
+        if (userData) {
+          userData.followers += res ? 1 : -1;
+          this.user.set({ ...userData });
+          this.snackbar.open(res ? 'Unfollowed successfully!' : 'Followed successfully!', 'Close', {
+            duration: 3000,
+          });
+        }
+      },
+      error: (err) => {
+        let errMsg = err.error?.message || 'Failed to update follow status';
+        this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
+      },
+    });
   }
 
   submitReport(): void {
-    if (!this.reportReason) return;
-    this.reportSubmitted = true;
-    setTimeout(() => {
-      this.showReportModal = false;
-      this.reportSubmitted = false;
-      this.reportReason = '';
-    }, 2000);
+    this.postService
+      .reportPost({
+        reported: this.user()?.username ?? '',
+        reason: this.reportReason,
+      })
+      .subscribe({
+        next: () => {
+          this.reportSubmitted = true;
+          this.snackbar.open('User reported successfully!', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          let errMsg = err.error?.message || 'Failed to report user';
+          this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
+        },
+      });
   }
 
   closeAllModals(): void {
@@ -123,5 +166,21 @@ export class Profile implements OnInit {
     this.showFollowersModal = false;
     this.showFollowingModal = false;
     this.showReportModal = false;
+  }
+
+  freindsList(type: 'followers' | 'following'): void {
+    if (type === 'followers') {
+      this.showFollowersModal = true;
+      this.authService.followers(this.user()?.username ?? '').subscribe((list) => {
+        this.followersList.set(list);
+        this.showFollowersModal = true;
+      });
+    } else {
+      this.showFollowingModal = true;
+      this.authService.following(this.user()?.username ?? '').subscribe((list) => {
+        this.followingList.set(list);
+        this.showFollowingModal = true;
+      });
+    }
   }
 }

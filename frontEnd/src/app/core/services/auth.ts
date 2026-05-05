@@ -97,4 +97,9 @@ export class AuthService {
       `http://localhost:8080/api/users/following/${username}`,
     );
   }
+
+  editProfile(username: string, data: Partial<UserProfileDTO>): Observable<UserProfileDTO> {
+    return this.http
+      .put<UserProfileDTO>(`http://localhost:8080/api/users/edit/${username}`, data)
+  }
 }

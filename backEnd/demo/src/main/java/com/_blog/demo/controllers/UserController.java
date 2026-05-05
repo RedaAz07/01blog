@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.auth.EditProfileRequestDTO;
 import com._blog.demo.dto.userDTO;
 import com._blog.demo.services.UserService;
-
-
-
 
 @RestController // Tells Spring this class listens for web traffic
 @RequestMapping("/api/users") // The base URL for all user stuff
@@ -28,6 +28,7 @@ public class UserController {
 
         return userService.findAllUsers();
     }
+
     @GetMapping("/me")
     public userDTO getCurrentUser(Principal principal) {
         String param = principal.getName();
@@ -36,21 +37,28 @@ public class UserController {
     }
 
     @GetMapping("/suggestions")
-    public ResponseEntity<List<userDTO>>  getMethodName(Principal principal) {
+    public ResponseEntity<List<userDTO>> getMethodName(Principal principal) {
         String param = principal.getName();
         List<userDTO> suggestions = userService.getSuggestions(param);
         return ResponseEntity.ok(suggestions);
     }
-    
+
     @GetMapping("/profile/{username}")
-    public ResponseEntity<userDTO> getMethodName(@PathVariable String username) {
-        userDTO user = userService.getUserByUsername(username);
+    public ResponseEntity<userDTO> getMethodName(@PathVariable String username, Principal principal) {
+        String param = principal.getName();
+        userDTO user = userService.getUserByUsername(username, param);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(user);
     }
 
-    
+    @PutMapping("edit/{username}")
+    public ResponseEntity<userDTO> putMethodName(@PathVariable String username,
+            @RequestBody EditProfileRequestDTO entity, Principal principal) {
+        String param = principal.getName();
+        userDTO response = userService.editProfile(username, entity, param);
+        return ResponseEntity.ok(response);
+    }
 
 }

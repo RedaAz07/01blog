@@ -4,10 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service; // The DTO we talked about!
+import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.RegisterRequestDTO;
-import com._blog.demo.dto.userDTO;
+import com._blog.demo.dto.auth.EditProfileRequestDTO;
+import com._blog.demo.dto.userDTO; // The DTO we talked about!
 import com._blog.demo.entities.User;
 import com._blog.demo.repositories.UserRepository;
 
@@ -104,7 +105,7 @@ public class UserService {
 
     }
 
-    public userDTO getUserByUsername(String username) {
+    public userDTO getUserByUsername(String username, String currentUsername) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
         userDTO dto = new userDTO();
@@ -119,9 +120,36 @@ public class UserService {
         dto.setFollowing(user.getFollowing().size());
         dto.setBio(user.getBio());
         dto.setStatus(user.isStatus());
-        // dto.setNotifications(user.getReceivedNotifications().size());
+        dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
+                userRepository.findByUsername(currentUsername)
+                        .orElseThrow(() -> new RuntimeException("User not found with username: " + currentUsername))
+                        .getId())));
         dto.setProfilePictureUrl(user.getProfilePictureUrl());
         return dto;
     }
 
+    public userDTO editProfile(String username, EditProfileRequestDTO request, String currentUsername) {
+        if (!username.equals(currentUsername)) {
+            throw new RuntimeException("You can only edit your own profile!");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new RuntimeException("Username is already taken!");
+            }
+            user.setUsername(request.getUsername());
+        }
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email is already in use!");
+            }
+            user.setEmail(request.getEmail());
+        }
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setBio(request.getBio());
+        userRepository.save(user);
+        return getUserByUsername(username, currentUsername);
+    }
 }

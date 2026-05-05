@@ -67,7 +67,6 @@ public class PostService {
         Page<Post> postPage = postRepository.findAll(pageable);
 
         return postPage.map(p -> {
-            System.err.println(">>>>>>>>>>>>>>>>>>>>>>>><<"+p.getUser().getUsername());
             PostResponseDTO postDto = new PostResponseDTO(
                     p.getId(),
                     p.getTitle(),
