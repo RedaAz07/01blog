@@ -1,4 +1,13 @@
-import { Component, Input, OnInit, signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  signal,
+  computed,
+  inject,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, UserProfileDTO } from '../core/services/auth';
@@ -37,6 +46,26 @@ export interface UserProfile {
   styleUrls: ['./profile.css'],
 })
 export class Profile implements OnInit {
+  isPostLoading = false;
+  private postObserver!: IntersectionObserver;
+
+  @ViewChild('postScrollAnchor') set setupPostAnchor(element: ElementRef) {
+    if (element && !this.postObserver) {
+      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
+
+      this.postObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !this.isPostLoading) {
+          this.route.params.subscribe((params) => {
+            const username = params['username'];
+            this.loadPosts(username);
+          });
+        }
+      }, options);
+
+      this.postObserver.observe(element.nativeElement);
+    }
+  }
+
   constructor(
     public authService: AuthService,
     public postService: PostService,
@@ -46,20 +75,19 @@ export class Profile implements OnInit {
     public postsService: PostService,
   ) {}
   snackbar = inject(MatSnackBar);
+  currentPostPage = 0;
 
   user = signal<UserProfile | null>(null);
   currentUser = signal<UserProfile | null>(null);
   isCurrentUser = computed(() => {
     const pUser = this.user();
     const cUser = this.currentUser();
-    // Return true ONLY if both exist and the usernames match
     return pUser != null && cUser != null && pUser.username === cUser.username;
   });
   followersList = signal<{ username: string; avatar: string }[]>([]);
   followingList = signal<{ username: string; avatar: string }[]>([]);
   Posts = signal<PostResponseDTO[]>([]);
   postManager = usePostManager(this.Posts);
-
 
   isFollowing = signal(false);
   showEditModal = false;
@@ -84,15 +112,7 @@ export class Profile implements OnInit {
     this.route.params.subscribe((params) => {
       const username = params['username'];
       this.loadUserProfile(username);
-      this.postService.fetchPostsByOwner(0, 10, username).subscribe({
-        next: (response) => {
-          this.Posts.set(response.content);
-        },
-        error: (err) => {
-          console.log(err);
-          this.snackbar.open('Failed to load posts for this user.', 'Close', { duration: 3000 });
-        },
-      });
+      this.loadPosts(username);
     });
 
     this.authService.currentUser$.subscribe((profile) => {
@@ -100,6 +120,29 @@ export class Profile implements OnInit {
     });
   }
 
+  loadPosts(username: string): void {
+    if (this.isPostLoading) return;
+
+    this.isPostLoading = true;
+
+    this.postService.fetchPostsByOwner(this.currentPostPage, 10, username).subscribe({
+      next: (response) => {
+        this.currentPostPage++;
+        this.Posts.update((currentPosts) => [...currentPosts, ...response.content]);
+        this.isPostLoading = false;
+      },
+      error: (err) => {
+        console.log(err);
+        this.snackbar.open('Failed to load more posts.', 'Close', { duration: 3000 });
+        this.isPostLoading = false;
+      },
+    });
+  }
+  ngOnDestroy() {
+    if (this.postObserver) {
+      this.postObserver.disconnect();
+    }
+  }
   loadUserProfile(username: string): void {
     this.authService.profile(username).subscribe({
       next: (profile: any) => {
@@ -202,9 +245,4 @@ export class Profile implements OnInit {
       });
     }
   }
-
-
-  
-
-
 }

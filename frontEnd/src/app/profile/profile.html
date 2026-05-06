@@ -310,4 +310,7 @@
     (close)="postManager.closePostModal()"
   >
   </app-post-component>
+  <div #postScrollAnchor class="scroll-anchor">
+    <span *ngIf="isPostLoading">Loading older posts...</span>
+  </div>
 </div>

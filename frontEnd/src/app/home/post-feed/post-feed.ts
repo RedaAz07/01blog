@@ -120,7 +120,6 @@ export class PostFeed implements OnInit, OnDestroy {
     this.isCommentsLoading = true;
     this.commentService.fetchComments(this.currentCommentPage, 5, this.post.id).subscribe({
       next: (response) => {
-        console.log(response);
 
         this.currentCommentPage++;
         this.Comments.update((currentList) => [...currentList, ...response.content]);
