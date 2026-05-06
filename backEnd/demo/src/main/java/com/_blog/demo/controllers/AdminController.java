@@ -4,12 +4,14 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.Response;
@@ -24,15 +26,14 @@ public class AdminController {
     private AdminService AdminService;
 
     @GetMapping("/reports/posts")
-
-    public ResponseEntity<List<ReportResponseDTO>> getPostReported(Principal    principal) {
-        List<ReportResponseDTO> reports = AdminService.getPostReports(principal.getName()); // Assuming you have a service to fetch reports based on the parameter
+    public ResponseEntity<Page<ReportResponseDTO>> getPostReported(   Principal    principal , @RequestParam(defaultValue="0" ) int page , @RequestParam(defaultValue="10") int size ) {
+        Page<ReportResponseDTO> reports = AdminService.getPostReports(principal.getName(), page, size); // Assuming you have a service to fetch reports based on the parameter
         return ResponseEntity.ok(reports);
     }
 
     @GetMapping("/reports/users")
-    public ResponseEntity<List<ReportResponseDTO>> getUserReported(Principal    principal) {
-        List<ReportResponseDTO> reports = AdminService.getUserReports(principal.getName()); // Assuming you have a service to fetch reports based on the parameter
+    public ResponseEntity<Page<ReportResponseDTO>> getUserReported(Principal    principal   , @RequestParam(defaultValue="0" ) int page , @RequestParam(defaultValue="10") int size) {
+        Page<ReportResponseDTO> reports = AdminService.getUserReports(principal.getName(), page, size); // Assuming you have a service to fetch reports based on the parameter
         return ResponseEntity.ok(reports);
     }
 
@@ -59,5 +60,6 @@ public class AdminController {
         String res = AdminService.hidePost(id);
         return ResponseEntity.ok(new Response(res));
     }
+
 
 }

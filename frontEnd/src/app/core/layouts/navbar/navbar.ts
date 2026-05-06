@@ -37,6 +37,7 @@ export class Navbar implements OnInit {
   }
   
   ngOnInit() {
+    
     this.loadMore();
     this.searchResults$ = this.searchSubject.pipe(
       debounceTime(300), 

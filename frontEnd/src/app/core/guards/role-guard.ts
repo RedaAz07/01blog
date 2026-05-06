@@ -21,7 +21,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
     filter(user => user !== null), 
     take(1), 
     map(user => {
-      if (user!.role === expectedRole || user!.role === 'ADMIN') {
+      if (user!.role === expectedRole || user!.role === 'ROLE_ADMIN') {
         return true; 
       } else {
         snackbar.open('Access Denied: You do not have permission!', 'Close', { duration: 3000 });

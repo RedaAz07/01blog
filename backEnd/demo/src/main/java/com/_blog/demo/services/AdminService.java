@@ -1,8 +1,10 @@
 package com._blog.demo.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.post.PostResponseDTO;
@@ -32,20 +34,26 @@ public class AdminService {
     @Autowired
     private likeRepository likeRepository;
 
-    public List<ReportResponseDTO> getPostReports(String username) {
+    public Page<ReportResponseDTO> getPostReports(String username, int page, int size) {
         User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        return reportRepository.findByReportedPostIsNotNull()
-                .stream()
-                .map(report -> mapToReportDTO(report, auth))
-                .toList();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<Report> postPage = reportRepository.findByReportedPostIsNotNull(pageable);
+
+        return postPage
+                .map(report -> mapToReportDTO(report, auth));
     }
 
-    public List<ReportResponseDTO> getUserReports(String username) {
+    public Page<ReportResponseDTO> getUserReports(String username, int page, int size) {
         User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        return reportRepository.findByReportedPostIsNull()
-                .stream()
-                .map(report -> mapToReportDTO(report, auth))
-                .toList();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<Report> userReports = reportRepository.findByReportedPostIsNull(pageable);
+
+        return userReports
+                .map(report -> mapToReportDTO(report, auth));
     }
 
     private ReportResponseDTO mapToReportDTO(Report report, User auth) {
@@ -92,8 +100,7 @@ public class AdminService {
                 p.getTimestamp() != null ? p.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, p),
                 commentRepository.countByPost(p),
-                likeRepository.countByPost(p)
-        );
+                likeRepository.countByPost(p));
         return dto;
     }
 
@@ -133,7 +140,8 @@ public class AdminService {
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid  ID format: ");
         }
-        //   user user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Post not found"));
+        // user user = userRepository.findByUsername(username).orElseThrow(() -> new
+        // RuntimeException("Post not found"));
         Post post = postRepository.findById(Id).orElseThrow(() -> new RuntimeException("Post not found"));
 
         if (post.isStatus()) {

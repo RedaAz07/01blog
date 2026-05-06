@@ -1,0 +1,367 @@
+<div class="admin-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L29 10V22L16 29L3 22V10L16 3Z" fill="var(--teal)" opacity="0.18"/>
+          <path d="M16 3L29 10V22L16 29L3 22V10L16 3Z" stroke="var(--teal)" stroke-width="1.5"/>
+          <circle cx="16" cy="16" r="4" fill="var(--teal)"/>
+          <path d="M16 10V8M16 24V22M10 16H8M24 16H22" stroke="var(--mint)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Nexus</span>
+        <span class="brand-sub">Admin Panel</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 0" (click)="activeTab = 0">
+        <mat-icon>dashboard</mat-icon>
+        <span>Overview</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 1" (click)="activeTab = 1">
+        <mat-icon>group</mat-icon>
+        <span>Users</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 2" (click)="activeTab = 2">
+        <mat-icon>article</mat-icon>
+        <span>Posts</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 3" (click)="activeTab = 3">
+        <mat-icon>flag</mat-icon>
+        <span>Reports</span>
+        <span class="nav-badge" *ngIf="pendingReports > 0">{{ pendingReports }}</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-profile">
+        <div class="avatar avatar-sm forest">A</div>
+        <div>
+          <p class="admin-name">Super Admin</p>
+          <p class="admin-role">Full Access</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- ── OVERVIEW TAB ── -->
+    <div class="tab-panel" *ngIf="activeTab === 0">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard Overview</h1>
+          <p class="page-sub">Welcome back — here's what's happening today.</p>
+        </div>
+        <div class="header-date">
+          <mat-icon>calendar_today</mat-icon>
+          <span>{{ today }}</span>
+        </div>
+      </header>
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card" *ngFor="let s of statCards" [class]="'stat-' + s.color">
+          <div class="stat-icon-wrap">
+            <mat-icon>{{ s.icon }}</mat-icon>
+          </div>
+          <div class="stat-body">
+            <span class="stat-label">{{ s.label }}</span>
+            <span class="stat-value">{{ s.value | number }}</span>
+          </div>
+          <div class="stat-change" [class.up]="s.change > 0" [class.down]="s.change < 0">
+            <mat-icon>{{ s.change > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+            <span>{{ s.change > 0 ? '+' : '' }}{{ s.change }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics row -->
+      <div class="analytics-row">
+
+        <!-- Weekly posts bar chart -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2 class="card-title">Weekly Activity</h2>
+            <span class="card-badge">Posts this week</span>
+          </div>
+          <svg class="bar-chart" viewBox="0 0 420 180" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grid lines -->
+            <line x1="40" y1="20" x2="410" y2="20" stroke="var(--border)" stroke-dasharray="4"/>
+            <line x1="40" y1="60" x2="410" y2="60" stroke="var(--border)" stroke-dasharray="4"/>
+            <line x1="40" y1="100" x2="410" y2="100" stroke="var(--border)" stroke-dasharray="4"/>
+            <line x1="40" y1="140" x2="410" y2="140" stroke="var(--border)" stroke-dasharray="4"/>
+            <!-- Y labels -->
+            <text x="30" y="24" class="chart-label" text-anchor="end">100</text>
+            <text x="30" y="64" class="chart-label" text-anchor="end">75</text>
+            <text x="30" y="104" class="chart-label" text-anchor="end">50</text>
+            <text x="30" y="144" class="chart-label" text-anchor="end">25</text>
+            <!-- Bars -->
+            <g *ngFor="let v of weeklyPosts; let i = index">
+              <!-- Background bar -->
+              <rect
+                [attr.x]="46 + i * 54"
+                y="20"
+                width="34"
+                height="120"
+                rx="6"
+                fill="var(--mint40)"
+                opacity="0.3"
+              />
+              <!-- Value bar -->
+              <rect
+                [attr.x]="46 + i * 54"
+                [attr.y]="140 - (v / maxPostCount) * 120"
+                width="34"
+                [attr.height]="(v / maxPostCount) * 120"
+                rx="6"
+                fill="url(#barGrad)"
+              />
+              <!-- Value label -->
+              <text
+                [attr.x]="63 + i * 54"
+                [attr.y]="135 - (v / maxPostCount) * 120"
+                class="chart-label"
+                text-anchor="middle"
+                font-weight="600"
+              >{{ v }}</text>
+              <!-- Day label -->
+              <text
+                [attr.x]="63 + i * 54"
+                y="162"
+                class="chart-label"
+                text-anchor="middle"
+              >{{ weekLabels[i] }}</text>
+            </g>
+            <defs>
+              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--teal)"/>
+                <stop offset="100%" stop-color="var(--forest)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Donut chart — categories -->
+        <div class="card donut-card">
+          <div class="card-header">
+            <h2 class="card-title">Content Mix</h2>
+          </div>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 200 200" class="donut-svg" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="100" cy="100" r="72" fill="none" stroke="var(--border)" stroke-width="28"/>
+              <path
+                *ngFor="let c of categoryData; let i = index"
+                [attr.d]="getCategoryArc(i)"
+                fill="none"
+                [attr.stroke]="c.color"
+                stroke-width="28"
+                stroke-linecap="butt"
+              />
+              <text x="100" y="96" text-anchor="middle" class="donut-center-val">{{ categoryTotal | number }}</text>
+              <text x="100" y="114" text-anchor="middle" class="donut-center-label">total posts</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item" *ngFor="let c of categoryData">
+                <span class="legend-dot" [style.background]="c.color"></span>
+                <span class="legend-label">{{ c.label }}</span>
+                <span class="legend-val">{{ c.count | number }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Most reported users -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Most Reported Users</h2>
+          <button class="btn-ghost" (click)="activeTab = 3">View all reports →</button>
+        </div>
+        <div class="reported-list">
+          <div class="reported-item" *ngFor="let u of topReportedUsers; let i = index">
+            <span class="rank-num">{{ i + 1 }}</span>
+            <div class="avatar avatar-sm" [class]="u.status">{{ u.avatar }}</div>
+            <div class="reported-info">
+              <span class="reported-name">{{ u.name }}</span>
+              <span class="reported-email">{{ u.email }}</span>
+            </div>
+            <div class="report-bar-wrap">
+              <div class="report-bar">
+                <div class="report-bar-fill" [style.width.%]="(u.reports / 12) * 100"></div>
+              </div>
+            </div>
+            <span class="report-count">{{ u.reports }} reports</span>
+            <span class="status-chip" [class]="u.status">{{ u.status }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USERS TAB ── -->
+    <div class="tab-panel" *ngIf="activeTab === 1">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">User Management</h1>
+          <p class="page-sub">{{ users.length }} total users registered</p>
+        </div>
+        <div class="filter-pills">
+          <button class="pill" [class.active]="selectedFilter === 'all'" (click)="selectedFilter = 'all'">All</button>
+          <button class="pill" [class.active]="selectedFilter === 'active'" (click)="selectedFilter = 'active'">Active</button>
+          <button class="pill" [class.active]="selectedFilter === 'warned'" (click)="selectedFilter = 'warned'">Warned</button>
+          <button class="pill" [class.active]="selectedFilter === 'banned'" (click)="selectedFilter = 'banned'">Banned</button>
+        </div>
+      </header>
+
+      <div class="card table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Posts</th>
+              <th>Reports</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of filteredUsers" [class]="'row-' + u.status">
+              <td>
+                <div class="user-cell">
+                  <div class="avatar avatar-sm" [class]="u.status">{{ u.avatar }}</div>
+                  <div>
+                    <p class="user-name">{{ u.name }}</p>
+                    <p class="user-email">{{ u.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-badge" [class]="u.role">{{ u.role }}</span></td>
+              <td><span class="status-chip" [class]="u.status">{{ u.status }}</span></td>
+              <td class="num-cell">{{ u.posts }}</td>
+              <td class="num-cell" [class.danger-num]="u.reports > 4">{{ u.reports }}</td>
+              <td class="muted-cell">{{ u.joinDate }}</td>
+              <td>
+                <div class="action-btns">
+                  <button class="icon-btn warn" [matTooltip]="'Warn user'" (click)="warnUser(u)" [disabled]="u.status === 'banned'">
+                    <mat-icon>warning_amber</mat-icon>
+                  </button>
+                  <button class="icon-btn ban" [matTooltip]="u.status === 'banned' ? 'Unban user' : 'Ban user'" (click)="banUser(u)">
+                    <mat-icon>{{ u.status === 'banned' ? 'lock_open' : 'block' }}</mat-icon>
+                  </button>
+                  <button class="icon-btn delete" [matTooltip]="'Delete user'" (click)="deleteUser(u.id)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── POSTS TAB ── -->
+    <div class="tab-panel" *ngIf="activeTab === 2">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Content Moderation</h1>
+          <p class="page-sub">{{ posts.length }} posts under review</p>
+        </div>
+        <div class="filter-pills">
+          <button class="pill" [class.active]="postFilter === 'all'" (click)="postFilter = 'all'">All</button>
+          <button class="pill" [class.active]="postFilter === 'visible'" (click)="postFilter = 'visible'">Visible</button>
+          <button class="pill" [class.active]="postFilter === 'hidden'" (click)="postFilter = 'hidden'">Hidden</button>
+          <button class="pill" [class.active]="postFilter === 'removed'" (click)="postFilter = 'removed'">Removed</button>
+        </div>
+      </header>
+
+      <div class="posts-grid">
+        <div class="post-card" *ngFor="let p of filteredPosts" [class]="'post-' + p.status">
+          <div class="post-header">
+            <div class="user-cell">
+              <div class="avatar avatar-sm" [class]="p.reports > 5 ? 'banned' : 'active'">{{ p.authorAvatar }}</div>
+              <div>
+                <p class="user-name">{{ p.author }}</p>
+                <p class="user-email">{{ p.date }}</p>
+              </div>
+            </div>
+            <div class="post-meta-right">
+              <span class="category-tag">{{ p.category }}</span>
+              <span class="status-chip" [class]="p.status">{{ p.status }}</span>
+            </div>
+          </div>
+          <p class="post-content">{{ p.content }}</p>
+          <div class="post-footer">
+            <div class="post-stats">
+              <span class="post-stat"><mat-icon>favorite_border</mat-icon> {{ p.likes }}</span>
+              <span class="post-stat" [class.danger-num]="p.reports > 5">
+                <mat-icon>flag</mat-icon> {{ p.reports }} reports
+              </span>
+            </div>
+            <div class="action-btns">
+              <button class="icon-btn warn" [matTooltip]="p.status === 'visible' ? 'Hide post' : 'Unhide post'" (click)="togglePostVisibility(p)" [disabled]="p.status === 'removed'">
+                <mat-icon>{{ p.status === 'visible' ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <button class="icon-btn delete" [matTooltip]="'Remove post'" (click)="removePost(p)" [disabled]="p.status === 'removed'">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORTS TAB ── -->
+    <div class="tab-panel" *ngIf="activeTab === 3">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Report Queue</h1>
+          <p class="page-sub">{{ pendingReports }} reports awaiting review</p>
+        </div>
+        <div class="filter-pills">
+          <button class="pill" [class.active]="reportFilter === 'all'" (click)="reportFilter = 'all'">All</button>
+          <button class="pill" [class.active]="reportFilter === 'pending'" (click)="reportFilter = 'pending'">Pending</button>
+          <button class="pill" [class.active]="reportFilter === 'resolved'" (click)="reportFilter = 'resolved'">Resolved</button>
+          <button class="pill" [class.active]="reportFilter === 'dismissed'" (click)="reportFilter = 'dismissed'">Dismissed</button>
+        </div>
+      </header>
+
+      <div class="reports-list">
+        <div class="report-card" *ngFor="let r of filteredReports" [class]="'sev-' + r.severity">
+          <div class="report-left">
+            <span class="severity-dot" [class]="r.severity"></span>
+            <div class="avatar avatar-sm">{{ r.targetAvatar }}</div>
+            <div class="report-info">
+              <div class="report-title-row">
+                <span class="report-target">{{ r.targetName }}</span>
+                <span class="report-type-badge" [class]="r.type">{{ r.type }}</span>
+              </div>
+              <p class="report-reason">{{ r.reason }}</p>
+              <p class="report-by">Reported by <strong>{{ r.reportedBy }}</strong> · {{ r.date }}</p>
+            </div>
+          </div>
+          <div class="report-right">
+            <span class="severity-chip" [class]="r.severity">{{ r.severity }}</span>
+            <span class="status-chip" [class]="r.status">{{ r.status }}</span>
+            <div class="action-btns" *ngIf="r.status === 'pending'">
+              <button class="icon-btn resolve" [matTooltip]="'Resolve'" (click)="resolveReport(r)">
+                <mat-icon>check_circle_outline</mat-icon>
+              </button>
+              <button class="icon-btn delete" [matTooltip]="'Dismiss'" (click)="dismissReport(r)">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
