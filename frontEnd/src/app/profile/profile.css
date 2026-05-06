@@ -39,38 +39,32 @@ html[data-theme='dark'] {
 /* ─────────────────────────────────────────
    Page wrapper
 ───────────────────────────────────────── */
-.profile-page {
-  min-height: 100vh;
-  background: var(--theme-bg);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 48px 16px 80px;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  color: var(--theme-ink);
-}
+
 
 /* ─────────────────────────────────────────
    Layout: card + posts stacked & centred
 ───────────────────────────────────────── */
 .profile-layout {
   width: 100%;
-  max-width: 620px;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: row;
+  gap: 40px;
+  
 }
 
 /* ─────────────────────────────────────────
    Profile card  (unchanged)
 ───────────────────────────────────────── */
 .profile-card {
-  width: 100%;
+  width: 40%;
+  height: 60%;
   background: var(--theme-card);
   border: 1px solid var(--theme-border);
   border-radius: 20px;
   box-shadow: var(--theme-shadow);
   overflow: hidden;
+  position: sticky;
+  top: 10%;
 }
 
 .cover-strip {
@@ -687,22 +681,25 @@ html[data-theme='dark'] {
    Posts section  ← NEW
 ───────────────────────────────────────── */
 .posts-section {
-  width: 100%;
+  width: 50%;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  padding: 10px;
 }
 
 /* Section header bar */
 .posts-header {
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 14px;
   background: var(--theme-card);
   border: 1px solid var(--theme-border);
   border-radius: 14px 14px 0 0;
   box-shadow: var(--theme-shadow);
+  margin-bottom: 5px;
+  
 }
 
 .posts-header-left {
