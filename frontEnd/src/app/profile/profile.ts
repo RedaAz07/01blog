@@ -10,6 +10,8 @@ import { Post } from '../home/home';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { PostFeed } from '../home/post-feed/post-feed';
+import { PostComponent } from '../home/post-component/post-component';
+import { usePostManager } from '../core/services/post-manager';
 
 export interface UserProfile {
   id: number;
@@ -30,7 +32,7 @@ export interface UserProfile {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, PostFeed],
+  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, PostFeed, PostComponent],
   templateUrl: './profile.html',
   styleUrls: ['./profile.css'],
 })
@@ -56,6 +58,9 @@ export class Profile implements OnInit {
   followersList = signal<{ username: string; avatar: string }[]>([]);
   followingList = signal<{ username: string; avatar: string }[]>([]);
   Posts = signal<PostResponseDTO[]>([]);
+  postManager = usePostManager(this.Posts);
+
+
   isFollowing = signal(false);
   showEditModal = false;
   showFollowersModal = false;
@@ -197,63 +202,9 @@ export class Profile implements OnInit {
       });
     }
   }
-  editingPost: Post | null = null;
-  postModalOpen = false;
 
-  editPost(post: Post): void {
-    this.editingPost = post;
-    this.postModalOpen = true;
-    console.log(post);
-  }
 
-  reportPost(post: any): void {
-    const reason = prompt('Please enter the reason for reporting this post:');
-    if (!reason) {
-      this.snackbar.open('Report cancelled. Reason is required.', 'Close', { duration: 3000 });
-      return;
-    }
-    console.log(post);
+  
 
-    const reportData = {
-      reported: post.authorUsername,
-      reportedPost: post.id,
-      reason: reason,
-    };
 
-    this.postService.reportPost(reportData).subscribe({
-      next: () => {
-        this.snackbar.open('Post reported successfully. Thank you for your feedback.', 'Close', {
-          duration: 3000,
-        });
-      },
-      error: (err) => {
-        this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-          duration: 3000,
-        });
-      },
-    });
-  }
-
-  deletePost(post: Post): void {
-    if (
-      confirm(
-        `Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`,
-      )
-    ) {
-      this.postService.deletePost(post.id).subscribe({
-        next: () => {
-          this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
-          this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
-        },
-        error: (err) => {
-          this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-            duration: 3000,
-          });
-        },
-      });
-      this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
-
-      this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
-    }
-  }
 }

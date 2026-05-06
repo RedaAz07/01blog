@@ -1,15 +1,12 @@
 <main class="page-layout">
-
   <ng-container *ngIf="authservice.currentUser$ | async as cUser">
-
     <section class="feed-col">
-      
-      <div class="create-trigger" (click)="openCreatePost()">
+      <div class="create-trigger" (click)="postManager.openCreatePost()">
         <div class="pp-circle1">{{ cUser.username.charAt(0) | uppercase }}</div>
         <div class="ct-input">
           <span>What's on your mind, {{ cUser.username.split(' ')[0] }}?</span>
         </div>
-        <button class="ct-media-btn" (click)="$event.stopPropagation(); openCreatePost()">
+        <button class="ct-media-btn" (click)="$event.stopPropagation(); postManager.openCreatePost()">
           <mat-icon>add_photo_alternate</mat-icon>
         </button>
       </div>
@@ -17,41 +14,42 @@
       <app-post-feed
         *ngFor="let p of Posts()"
         [post]="p"
-        [currentUser]="cUser" 
-        (edit)="editPost($event)"
-        (report)="reportPost($event)"
-        (delete)="deletePost($event)"
+        [currentUser]="cUser"
+        (edit)="postManager.editPost($event)"
+        (report)="postManager.reportPost($event)"
+        (delete)="postManager.deletePost($event)"
       >
       </app-post-feed>
 
-<div #scrollAnchor class="scroll-anchor">
-      <span *ngIf="isLoading">Loading more posts...</span>
-    </div>   
-   </section>
+      <div #scrollAnchor class="scroll-anchor">
+        <span *ngIf="isLoading">Loading more posts...</span>
+      </div>
+    </section>
 
     <aside class="suggestions-col">
-    <div class="suggestions-card">
-      <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
-      <div class="sug-user" *ngFor="let u of suggestedUsers$| async">
-       <a class="href" [routerLink]="['/profile', u.username]">
-        <div class="pp-circle1">{{ u.username.charAt(0) | uppercase }}</div>
-       </a>
-        <div class="sug-info">
-          <span class="sug-name">{{ u.firstName }} {{ u.lastName }}</span>
-          <span class="sug-handle">@{{ u.username }}</span>
+      <div class="suggestions-card">
+        <h3 class="sug-title"><mat-icon>group_add</mat-icon> People to Follow</h3>
+        <div class="sug-user" *ngFor="let u of suggestedUsers$ | async">
+          <a class="href" [routerLink]="['/profile', u.username]">
+            <div class="pp-circle1">{{ u.username.charAt(0) | uppercase }}</div>
+          </a>
+          <div class="sug-info">
+            <span class="sug-name">{{ u.firstName }} {{ u.lastName }}</span>
+            <span class="sug-handle">@{{ u.username }}</span>
+          </div>
+          <button class="follow-btn" [class.following]="u.followingBYMe" (click)="toggleFollow(u)">
+            {{ u.followingBYMe ? 'Following' : 'Follow' }}
+          </button>
         </div>
-        <button class="follow-btn" [class.following]="u.followingBYMe" (click)="toggleFollow(u)">
-        {{ u.followingBYMe ? 'Following' : 'Follow' }}
-      </button>
       </div>
-    </div>
-  </aside>
-
-  </ng-container> </main>
+    </aside>
+  </ng-container>
+</main>
 
 <app-post-component
-  [isOpen]="postModalOpen"
-  [editingPost]="editingPost" 
-  (save)="handlePostSave($event)"
-  (close)="closePostModal()">
+  [isOpen]="postManager.postModalOpen()"
+  [editingPost]="postManager.editingPost()"
+  (save)="postManager.handlePostSave($event)"
+  (close)="postManager.closePostModal()"
+>
 </app-post-component>

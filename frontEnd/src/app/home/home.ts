@@ -29,6 +29,7 @@ import { PostFeed } from './post-feed/post-feed';
 import { Observable } from 'rxjs/internal/Observable';
 import { Follow } from '../core/services/follow';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { usePostManager } from '../core/services/post-manager';
 
 export interface Post {
   id: number;
@@ -67,6 +68,7 @@ export interface SuggestedUser {
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
   Posts = signal<PostResponseDTO[]>([]);
+  postManager = usePostManager(this.Posts);
   suggestedUsers = signal<any[]>([]);
   @ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
     if (element && this.observer) {
@@ -108,59 +110,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
         });
       },
     });
-  }
-  postModalOpen = false;
-  editingPost: Post | null = null;
-
-  openCreatePost(): void {
-    this.editingPost = null;
-    this.postModalOpen = true;
-  }
-
-  closePostModal(): void {
-    this.postModalOpen = false;
-    this.editingPost = null;
-  }
-
-  handlePostSave(postData: any): void {
-    const requestPayload: PostRequestDTO = {
-      title: postData.title,
-      content: postData.content,
-    };
-
-    if (this.editingPost) {
-      const updatePayload: PostUpdateRequestDTO = {
-        id: this.editingPost.id,
-        title: postData.title,
-        content: postData.content,
-      };
-      this.postService.updatePost(updatePayload).subscribe({
-        next: (updatedPostFromDB: PostResponseDTO) => {
-          this.Posts.update((currentPosts) =>
-            currentPosts.map((p) => (p.id === updatedPostFromDB.id ? updatedPostFromDB : p)),
-          );
-          this.snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
-          this.closePostModal();
-        },
-        error: (err) => {
-          this.snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
-        },
-      });
-    } else {
-      this.postService.createPost(requestPayload).subscribe({
-        next: (savedPostFromDB: PostResponseDTO) => {
-          this.Posts.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
-
-          this.closePostModal();
-        },
-        error: (err) => {
-          alert('Sorry, something went wrong while saving your post. Please try again.');
-        },
-      });
-    }
-
-    // Close the modal when done!
-    this.closePostModal();
   }
 
   private profileSidebarOpen = false;
@@ -211,62 +160,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
   closeProfileSidebar(): void {
     this.profileSidebarOpen = false;
-  }
-
-  reportPost(post: any): void {
-    const reason = prompt('Please enter the reason for reporting this post:');
-    if (!reason) {
-      this.snackbar.open('Report cancelled. Reason is required.', 'Close', { duration: 3000 });
-      return;
-    }
-    console.log(post);
-
-    const reportData = {
-      reported: post.authorUsername,
-      reportedPost: post.id,
-      reason: reason,
-    };
-
-    this.postService.reportPost(reportData).subscribe({
-      next: () => {
-        this.snackbar.open('Post reported successfully. Thank you for your feedback.', 'Close', {
-          duration: 3000,
-        });
-      },
-      error: (err) => {
-        this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-          duration: 3000,
-        });
-      },
-    });
-  }
-
-  editPost(post: Post): void {
-    this.editingPost = post;
-    this.postModalOpen = true;
-    console.log(post);
-  }
-  deletePost(post: Post): void {
-    if (
-      confirm(
-        `Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`,
-      )
-    ) {
-      this.postService.deletePost(post.id).subscribe({
-        next: () => {
-          this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
-          this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
-        },
-        error: (err) => {
-          this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-            duration: 3000,
-          });
-        },
-      });
-      this.Posts.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
-
-      this.snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
-    }
   }
 
   toggleLike(post: Post): void {
