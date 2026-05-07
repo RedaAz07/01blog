@@ -102,7 +102,7 @@
             <text x="30" y="104" class="chart-label" text-anchor="end">50</text>
             <text x="30" y="144" class="chart-label" text-anchor="end">25</text>
             <!-- Bars -->
-            <g *ngFor="let v of weeklyPosts; let i = index">
+            <g *ngFor="let v of weeklyPosts(); let i = index">
               <!-- Background bar -->
               <rect
                 [attr.x]="46 + i * 54"
@@ -116,27 +116,27 @@
               <!-- Value bar -->
               <rect
                 [attr.x]="46 + i * 54"
-                [attr.y]="140 - (v / maxPostCount) * 120"
+                [attr.y]="140 - (v.count / maxPostCount) * 120"
                 width="34"
-                [attr.height]="(v / maxPostCount) * 120"
+                [attr.height]="(v.count / maxPostCount) * 120"
                 rx="6"
                 fill="url(#barGrad)"
               />
               <!-- Value label -->
               <text
                 [attr.x]="63 + i * 54"
-                [attr.y]="135 - (v / maxPostCount) * 120"
+                [attr.y]="135 - (v.count / maxPostCount) * 120"
                 class="chart-label"
                 text-anchor="middle"
                 font-weight="600"
-              >{{ v }}</text>
+              >{{ v.count }}</text>
               <!-- Day label -->
               <text
                 [attr.x]="63 + i * 54"
                 y="162"
                 class="chart-label"
                 text-anchor="middle"
-              >{{ weekLabels[i] }}</text>
+              >{{ v.day }}</text>
             </g>
             <defs>
               <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
@@ -148,34 +148,7 @@
         </div>
 
         <!-- Donut chart — categories -->
-        <div class="card donut-card">
-          <div class="card-header">
-            <h2 class="card-title">Content Mix</h2>
-          </div>
-          <div class="donut-wrap">
-            <svg viewBox="0 0 200 200" class="donut-svg" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="100" cy="100" r="72" fill="none" stroke="var(--border)" stroke-width="28"/>
-              <path
-                *ngFor="let c of categoryData; let i = index"
-                [attr.d]="getCategoryArc(i)"
-                fill="none"
-                [attr.stroke]="c.color"
-                stroke-width="28"
-                stroke-linecap="butt"
-              />
-              <text x="100" y="96" text-anchor="middle" class="donut-center-val">{{ categoryTotal | number }}</text>
-              <text x="100" y="114" text-anchor="middle" class="donut-center-label">total posts</text>
-            </svg>
-            <div class="donut-legend">
-              <div class="legend-item" *ngFor="let c of categoryData">
-                <span class="legend-dot" [style.background]="c.color"></span>
-                <span class="legend-label">{{ c.label }}</span>
-                <span class="legend-val">{{ c.count | number }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        
       </div>
 
       <!-- Most reported users -->
@@ -185,20 +158,20 @@
           <button class="btn-ghost" (click)="activeTab = 3">View all reports →</button>
         </div>
         <div class="reported-list">
-          <div class="reported-item" *ngFor="let u of topReportedUsers; let i = index">
+          <div class="reported-item" *ngFor="let u of topReportedUsers(); let i = index">
             <span class="rank-num">{{ i + 1 }}</span>
-            <div class="avatar avatar-sm" [class]="u.status">{{ u.avatar }}</div>
+            <div class="avatar avatar-sm" [class]="u.status? 'active' : 'banned' ">{{u.username.charAt(0) |uppercase }}</div>
             <div class="reported-info">
-              <span class="reported-name">{{ u.name }}</span>
-              <span class="reported-email">{{ u.email }}</span>
+              <span class="reported-name">{{ u.firstName }} {{ u.lastName }}</span>
+              <span class="reported-email">{{ u.username }}</span>
             </div>
             <div class="report-bar-wrap">
               <div class="report-bar">
-                <div class="report-bar-fill" [style.width.%]="(u.reports / 12) * 100"></div>
+                <div class="report-bar-fill" [style.width.%]="(u.count / 12) * 100"></div>
               </div>
             </div>
-            <span class="report-count">{{ u.reports }} reports</span>
-            <span class="status-chip" [class]="u.status">{{ u.status }}</span>
+            <span class="report-count">{{ u.count }} reports</span>
+            <span class="status-chip" [class]="u.status? 'active' : 'banned'">{{ u.status ? "Active" : "banned" }}</span>
           </div>
         </div>
       </div>
@@ -214,7 +187,6 @@
         <div class="filter-pills">
           <button class="pill" [class.active]="selectedFilter === 'all'" (click)="selectedFilter = 'all'">All</button>
           <button class="pill" [class.active]="selectedFilter === 'active'" (click)="selectedFilter = 'active'">Active</button>
-          <button class="pill" [class.active]="selectedFilter === 'warned'" (click)="selectedFilter = 'warned'">Warned</button>
           <button class="pill" [class.active]="selectedFilter === 'banned'" (click)="selectedFilter = 'banned'">Banned</button>
         </div>
       </header>
@@ -250,9 +222,8 @@
               <td class="muted-cell">{{ u.joinDate }}</td>
               <td>
                 <div class="action-btns">
-                  <button class="icon-btn warn" [matTooltip]="'Warn user'" (click)="warnUser(u)" [disabled]="u.status === 'banned'">
-                    <mat-icon>warning_amber</mat-icon>
-                  </button>
+                  
+                  
                   <button class="icon-btn ban" [matTooltip]="u.status === 'banned' ? 'Unban user' : 'Ban user'" (click)="banUser(u)">
                     <mat-icon>{{ u.status === 'banned' ? 'lock_open' : 'block' }}</mat-icon>
                   </button>

@@ -1,6 +1,7 @@
 package com._blog.demo.controllers;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.dashboard.Stats;
+import com._blog.demo.dto.dashboard.TopReportedDTO;
+import com._blog.demo.dto.dashboard.WeeklyPosts;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.services.AdminService;
 
@@ -28,24 +31,16 @@ public class AdminController {
     @GetMapping("/reports/posts")
     public ResponseEntity<Page<ReportResponseDTO>> getPostReported(Principal principal,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Page<ReportResponseDTO> reports = AdminService.getPostReports(principal.getName(), page, size); // Assuming you
-                                                                                                        // have a
-                                                                                                        // service to
-                                                                                                        // fetch reports
-                                                                                                        // based on the
-                                                                                                        // parameter
+        Page<ReportResponseDTO> reports = AdminService.getPostReports(principal.getName(), page, size);
+
         return ResponseEntity.ok(reports);
     }
 
     @GetMapping("/reports/users")
     public ResponseEntity<Page<ReportResponseDTO>> getUserReported(Principal principal,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        Page<ReportResponseDTO> reports = AdminService.getUserReports(principal.getName(), page, size); // Assuming you
-                                                                                                        // have a
-                                                                                                        // service to
-                                                                                                        // fetch reports
-                                                                                                        // based on the
-                                                                                                        // parameter
+        Page<ReportResponseDTO> reports = AdminService.getUserReports(principal.getName(), page, size);
+
         return ResponseEntity.ok(reports);
     }
 
@@ -69,9 +64,20 @@ public class AdminController {
     }
 
     @GetMapping("stats/totals")
-    public ResponseEntity<Stats> getMethodName() {
+    public ResponseEntity<Stats> getTotals() {
         Stats states = AdminService.getStats();
         return ResponseEntity.ok(states);
     }
 
+    @GetMapping("stats/weeklyPosts")
+    public ResponseEntity<List<WeeklyPosts>> getWeeklyPosts() {
+        List<WeeklyPosts> weeklyPosts = AdminService.getWeeklyPosts();
+        return ResponseEntity.ok(weeklyPosts);
+    }
+
+     @GetMapping("stats/TopReporeted")
+    public ResponseEntity<List<TopReportedDTO>> getTopReported() {
+        List<TopReportedDTO> weeklyPosts = AdminService.getTopReported();
+        return ResponseEntity.ok(weeklyPosts);
+    }
 }

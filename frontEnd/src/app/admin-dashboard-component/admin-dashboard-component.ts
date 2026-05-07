@@ -7,7 +7,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { AdminDashboard, TotalsDto } from '../core/services/admin-dashboard';
+import {
+  AdminDashboard,
+  TopReportedDto,
+  TotalsDto,
+  WeeklyPosts,
+} from '../core/services/admin-dashboard';
 
 export interface User {
   id: number;
@@ -15,7 +20,7 @@ export interface User {
   email: string;
   avatar: string;
   role: 'user' | 'moderator';
-  status: 'active' | 'banned' | 'warned';
+  status: 'active' | 'banned';
   posts: number;
   reports: number;
   joinDate: string;
@@ -71,6 +76,8 @@ export interface StatCard {
 })
 export class AdminDashboardComponent implements OnInit {
   totals = signal<TotalsDto>({ users: 0, posts: 0, banned: 0, reports: 0 });
+  weeklyPosts = signal<WeeklyPosts[]>([]);
+  topReportedUsers = signal<TopReportedDto[]>([]);
   activeTab = 0;
   today = '';
   selectedFilter: 'all' | 'active' | 'banned' | 'warned' = 'all';
@@ -136,7 +143,7 @@ export class AdminDashboardComponent implements OnInit {
       email: 'omar.t@mail.com',
       avatar: 'OT',
       role: 'user',
-      status: 'warned',
+      status: 'banned',
       posts: 310,
       reports: 5,
       joinDate: 'Nov 20, 2023',
@@ -169,7 +176,7 @@ export class AdminDashboardComponent implements OnInit {
       email: 'lina@mail.com',
       avatar: 'LM',
       role: 'user',
-      status: 'warned',
+      status: 'banned',
       posts: 67,
       reports: 8,
       joinDate: 'Dec 5, 2023',
@@ -325,14 +332,6 @@ export class AdminDashboardComponent implements OnInit {
     },
   ];
 
-  // Analytics data
-  weeklyPosts = [42, 68, 55, 91, 73, 88, 64];
-  weekLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  topReportedUsers = this.users
-    .filter((u) => u.reports > 0)
-    .sort((a, b) => b.reports - a.reports)
-    .slice(0, 5);
-
   categoryData = [
     { label: 'Politics', count: 3420, color: '#408a71' },
     { label: 'Travel', count: 5810, color: '#285a48' },
@@ -344,9 +343,20 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit() {
     this.adminService.getTotals().subscribe((totals) => {
       console.log(totals);
-      
+
       this.totals.set(totals);
     });
+
+    this.adminService.getWeeklyPosts().subscribe((posts) => {
+      posts.map(
+        (p) => (p.day = new Date(p.day.toString()).toLocaleString('en-US', { weekday: 'short' })),
+      );
+      this.weeklyPosts.set(posts);
+    });
+
+    this.adminService.getTopReported().subscribe((reports) => 
+      
+      this.topReportedUsers.set(reports));
   }
 
   get filteredUsers(): User[] {
@@ -369,7 +379,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   get maxPostCount(): number {
-    return Math.max(...this.weeklyPosts);
+    return Math.max(...this.weeklyPosts().map((p) => p.count), 0);
   }
 
   get categoryTotal(): number {
@@ -397,10 +407,6 @@ export class AdminDashboardComponent implements OnInit {
 
   banUser(user: User) {
     user.status = user.status === 'banned' ? 'active' : 'banned';
-  }
-
-  warnUser(user: User) {
-    user.status = 'warned';
   }
 
   deleteUser(id: number) {

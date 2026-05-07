@@ -1,5 +1,8 @@
 package com._blog.demo.services;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +11,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.dashboard.Stats;
+import com._blog.demo.dto.dashboard.TopReportedDTO;
+import com._blog.demo.dto.dashboard.WeeklyPosts;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.dto.userDTO;
@@ -166,6 +171,33 @@ public class AdminService {
 
         return new Stats(posts, users, reports, banned);
 
+    }
+
+    public List<WeeklyPosts> getWeeklyPosts() {
+
+        List<WeeklyPosts> result = postRepository.getPostsLast7Days()
+                .stream()
+                .map(r -> new WeeklyPosts(
+                        (LocalDate) r[0],
+                        ((Number) r[1]).longValue()))
+                .toList();
+
+        return result;
+    }
+
+    public List<TopReportedDTO> getTopReported() {
+
+        List<TopReportedDTO> result = reportRepository.findTop5Reports()
+                .stream()
+                .map(r -> new TopReportedDTO(
+                        (Long) r[0],
+                        (String) r[1],
+                        (String) r[2],
+                        (String) r[3],
+                        (Boolean) r[4]))
+                .toList();
+
+        return result;
     }
 
 }
