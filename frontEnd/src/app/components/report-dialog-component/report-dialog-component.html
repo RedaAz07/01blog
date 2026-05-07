@@ -1,41 +1,103 @@
-    <div class="modal-header" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
-      <h2 style="margin: 0; font-size: 1.2rem;">Report {{ data.targetName }}</h2>
-      <button style="background: none; border: none; cursor: pointer; font-size: 1.2rem;" (click)="close()">✕</button>
+<!-- Report Modal -->
+
+<div class="modal-header">
+  <div class="modal-header-left">
+    <div class="report-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+        <line x1="4" y1="22" x2="4" y2="15"/>
+      </svg>
     </div>
-
-    <div class="modal-body" style="padding: 20px;" *ngIf="step === 'form'">
-      <p style="margin-top: 0; color: #666;">Why are you reporting this?</p>
-      
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <label *ngFor="let r of reportReasons" style="display: flex; gap: 10px; cursor: pointer;">
-          <input type="radio" name="reason" [value]="r" [(ngModel)]="reportReason" />
-          <span>{{ r }}</span>
-        </label>
-      </div>
-
-      <textarea 
-        *ngIf="reportReason === 'Other'" 
-        [(ngModel)]="otherReason" 
-        placeholder="Please provide details (minimum 5 characters)..."
-        style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: vertical;"
-        rows="3">
-      </textarea>
-
-      <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="btn-ghost" (click)="close()">Cancel</button>
-        <button class="btn-danger-solid" [disabled]="!isValid()" (click)="goToConfirm()">Continue</button>
-      </div>
+    <div>
+      <h2 class="modal-title">Report</h2>
+      <p class="modal-subtitle">{{ data.targetName }}</p>
     </div>
+  </div>
+  <button class="close-btn" (click)="close()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
 
-    <div class="modal-body" style="padding: 20px; text-align: center;" *ngIf="step === 'confirm'">
-      <h3 style="margin-top: 0;">Are you sure?</h3>
-      <p style="color: #666;">This report will be sent to our moderation team for review.</p>
-      <div style="margin-top: 20px; background: #f9f9f9; padding: 10px; border-radius: 8px; font-style: italic;">
-        "{{ getFinalReason() }}"
-      </div>
+<!-- ── Step 1: Form ── -->
+<div class="modal-body" *ngIf="step === 'form'">
+  <p class="step-label">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    Select a reason for your report
+  </p>
 
-      <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-        <button class="btn-ghost" (click)="step = 'form'">Back</button>
-        <button class="btn-danger-solid" (click)="submitFinal()">Yes, Report</button>
-      </div>
-    </div>
+  <div class="reason-list">
+    <label class="reason-item" *ngFor="let r of reportReasons" [class.selected]="reportReason === r">
+      <input type="radio" name="reason" [value]="r" [(ngModel)]="reportReason" />
+      <span class="reason-radio">
+        <span class="radio-dot"></span>
+      </span>
+      <span class="reason-text">{{ r }}</span>
+      <svg *ngIf="reportReason === r" class="reason-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </label>
+  </div>
+
+  <div class="other-field" *ngIf="reportReason === 'Other'">
+    <label class="other-label">Provide more details</label>
+    <textarea
+      [(ngModel)]="otherReason"
+      placeholder="Please describe the issue in detail (minimum 5 characters)…"
+      rows="3"
+      class="other-textarea"
+    ></textarea>
+  
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-ghost" (click)="close()">Cancel</button>
+    <button class="btn-danger-solid" [disabled]="!isValid()" (click)="goToConfirm()">
+      Continue
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── Step 2: Confirm ── -->
+<div class="modal-body confirm-body" *ngIf="step === 'confirm'">
+
+  <div class="confirm-icon-wrap">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+      <line x1="4" y1="22" x2="4" y2="15"/>
+    </svg>
+  </div>
+
+  <h3 class="confirm-title">Confirm your report</h3>
+  <p class="confirm-desc">This will be sent to our moderation team for review. False reports may result in account restrictions.</p>
+
+  <div class="confirm-reason-box">
+    <span class="confirm-reason-label">Reason</span>
+    <span class="confirm-reason-value">"{{ getFinalReason() }}"</span>
+  </div>
+
+  <div class="modal-footer confirm-footer">
+    <button class="btn-ghost" (click)="step = 'form'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back
+    </button>
+    <button class="btn-danger-solid" (click)="submitFinal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+        <line x1="4" y1="22" x2="4" y2="15"/>
+      </svg>
+      Submit Report
+    </button>
+  </div>
+</div>

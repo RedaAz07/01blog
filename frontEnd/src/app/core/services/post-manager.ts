@@ -1,9 +1,13 @@
 // src/app/core/services/post-manager.ts
 import { inject, signal, WritableSignal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { PostService, PostRequestDTO, PostUpdateRequestDTO, PostResponseDTO } from './post'; 
+import { PostService, PostRequestDTO, PostUpdateRequestDTO, PostResponseDTO } from './post';
+import { MatDialog } from '@angular/material/dialog';
+import { ReportDialogComponent } from '../../components/report-dialog-component/report-dialog-component';
 
 export function usePostManager(postsSignal: WritableSignal<any[]>) {
+  const dialog = inject(MatDialog);
+
   const postService = inject(PostService);
   const snackbar = inject(MatSnackBar);
 
@@ -39,11 +43,11 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         title: postData.title,
         content: postData.content,
       };
-      
+
       postService.updatePost(updatePayload).subscribe({
         next: (updatedPostFromDB: PostResponseDTO) => {
           postsSignal.update((currentPosts) =>
-            currentPosts.map((p) => (p.id === updatedPostFromDB.id ? updatedPostFromDB : p))
+            currentPosts.map((p) => (p.id === updatedPostFromDB.id ? updatedPostFromDB : p)),
           );
           snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
           closePostModal();
@@ -56,38 +60,58 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
           postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
           closePostModal();
         },
-        error: (err) => alert('Sorry, something went wrong while saving your post. Please try again.'),
+        error: (err) =>
+          alert('Sorry, something went wrong while saving your post. Please try again.'),
       });
     }
   };
 
   const reportPost = (post: any) => {
-    const reason = prompt('Please enter the reason for reporting this post:');
-    if (!reason) {
-      snackbar.open('Report cancelled. Reason is required.', 'Close', { duration: 3000 });
-      return;
-    }
+    const dialogRef = dialog.open(ReportDialogComponent, {
+      width: '400px',
+      data: { targetName: '@' + post.id }, // Passes the username to the dialog UI
+    });
+    dialogRef.afterClosed().subscribe((finalReason: string) => {
+      if (!finalReason) return;
+      if (finalReason.trim().length < 5 || finalReason.trim().length > 100) {
+        snackbar.open('Reasom must be between 5  and 100 charactere', 'Close', {
+          duration: 5000,
+        });
+        return;
+      }
+      const reportData = {
+        reported: post.authorUsername,
+        reportedPost: post.id,
+        reason: finalReason,
+      };
 
-    const reportData = {
-      reported: post.authorUsername,
-      reportedPost: post.id,
-      reason: reason,
-    };
+      postService.reportPost(reportData).subscribe({
+        next: () => snackbar.open('Post reported successfully!', 'Close', { duration: 3000 }),
+        error: (err) => {
+          console.log(err);
 
-    postService.reportPost(reportData).subscribe({
-      next: () => snackbar.open('Post reported successfully. Thank you for your feedback.', 'Close', { duration: 3000 }),
-      error: (err) => snackbar.open('Sorry, something went wrong. Please try again.', 'Close', { duration: 3000 }),
+          let errorM = err?.error?.reason || err.error || 'Failed to report';
+          snackbar.open(errorM, 'Close', { duration: 5000 });
+        },
+      });
     });
   };
 
   const deletePost = (post: any) => {
-    if (confirm(`Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`,
+      )
+    ) {
       postService.deletePost(post.id).subscribe({
         next: () => {
           postsSignal.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
           snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
         },
-        error: (err) => snackbar.open('Sorry, something went wrong. Please try again.', 'Close', { duration: 3000 }),
+        error: (err) =>
+          snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
+            duration: 3000,
+          }),
       });
     }
   };
@@ -100,6 +124,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     closePostModal,
     handlePostSave,
     reportPost,
-    deletePost
+    deletePost,
   };
 }

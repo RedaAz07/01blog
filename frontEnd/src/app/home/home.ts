@@ -67,6 +67,7 @@ export interface SuggestedUser {
   styleUrls: ['./home.css'],
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
+
   Posts = signal<PostResponseDTO[]>([]);
   postManager = usePostManager(this.Posts);
   suggestedUsers = signal<any[]>([]);
@@ -76,7 +77,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   snackbar = inject(MatSnackBar);
-  dialog = inject(MatDialog);
   suggestedUsers$!: Observable<UserProfileDTO[]>;
   private observer!: IntersectionObserver;
   currentPage = 0;

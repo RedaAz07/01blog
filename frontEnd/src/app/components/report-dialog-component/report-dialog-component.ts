@@ -7,12 +7,14 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
   selector: 'app-report-dialog',
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule],
-  templateUrl: './report-dialog-component.html'
+  templateUrl: './report-dialog-component.html',
+  styleUrls: ['./report-dialog-component.css'],
+
+
 })
 export class ReportDialogComponent {
   dialogRef = inject(MatDialogRef<ReportDialogComponent>);
-  data = inject(MAT_DIALOG_DATA); // We pass the username or post title here!
-
+  data = inject(MAT_DIALOG_DATA); 
   step: 'form' | 'confirm' = 'form';
   
   reportReasons = [
@@ -35,6 +37,7 @@ export class ReportDialogComponent {
 
   getFinalReason(): string {
     return this.reportReason === 'Other' ? this.otherReason.trim() : this.reportReason;
+
   }
 
   goToConfirm() {
@@ -42,11 +45,10 @@ export class ReportDialogComponent {
   }
 
   submitFinal() {
-    // When the user clicks "Yes, Report", we close the dialog and hand the text back to the parent!
     this.dialogRef.close(this.getFinalReason());
   }
 
   close() {
-    this.dialogRef.close(); // Closes returning undefined
+    this.dialogRef.close(); 
   }
 }

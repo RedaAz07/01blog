@@ -41,12 +41,12 @@ public class ReportService {
         if (reportedPost != null && !reportedPost.getUser().getId().equals(reportedUser.getId())) {
             throw new RuntimeException("the reported post does not belong to the reported user");
         }
-        if (reportedPost == null && reportRepository.existsByReporterAndReportedAndReportedPostIsNull(reporter, reportedUser)) {
+/*         if (reportedPost == null && reportRepository.existsByReporterAndReportedAndReportedPostIsNull(reporter, reportedUser)) {
             throw new RuntimeException("You have already reported this user");
         }
         if (reportedPost != null && reportRepository.existsByReporterAndReportedAndReportedPost(reporter, reportedUser, reportedPost)) {
             throw new RuntimeException("You have already reported this post of this user");
-        }
+        } */
 
         Report newReport = new Report();
         newReport.setReason(entity.getReason());

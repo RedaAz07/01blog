@@ -200,16 +200,19 @@ export class Profile implements OnInit {
     const targetUser = this.user()?.username;
     if (!targetUser) return;
 
-    // 1. Open the dialog
     const dialogRef = this.dialog.open(ReportDialogComponent, {
       width: '400px',
       data: { targetName: '@' + targetUser }, // Passes the username to the dialog UI
     });
 
-    // 2. Wait for it to close
     dialogRef.afterClosed().subscribe((finalReason: string) => {
-      // If they clicked cancel, finalReason will be undefined. We just stop.
       if (!finalReason) return;
+      if (finalReason.trim().length < 5 || finalReason.trim().length > 100) {
+        this.snackbar.open('Reasom must be between 5  and 100 charactere', 'Close', {
+          duration: 5000,
+        });
+        return;
+      }
 
       // 3. If they gave us a reason, fire the HTTP request!
       this.postService
@@ -222,7 +225,7 @@ export class Profile implements OnInit {
             this.snackbar.open('User reported successfully!', 'Close', { duration: 3000 }),
           error: (err) => {
             console.log(err);
-            
+
             let errorM = err?.error?.reason || err.error || 'Failed to report';
             this.snackbar.open(errorM, 'Close', { duration: 5000 });
           },
