@@ -1,0 +1,41 @@
+    <div class="modal-header" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+      <h2 style="margin: 0; font-size: 1.2rem;">Report {{ data.targetName }}</h2>
+      <button style="background: none; border: none; cursor: pointer; font-size: 1.2rem;" (click)="close()">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding: 20px;" *ngIf="step === 'form'">
+      <p style="margin-top: 0; color: #666;">Why are you reporting this?</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label *ngFor="let r of reportReasons" style="display: flex; gap: 10px; cursor: pointer;">
+          <input type="radio" name="reason" [value]="r" [(ngModel)]="reportReason" />
+          <span>{{ r }}</span>
+        </label>
+      </div>
+
+      <textarea 
+        *ngIf="reportReason === 'Other'" 
+        [(ngModel)]="otherReason" 
+        placeholder="Please provide details (minimum 5 characters)..."
+        style="width: 100%; margin-top: 15px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: vertical;"
+        rows="3">
+      </textarea>
+
+      <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-ghost" (click)="close()">Cancel</button>
+        <button class="btn-danger-solid" [disabled]="!isValid()" (click)="goToConfirm()">Continue</button>
+      </div>
+    </div>
+
+    <div class="modal-body" style="padding: 20px; text-align: center;" *ngIf="step === 'confirm'">
+      <h3 style="margin-top: 0;">Are you sure?</h3>
+      <p style="color: #666;">This report will be sent to our moderation team for review.</p>
+      <div style="margin-top: 20px; background: #f9f9f9; padding: 10px; border-radius: 8px; font-style: italic;">
+        "{{ getFinalReason() }}"
+      </div>
+
+      <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+        <button class="btn-ghost" (click)="step = 'form'">Back</button>
+        <button class="btn-danger-solid" (click)="submitFinal()">Yes, Report</button>
+      </div>
+    </div>

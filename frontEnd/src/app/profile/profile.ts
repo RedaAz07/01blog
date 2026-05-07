@@ -21,6 +21,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { PostFeed } from '../home/post-feed/post-feed';
 import { PostComponent } from '../home/post-component/post-component';
 import { usePostManager } from '../core/services/post-manager';
+import { MatDialog } from '@angular/material/dialog';
+import { ReportDialogComponent } from '../components/report-dialog-component/report-dialog-component';
 
 export interface UserProfile {
   id: number;
@@ -65,7 +67,7 @@ export class Profile implements OnInit {
       this.postObserver.observe(element.nativeElement);
     }
   }
-
+  dialog = inject(MatDialog);
   constructor(
     public authService: AuthService,
     public postService: PostService,
@@ -94,19 +96,8 @@ export class Profile implements OnInit {
   showFollowersModal = false;
   showFollowingModal = false;
   showReportModal = false;
-
+  showOtherREport = false;
   editForm: Partial<UserProfile> = {};
-
-  reportReason = '';
-  reportReasons = [
-    'Spam or misleading',
-    'Harassment or bullying',
-    'Hate speech',
-    'Impersonation',
-    'Inappropriate content',
-    'Other',
-  ];
-  reportSubmitted = false;
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -206,21 +197,37 @@ export class Profile implements OnInit {
   }
 
   submitReport(): void {
-    this.postService
-      .reportPost({
-        reported: this.user()?.username ?? '',
-        reason: this.reportReason,
-      })
-      .subscribe({
-        next: () => {
-          this.reportSubmitted = true;
-          this.snackbar.open('User reported successfully!', 'Close', { duration: 3000 });
-        },
-        error: (err) => {
-          let errMsg = err.error?.message || 'Failed to report user';
-          this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
-        },
-      });
+    const targetUser = this.user()?.username;
+    if (!targetUser) return;
+
+    // 1. Open the dialog
+    const dialogRef = this.dialog.open(ReportDialogComponent, {
+      width: '400px',
+      data: { targetName: '@' + targetUser }, // Passes the username to the dialog UI
+    });
+
+    // 2. Wait for it to close
+    dialogRef.afterClosed().subscribe((finalReason: string) => {
+      // If they clicked cancel, finalReason will be undefined. We just stop.
+      if (!finalReason) return;
+
+      // 3. If they gave us a reason, fire the HTTP request!
+      this.postService
+        .reportPost({
+          reported: targetUser,
+          reason: finalReason,
+        })
+        .subscribe({
+          next: () =>
+            this.snackbar.open('User reported successfully!', 'Close', { duration: 3000 }),
+          error: (err) => {
+            console.log(err);
+            
+            let errorM = err?.error?.reason || err.error || 'Failed to report';
+            this.snackbar.open(errorM, 'Close', { duration: 5000 });
+          },
+        });
+    });
   }
 
   closeAllModals(): void {

@@ -19,7 +19,7 @@
   <!-- Search Results Dropdown -->
   <div class="nav-center search-results" *ngIf="searchResults$ | async as results">
     <div class="search-result-item" *ngFor="let user of results.users">
-      <a [routerLink]="['/users', user.id]" (click)="closeSearch()">
+      <a [routerLink]="['/profile', user.username]" (click)="closeSearch()">
         <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
 
         {{ user.username }}</a
