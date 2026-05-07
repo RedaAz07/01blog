@@ -66,7 +66,7 @@
 
       <!-- Stat cards -->
       <div class="stats-grid">
-        <div class="stat-card" *ngFor="let s of statCards" [class]="'stat-' + s.color">
+        <div class="stat-card" *ngFor="let s of statCards()" [class]="'stat-' + s.color">
           <div class="stat-icon-wrap">
             <mat-icon>{{ s.icon }}</mat-icon>
           </div>
@@ -365,3 +365,4 @@
 
   </main>
 </div>
+

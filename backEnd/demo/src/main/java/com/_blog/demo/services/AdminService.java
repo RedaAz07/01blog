@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.dto.userDTO;
@@ -154,6 +155,17 @@ public class AdminService {
             postRepository.save(post);
             return "Post Unhide seccefully";
         }
+    }
+
+    public Stats getStats() {
+
+        Long posts = postRepository.count();
+        Long users = userRepository.count();
+        Long banned = userRepository.countByStatusFalse();
+        Long reports = reportRepository.count();
+
+        return new Stats(posts, users, reports, banned);
+
     }
 
 }
