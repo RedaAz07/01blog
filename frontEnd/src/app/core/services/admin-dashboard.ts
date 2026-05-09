@@ -11,14 +11,14 @@ export interface TotalsDto {
 
 export interface UsersDTO {
   id: number;
-  username: String;
-  firstName: String;
-  lastName: String;
-  role: String;
+  username: string;
+  firstName: string;
+  lastName: string;
+  role: string;
   status: boolean;
   posts: number;
   reports: number;
-  joined: String;
+  joined: string;
 }
 
 export interface PageResponse {
@@ -75,5 +75,13 @@ export class AdminDashboard {
         this.usersSubject.next(comninedList);
       }),
     );
+  }
+
+  banUser(username: string): Observable<any> {
+    return this.http.put<any>(`http://localhost:8080/api/admin/banUser/${username}`, {});
+  }
+
+  deleteUser(username: string): Observable<any> {
+    return this.http.delete<any>(`http://localhost:8080/api/admin/deleteUser/${username}`, {});
   }
 }

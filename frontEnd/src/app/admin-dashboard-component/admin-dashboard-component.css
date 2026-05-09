@@ -489,7 +489,9 @@
 /* ═══════════════════════════════════ TABLE ═══════════════════════════════════ */
 .table-card { padding: 0;
 height: 600px;
-overflow-y: auto;}
+overflow-y: auto;
+overflow-x: auto;
+}
 
 .data-table {
   width: 100%;

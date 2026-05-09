@@ -231,20 +231,20 @@
               </td>
               <td class="num-cell">{{ u.posts }}</td>
               <td class="num-cell" [class.danger-num]="u.reports > 4">{{ u.reports }}</td>
-              <td class="muted-cell">{{ u.joined }}</td>
+              <td class="muted-cell">{{ u.joined}}</td>
               <td>
                 <div class="action-btns">
                   <button
                     class="icon-btn ban"
                     [matTooltip]="!u.status ? 'Unban user' : 'Ban user'"
-                    (click)="banUser(u)"
+                  (click)="openBanConfirm(u)"
                   >
                     <mat-icon>{{ !u.status ? 'lock_open' : 'block' }}</mat-icon>
                   </button>
                   <button
                     class="icon-btn delete"
                     [matTooltip]="'Delete user'"
-                    (click)="deleteUser(u.id)"
+                   (click)="openDeleteConfirm(u)"
                   >
                     <mat-icon>delete_outline</mat-icon>
                   </button>

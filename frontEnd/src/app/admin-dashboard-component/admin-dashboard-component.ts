@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,9 @@ import {
   UsersDTO,
   WeeklyPosts,
 } from '../core/services/admin-dashboard';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../components/confirm-dialog/confirm-dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface Post {
   id: number;
@@ -65,6 +68,8 @@ export interface StatCard {
   styleUrls: ['./admin-dashboard-component.css'],
 })
 export class AdminDashboardComponent implements OnInit {
+  snackbar = inject(MatSnackBar);
+
   currentFilter: 'all' | 'active' | 'banned' = 'all';
   currentUserPage = 0;
   isUsersLoading = false;
@@ -267,7 +272,10 @@ export class AdminDashboardComponent implements OnInit {
     { label: 'Health', count: 2100, color: '#6b8f82' },
     { label: 'Art', count: 2810, color: '#234b3e' },
   ];
-  constructor(private adminService: AdminDashboard) {}
+  constructor(
+    private adminService: AdminDashboard,
+    private dialog: MatDialog,
+  ) {}
   ngOnInit() {
     this.adminService.getTotals().subscribe((totals) => {
       console.log(totals);
@@ -312,9 +320,9 @@ export class AdminDashboardComponent implements OnInit {
     this.currentUserPage = 0;
 
     this.users.set([]);
-    
+
     this.loadUsers();
-    console.log(1 , this.users());
+    console.log(1, this.users());
   }
   get filteredPosts(): Post[] {
     if (this.postFilter === 'all') return this.posts;
@@ -337,13 +345,70 @@ export class AdminDashboardComponent implements OnInit {
   get categoryTotal(): number {
     return this.categoryData.reduce((s, c) => s + c.count, 0);
   }
+  openBanConfirm(user: UsersDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Ban User',
+        message: `Are you sure you want to ban ${user.username}?`,
+      },
+    });
 
-  banUser(user: UsersDTO) {
-    // user.status = !user.status ;
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.banUser(user);
+      }
+    });
   }
+  banUser(user: UsersDTO) {
+    this.adminService.banUser(user.username).subscribe({
+      next: () => {
+        this.users.update((list) => {
+          const updated = list.map((u) =>
+            u.username === user.username ? { ...u, status: !u.status } : u,
+          );
 
-  deleteUser(id: number) {
-    this.users().filter((u) => u.id !== id);
+          return updated.filter((u) => {
+            if (this.currentFilter === 'active') return u.status === true;
+            if (this.currentFilter === 'banned') return u.status === false;
+            return true;
+          });
+        });
+        this.snackbar.open(`user ${user.status? 'banned' : 'unbanned'} seccefelly`, 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        let errorM = err || err?.error || 'Faild to ban this user ';
+        this.snackbar.open(errorM, 'Close', { duration: 3000 });
+      },
+    });
+  }
+  openDeleteConfirm(user: UsersDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently delete ${user.username}. Continue?`,
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteUser(user);
+      }
+    });
+  }
+  deleteUser(user: UsersDTO) {
+    this.adminService.deleteUser(user.username).subscribe({
+      next: () => {
+        this.users.update((list) => list.filter((u) => u.username !== user.username));
+                this.snackbar.open('user Delleted  seccefelly', 'Close', { duration: 3000 });
+
+      },
+      error : (err) =>{
+        let errorM = err || err?.error || 'Faild to delete this  user ';
+        this.snackbar.open(errorM, 'Close', { duration: 3000 });
+      },
+    });
   }
 
   togglePostVisibility(post: Post) {
