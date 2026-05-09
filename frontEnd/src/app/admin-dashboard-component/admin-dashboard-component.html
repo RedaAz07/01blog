@@ -1,19 +1,15 @@
 <div class="admin-shell">
-
   <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M16 3L29 10V22L16 29L3 22V10L16 3Z" fill="var(--teal)" opacity="0.18"/>
-          <path d="M16 3L29 10V22L16 29L3 22V10L16 3Z" stroke="var(--teal)" stroke-width="1.5"/>
-          <circle cx="16" cy="16" r="4" fill="var(--teal)"/>
-          <path d="M16 10V8M16 24V22M10 16H8M24 16H22" stroke="var(--mint)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="brand-text">
-        <span class="brand-name">Nexus</span>
-        <span class="brand-sub">Admin Panel</span>
+      <div class="sidebar-footer">
+        <div class="admin-profile">
+          <div class="avatar avatar-sm forest">A</div>
+          <div>
+            <p class="admin-name">Super Admin</p>
+            <p class="admin-role">Full Access</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -36,21 +32,10 @@
         <span class="nav-badge" *ngIf="pendingReports > 0">{{ pendingReports }}</span>
       </button>
     </nav>
-
-    <div class="sidebar-footer">
-      <div class="admin-profile">
-        <div class="avatar avatar-sm forest">A</div>
-        <div>
-          <p class="admin-name">Super Admin</p>
-          <p class="admin-role">Full Access</p>
-        </div>
-      </div>
-    </div>
   </aside>
 
   <!-- ═══ MAIN CONTENT ═══ -->
   <main class="main-content">
-
     <!-- ── OVERVIEW TAB ── -->
     <div class="tab-panel" *ngIf="activeTab === 0">
       <header class="page-header">
@@ -83,7 +68,6 @@
 
       <!-- Analytics row -->
       <div class="analytics-row">
-
         <!-- Weekly posts bar chart -->
         <div class="card chart-card">
           <div class="card-header">
@@ -92,10 +76,10 @@
           </div>
           <svg class="bar-chart" viewBox="0 0 420 180" xmlns="http://www.w3.org/2000/svg">
             <!-- Grid lines -->
-            <line x1="40" y1="20" x2="410" y2="20" stroke="var(--border)" stroke-dasharray="4"/>
-            <line x1="40" y1="60" x2="410" y2="60" stroke="var(--border)" stroke-dasharray="4"/>
-            <line x1="40" y1="100" x2="410" y2="100" stroke="var(--border)" stroke-dasharray="4"/>
-            <line x1="40" y1="140" x2="410" y2="140" stroke="var(--border)" stroke-dasharray="4"/>
+            <line x1="40" y1="20" x2="410" y2="20" stroke="var(--border)" stroke-dasharray="4" />
+            <line x1="40" y1="60" x2="410" y2="60" stroke="var(--border)" stroke-dasharray="4" />
+            <line x1="40" y1="100" x2="410" y2="100" stroke="var(--border)" stroke-dasharray="4" />
+            <line x1="40" y1="140" x2="410" y2="140" stroke="var(--border)" stroke-dasharray="4" />
             <!-- Y labels -->
             <text x="30" y="24" class="chart-label" text-anchor="end">100</text>
             <text x="30" y="64" class="chart-label" text-anchor="end">75</text>
@@ -129,26 +113,24 @@
                 class="chart-label"
                 text-anchor="middle"
                 font-weight="600"
-              >{{ v.count }}</text>
+              >
+                {{ v.count }}
+              </text>
               <!-- Day label -->
-              <text
-                [attr.x]="63 + i * 54"
-                y="162"
-                class="chart-label"
-                text-anchor="middle"
-              >{{ v.day }}</text>
+              <text [attr.x]="63 + i * 54" y="162" class="chart-label" text-anchor="middle">
+                {{ v.day }}
+              </text>
             </g>
             <defs>
               <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--teal)"/>
-                <stop offset="100%" stop-color="var(--forest)"/>
+                <stop offset="0%" stop-color="var(--teal)" />
+                <stop offset="100%" stop-color="var(--forest)" />
               </linearGradient>
             </defs>
           </svg>
         </div>
 
         <!-- Donut chart — categories -->
-        
       </div>
 
       <!-- Most reported users -->
@@ -160,7 +142,9 @@
         <div class="reported-list">
           <div class="reported-item" *ngFor="let u of topReportedUsers(); let i = index">
             <span class="rank-num">{{ i + 1 }}</span>
-            <div class="avatar avatar-sm" [class]="u.status? 'active' : 'banned' ">{{u.username.charAt(0) |uppercase }}</div>
+            <div class="avatar avatar-sm" [class]="u.status ? 'active' : 'banned'">
+              {{ u.username.charAt(0) | uppercase }}
+            </div>
             <div class="reported-info">
               <span class="reported-name">{{ u.firstName }} {{ u.lastName }}</span>
               <span class="reported-email">{{ u.username }}</span>
@@ -171,7 +155,9 @@
               </div>
             </div>
             <span class="report-count">{{ u.count }} reports</span>
-            <span class="status-chip" [class]="u.status? 'active' : 'banned'">{{ u.status ? "Active" : "banned" }}</span>
+            <span class="status-chip" [class]="u.status ? 'active' : 'banned'">{{
+              u.status ? 'Active' : 'banned'
+            }}</span>
           </div>
         </div>
       </div>
@@ -182,12 +168,30 @@
       <header class="page-header">
         <div>
           <h1 class="page-title">User Management</h1>
-          <p class="page-sub">{{ users.length }} total users registered</p>
+          <p class="page-sub">{{ totals().users }} total users registered</p>
         </div>
-        <div class="filter-pills">
-          <button class="pill" [class.active]="selectedFilter === 'all'" (click)="selectedFilter = 'all'">All</button>
-          <button class="pill" [class.active]="selectedFilter === 'active'" (click)="selectedFilter = 'active'">Active</button>
-          <button class="pill" [class.active]="selectedFilter === 'banned'" (click)="selectedFilter = 'banned'">Banned</button>
+          <div class="filter-pills">
+            <button
+              class="pill"
+              [class.active]="currentFilter == 'all'"
+              (click)="FilterUsers('all')"
+            >
+              All
+            </button>
+            <button
+              class="pill"
+              [class.active]="currentFilter == 'active'"
+              (click)="FilterUsers('active')"
+            >
+              Active
+            </button>
+            <button
+              class="pill"
+              [class.active]="currentFilter  == 'banned'"
+              (click)="FilterUsers('banned')"
+            >
+              Banned
+            </button>
         </div>
       </header>
 
@@ -205,35 +209,52 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of filteredUsers" [class]="'row-' + u.status">
+            <tr *ngFor="let u of users()" [class]=" u.status ? 'row-active' : 'row-banned'">
               <td>
                 <div class="user-cell">
-                  <div class="avatar avatar-sm" [class]="u.status">{{ u.avatar }}</div>
+                  <div class="avatar avatar-sm" [class]="u.status ? 'active' : 'banned'">
+                    {{ u.username.charAt(0) }}
+                  </div>
                   <div>
-                    <p class="user-name">{{ u.name }}</p>
-                    <p class="user-email">{{ u.email }}</p>
+                    <p class="user-name">{{ u.firstName }} {{ u.lastName }}</p>
+                    <p class="user-email">{{ u.username }}</p>
                   </div>
                 </div>
               </td>
-              <td><span class="role-badge" [class]="u.role">{{ u.role }}</span></td>
-              <td><span class="status-chip" [class]="u.status">{{ u.status }}</span></td>
+              <td>
+                <span class="role-badge" [class]="u.role">{{ u.role }}</span>
+              </td>
+              <td>
+                <span class="status-chip" [class]="u.status ? 'active' : 'banned'">{{
+                  u.status ? 'active' : 'banned'
+                }}</span>
+              </td>
               <td class="num-cell">{{ u.posts }}</td>
               <td class="num-cell" [class.danger-num]="u.reports > 4">{{ u.reports }}</td>
-              <td class="muted-cell">{{ u.joinDate }}</td>
+              <td class="muted-cell">{{ u.joined }}</td>
               <td>
                 <div class="action-btns">
-                  
-                  
-                  <button class="icon-btn ban" [matTooltip]="u.status === 'banned' ? 'Unban user' : 'Ban user'" (click)="banUser(u)">
-                    <mat-icon>{{ u.status === 'banned' ? 'lock_open' : 'block' }}</mat-icon>
+                  <button
+                    class="icon-btn ban"
+                    [matTooltip]="!u.status ? 'Unban user' : 'Ban user'"
+                    (click)="banUser(u)"
+                  >
+                    <mat-icon>{{ !u.status ? 'lock_open' : 'block' }}</mat-icon>
                   </button>
-                  <button class="icon-btn delete" [matTooltip]="'Delete user'" (click)="deleteUser(u.id)">
+                  <button
+                    class="icon-btn delete"
+                    [matTooltip]="'Delete user'"
+                    (click)="deleteUser(u.id)"
+                  >
                     <mat-icon>delete_outline</mat-icon>
                   </button>
                 </div>
               </td>
             </tr>
           </tbody>
+          <div #userScrollAnchor class="scroll-anchor">
+            <span *ngIf="isUsersLoading">Loading older posts...</span>
+          </div>
         </table>
       </div>
     </div>
@@ -246,10 +267,30 @@
           <p class="page-sub">{{ posts.length }} posts under review</p>
         </div>
         <div class="filter-pills">
-          <button class="pill" [class.active]="postFilter === 'all'" (click)="postFilter = 'all'">All</button>
-          <button class="pill" [class.active]="postFilter === 'visible'" (click)="postFilter = 'visible'">Visible</button>
-          <button class="pill" [class.active]="postFilter === 'hidden'" (click)="postFilter = 'hidden'">Hidden</button>
-          <button class="pill" [class.active]="postFilter === 'removed'" (click)="postFilter = 'removed'">Removed</button>
+          <button class="pill" [class.active]="postFilter === 'all'" (click)="postFilter = 'all'">
+            All
+          </button>
+          <button
+            class="pill"
+            [class.active]="postFilter === 'visible'"
+            (click)="postFilter = 'visible'"
+          >
+            Visible
+          </button>
+          <button
+            class="pill"
+            [class.active]="postFilter === 'hidden'"
+            (click)="postFilter = 'hidden'"
+          >
+            Hidden
+          </button>
+          <button
+            class="pill"
+            [class.active]="postFilter === 'removed'"
+            (click)="postFilter = 'removed'"
+          >
+            Removed
+          </button>
         </div>
       </header>
 
@@ -257,7 +298,9 @@
         <div class="post-card" *ngFor="let p of filteredPosts" [class]="'post-' + p.status">
           <div class="post-header">
             <div class="user-cell">
-              <div class="avatar avatar-sm" [class]="p.reports > 5 ? 'banned' : 'active'">{{ p.authorAvatar }}</div>
+              <div class="avatar avatar-sm" [class]="p.reports > 5 ? 'banned' : 'active'">
+                {{ p.authorAvatar }}
+              </div>
               <div>
                 <p class="user-name">{{ p.author }}</p>
                 <p class="user-email">{{ p.date }}</p>
@@ -277,10 +320,20 @@
               </span>
             </div>
             <div class="action-btns">
-              <button class="icon-btn warn" [matTooltip]="p.status === 'visible' ? 'Hide post' : 'Unhide post'" (click)="togglePostVisibility(p)" [disabled]="p.status === 'removed'">
+              <button
+                class="icon-btn warn"
+                [matTooltip]="p.status === 'visible' ? 'Hide post' : 'Unhide post'"
+                (click)="togglePostVisibility(p)"
+                [disabled]="p.status === 'removed'"
+              >
                 <mat-icon>{{ p.status === 'visible' ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
-              <button class="icon-btn delete" [matTooltip]="'Remove post'" (click)="removePost(p)" [disabled]="p.status === 'removed'">
+              <button
+                class="icon-btn delete"
+                [matTooltip]="'Remove post'"
+                (click)="removePost(p)"
+                [disabled]="p.status === 'removed'"
+              >
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </div>
@@ -297,10 +350,34 @@
           <p class="page-sub">{{ pendingReports }} reports awaiting review</p>
         </div>
         <div class="filter-pills">
-          <button class="pill" [class.active]="reportFilter === 'all'" (click)="reportFilter = 'all'">All</button>
-          <button class="pill" [class.active]="reportFilter === 'pending'" (click)="reportFilter = 'pending'">Pending</button>
-          <button class="pill" [class.active]="reportFilter === 'resolved'" (click)="reportFilter = 'resolved'">Resolved</button>
-          <button class="pill" [class.active]="reportFilter === 'dismissed'" (click)="reportFilter = 'dismissed'">Dismissed</button>
+          <button
+            class="pill"
+            [class.active]="reportFilter === 'all'"
+            (click)="reportFilter = 'all'"
+          >
+            All
+          </button>
+          <button
+            class="pill"
+            [class.active]="reportFilter === 'pending'"
+            (click)="reportFilter = 'pending'"
+          >
+            Pending
+          </button>
+          <button
+            class="pill"
+            [class.active]="reportFilter === 'resolved'"
+            (click)="reportFilter = 'resolved'"
+          >
+            Resolved
+          </button>
+          <button
+            class="pill"
+            [class.active]="reportFilter === 'dismissed'"
+            (click)="reportFilter = 'dismissed'"
+          >
+            Dismissed
+          </button>
         </div>
       </header>
 
@@ -315,7 +392,9 @@
                 <span class="report-type-badge" [class]="r.type">{{ r.type }}</span>
               </div>
               <p class="report-reason">{{ r.reason }}</p>
-              <p class="report-by">Reported by <strong>{{ r.reportedBy }}</strong> · {{ r.date }}</p>
+              <p class="report-by">
+                Reported by <strong>{{ r.reportedBy }}</strong> · {{ r.date }}
+              </p>
             </div>
           </div>
           <div class="report-right">
@@ -333,7 +412,5 @@
         </div>
       </div>
     </div>
-
   </main>
 </div>
-

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.dashboard.TopReportedDTO;
+import com._blog.demo.dto.dashboard.UsersDTO;
 import com._blog.demo.dto.dashboard.WeeklyPosts;
 import com._blog.demo.dto.report.ReportResponseDTO;
 import com._blog.demo.services.AdminService;
@@ -75,9 +76,21 @@ public class AdminController {
         return ResponseEntity.ok(weeklyPosts);
     }
 
-     @GetMapping("stats/TopReporeted")
+    @GetMapping("stats/TopReporeted")
     public ResponseEntity<List<TopReportedDTO>> getTopReported() {
         List<TopReportedDTO> weeklyPosts = AdminService.getTopReported();
         return ResponseEntity.ok(weeklyPosts);
     }
+
+    @GetMapping("stats/users")
+    public Page<UsersDTO> getAllUsres(
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) Boolean status) {
+
+        Page<UsersDTO> result = AdminService.getAllUsers(size, page, status);
+
+        return result;
+    }
+
 }

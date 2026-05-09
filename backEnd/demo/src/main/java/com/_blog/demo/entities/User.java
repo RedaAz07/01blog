@@ -1,7 +1,10 @@
 package com._blog.demo.entities;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -44,6 +47,8 @@ public class User {
     private Date birthDate;
     @Column(name = "profilePictureUrl")
     private String profilePictureUrl;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;

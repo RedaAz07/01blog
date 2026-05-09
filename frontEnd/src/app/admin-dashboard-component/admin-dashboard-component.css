@@ -127,7 +127,6 @@
 
 .sidebar-footer {
   padding: 20px 24px 0;
-  border-top: 1px solid var(--border);
   margin-top: 20px;
 }
 
@@ -488,7 +487,9 @@
 }
 
 /* ═══════════════════════════════════ TABLE ═══════════════════════════════════ */
-.table-card { padding: 0; }
+.table-card { padding: 0;
+height: 600px;
+overflow-y: auto;}
 
 .data-table {
   width: 100%;
@@ -754,4 +755,13 @@
   .sidebar { display: none; }
   .main-content { padding: 20px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.scroll-anchor {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--muted);
 }

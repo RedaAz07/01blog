@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.dashboard.TopReportedDTO;
+import com._blog.demo.dto.dashboard.UsersDTO;
 import com._blog.demo.dto.dashboard.WeeklyPosts;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.report.ReportResponseDTO;
@@ -200,4 +201,28 @@ public class AdminService {
         return result;
     }
 
+    public Page<UsersDTO> getAllUsers(int size, int page, Boolean status) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<User> users;
+        if (status == null) {
+
+            users = userRepository.findByRoleNot("ROLE_ADMIN", pageable);
+        } else if (status) {
+            users = userRepository.findByRoleNotAndStatus("ROLE_ADMIN", true, pageable);
+        } else {
+            users = userRepository.findByRoleNotAndStatus("ROLE_ADMIN", false, pageable);
+
+        }
+        return users.map(r -> new UsersDTO(
+                r.getId(),
+                r.getUsername(),
+                r.getFirstName(),
+                r.getLastName(),
+                r.getRole(),
+                r.isStatus(),
+                r.getPosts().size(),
+                r.getReportsReceived().size(),
+                r.getCreatedAt()));
+    }
 }

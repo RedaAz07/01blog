@@ -1,12 +1,29 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export interface TotalsDto {
   posts: number;
   users: number;
   reports: number;
   banned: number;
+}
+
+export interface UsersDTO {
+  id: number;
+  username: String;
+  firstName: String;
+  lastName: String;
+  role: String;
+  status: boolean;
+  posts: number;
+  reports: number;
+  joined: String;
+}
+
+export interface PageResponse {
+  content: UsersDTO[];
+  last: boolean;
 }
 
 export interface TopReportedDto {
@@ -26,6 +43,9 @@ export interface WeeklyPosts {
   providedIn: 'root',
 })
 export class AdminDashboard {
+  private usersSubject = new BehaviorSubject<UsersDTO[]>([]);
+  public users$ = this.usersSubject.asObservable();
+
   baseUrl = 'http://localhost:8080/api/admin/stats';
 
   constructor(private http: HttpClient) {}
@@ -40,5 +60,20 @@ export class AdminDashboard {
 
   getTopReported(): Observable<TopReportedDto[]> {
     return this.http.get<TopReportedDto[]>(`${this.baseUrl}/TopReporeted`);
+  }
+
+  getAllusers(page: number, size: number = 10, status?: boolean): Observable<PageResponse> {
+    let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    if (status !== undefined) {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<PageResponse>(`${this.baseUrl}/users`, { params }).pipe(
+      tap((res) => {
+        const currentUser = this.usersSubject.value;
+        const comninedList = [...currentUser, ...res.content];
+        this.usersSubject.next(comninedList);
+      }),
+    );
   }
 }

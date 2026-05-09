@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,22 +9,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import {
   AdminDashboard,
+  PageResponse,
   TopReportedDto,
   TotalsDto,
+  UsersDTO,
   WeeklyPosts,
 } from '../core/services/admin-dashboard';
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  avatar: string;
-  role: 'user' | 'moderator';
-  status: 'active' | 'banned';
-  posts: number;
-  reports: number;
-  joinDate: string;
-}
 
 export interface Post {
   id: number;
@@ -75,12 +65,30 @@ export interface StatCard {
   styleUrls: ['./admin-dashboard-component.css'],
 })
 export class AdminDashboardComponent implements OnInit {
+  currentFilter: 'all' | 'active' | 'banned' = 'all';
+  currentUserPage = 0;
+  isUsersLoading = false;
+  private userObserver!: IntersectionObserver;
+  @ViewChild('userScrollAnchor') set setupUserAnchor(element: ElementRef) {
+    if (element && !this.userObserver) {
+      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
+      this.userObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !this.isUsersLoading) {
+          console.log(this.users());
+          this.loadUsers();
+        }
+      }, options);
+
+      this.userObserver.observe(element.nativeElement);
+    }
+  }
+
   totals = signal<TotalsDto>({ users: 0, posts: 0, banned: 0, reports: 0 });
+  users = signal<UsersDTO[]>([]);
   weeklyPosts = signal<WeeklyPosts[]>([]);
   topReportedUsers = signal<TopReportedDto[]>([]);
   activeTab = 0;
   today = '';
-  selectedFilter: 'all' | 'active' | 'banned' | 'warned' = 'all';
   postFilter: 'all' | 'visible' | 'hidden' | 'removed' = 'all';
   reportFilter: 'all' | 'pending' | 'resolved' | 'dismissed' = 'all';
   statCards = computed<StatCard[]>(() => [
@@ -113,86 +121,6 @@ export class AdminDashboardComponent implements OnInit {
       color: 'muted',
     },
   ]);
-
-  users: User[] = [
-    {
-      id: 1,
-      name: 'Karim Benali',
-      email: 'karim@mail.com',
-      avatar: 'KB',
-      role: 'user',
-      status: 'active',
-      posts: 142,
-      reports: 0,
-      joinDate: 'Jan 12, 2024',
-    },
-    {
-      id: 2,
-      name: 'Sara El Fassi',
-      email: 'sara@mail.com',
-      avatar: 'SE',
-      role: 'moderator',
-      status: 'active',
-      posts: 87,
-      reports: 1,
-      joinDate: 'Mar 3, 2024',
-    },
-    {
-      id: 3,
-      name: 'Omar Tahiri',
-      email: 'omar.t@mail.com',
-      avatar: 'OT',
-      role: 'user',
-      status: 'banned',
-      posts: 310,
-      reports: 5,
-      joinDate: 'Nov 20, 2023',
-    },
-    {
-      id: 4,
-      name: 'Nadia Chraibi',
-      email: 'nadia@mail.com',
-      avatar: 'NC',
-      role: 'user',
-      status: 'banned',
-      posts: 54,
-      reports: 12,
-      joinDate: 'Feb 14, 2024',
-    },
-    {
-      id: 5,
-      name: 'Yassine Alaoui',
-      email: 'yassine@mail.com',
-      avatar: 'YA',
-      role: 'user',
-      status: 'active',
-      posts: 230,
-      reports: 2,
-      joinDate: 'Apr 1, 2024',
-    },
-    {
-      id: 6,
-      name: 'Lina Moussaoui',
-      email: 'lina@mail.com',
-      avatar: 'LM',
-      role: 'user',
-      status: 'banned',
-      posts: 67,
-      reports: 8,
-      joinDate: 'Dec 5, 2023',
-    },
-    {
-      id: 7,
-      name: 'Hamza Berrada',
-      email: 'hamza@mail.com',
-      avatar: 'HB',
-      role: 'user',
-      status: 'active',
-      posts: 192,
-      reports: 0,
-      joinDate: 'Jun 18, 2024',
-    },
-  ];
 
   posts: Post[] = [
     {
@@ -354,16 +282,40 @@ export class AdminDashboardComponent implements OnInit {
       this.weeklyPosts.set(posts);
     });
 
-    this.adminService.getTopReported().subscribe((reports) => 
-      
-      this.topReportedUsers.set(reports));
+    this.adminService.getTopReported().subscribe((reports) => this.topReportedUsers.set(reports));
+    this.loadUsers();
   }
 
-  get filteredUsers(): User[] {
-    if (this.selectedFilter === 'all') return this.users;
-    return this.users.filter((u) => u.status === this.selectedFilter);
+  loadUsers() {
+    if (this.isUsersLoading) return;
+    this.isUsersLoading = true;
+    let status: boolean | undefined;
+
+    if (this.currentFilter === 'active') {
+      status = true;
+    } else if (this.currentFilter === 'banned') {
+      status = false;
+    }
+
+    this.adminService.getAllusers(this.currentUserPage, 10, status).subscribe({
+      next: (res: PageResponse) => {
+        this.currentUserPage++;
+        this.users.update((current: UsersDTO[]) => [...current, ...res.content]);
+        this.isUsersLoading = false;
+      },
+    });
   }
 
+  FilterUsers(filter: 'all' | 'active' | 'banned') {
+    this.currentFilter = filter;
+
+    this.currentUserPage = 0;
+
+    this.users.set([]);
+    
+    this.loadUsers();
+    console.log(1 , this.users());
+  }
   get filteredPosts(): Post[] {
     if (this.postFilter === 'all') return this.posts;
     return this.posts.filter((p) => p.status === this.postFilter);
@@ -386,31 +338,12 @@ export class AdminDashboardComponent implements OnInit {
     return this.categoryData.reduce((s, c) => s + c.count, 0);
   }
 
-  getCategoryArc(index: number): string {
-    let startAngle = 0;
-    for (let i = 0; i < index; i++) {
-      startAngle += (this.categoryData[i].count / this.categoryTotal) * 360;
-    }
-    const sweep = (this.categoryData[index].count / this.categoryTotal) * 360;
-    return this.describeArc(100, 100, 72, startAngle - 90, startAngle + sweep - 90);
-  }
-
-  describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg: number): string {
-    const toRad = (d: number) => (d * Math.PI) / 180;
-    const x1 = cx + r * Math.cos(toRad(startDeg));
-    const y1 = cy + r * Math.sin(toRad(startDeg));
-    const x2 = cx + r * Math.cos(toRad(endDeg));
-    const y2 = cy + r * Math.sin(toRad(endDeg));
-    const large = endDeg - startDeg > 180 ? 1 : 0;
-    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-  }
-
-  banUser(user: User) {
-    user.status = user.status === 'banned' ? 'active' : 'banned';
+  banUser(user: UsersDTO) {
+    // user.status = !user.status ;
   }
 
   deleteUser(id: number) {
-    this.users = this.users.filter((u) => u.id !== id);
+    this.users().filter((u) => u.id !== id);
   }
 
   togglePostVisibility(post: Post) {

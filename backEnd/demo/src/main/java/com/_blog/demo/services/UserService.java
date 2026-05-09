@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.RegisterRequestDTO;
 import com._blog.demo.dto.auth.EditProfileRequestDTO;
-import com._blog.demo.dto.userDTO; // The DTO we talked about!
+import com._blog.demo.dto.userDTO;
 import com._blog.demo.entities.User;
-import com._blog.demo.repositories.UserRepository;
+import com._blog.demo.repositories.UserRepository; // The DTO we talked about!
 
 @Service
 public class UserService {
@@ -155,4 +155,6 @@ public class UserService {
         userRepository.save(user);
         return getUserByUsername(username, currentUsername);
     }
+
+    
 }
