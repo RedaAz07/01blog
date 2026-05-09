@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com._blog.demo.dto.dashboard.PostsDTO;
 import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.dashboard.TopReportedDTO;
 import com._blog.demo.dto.dashboard.UsersDTO;
@@ -224,5 +225,27 @@ public class AdminService {
                 r.getPosts().size(),
                 r.getReportsReceived().size(),
                 r.getCreatedAt()));
+    }
+
+    public Page<PostsDTO> getAllPosts(int page, int size, Boolean status) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("id").descending());
+
+        Page<Post> posts = (status == null)
+                ? postRepository.findAll(pageable)
+                : postRepository.findByStatus(pageable, status);
+
+        return posts.map(r -> new PostsDTO(
+                r.getId(),
+                r.getUser().getUsername(),
+                r.getTitle(),
+                r.getContent(),
+                r.getLikes().size(),
+                r.getReportsReceived().size(),
+                r.isStatus(),
+                r.getTimestamp()));
     }
 }

@@ -10,6 +10,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 import {
   AdminDashboard,
   PageResponse,
+  PageResponse1,
+  PostDTO,
   TopReportedDto,
   TotalsDto,
   UsersDTO,
@@ -18,18 +20,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../components/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-export interface Post {
-  id: number;
-  author: string;
-  authorAvatar: string;
-  content: string;
-  category: string;
-  likes: number;
-  reports: number;
-  status: 'visible' | 'hidden' | 'removed';
-  date: string;
-}
+import { RouterLink } from '@angular/router';
 
 export interface Report {
   id: number;
@@ -63,6 +54,7 @@ export interface StatCard {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
+    RouterLink,
   ],
   templateUrl: './admin-dashboard-component.html',
   styleUrls: ['./admin-dashboard-component.css'],
@@ -71,9 +63,14 @@ export class AdminDashboardComponent implements OnInit {
   snackbar = inject(MatSnackBar);
 
   currentFilter: 'all' | 'active' | 'banned' = 'all';
+  currentPostFilter: 'all' | 'visible' | 'hidden' = 'all';
   currentUserPage = 0;
   isUsersLoading = false;
+  currentPostPage = 0;
+  isPostsLoading = false;
   private userObserver!: IntersectionObserver;
+  private PostObserver!: IntersectionObserver;
+
   @ViewChild('userScrollAnchor') set setupUserAnchor(element: ElementRef) {
     if (element && !this.userObserver) {
       const options = { root: null, rootMargin: '0px', threshold: 0.1 };
@@ -88,13 +85,26 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  @ViewChild('postScrollAnchor') set setupPostAnchor(element: ElementRef) {
+    if (element && !this.PostObserver) {
+      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
+      this.PostObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !this.isPostsLoading) {
+          this.loadPosts();
+        }
+      }, options);
+
+      this.PostObserver.observe(element.nativeElement);
+    }
+  }
+
   totals = signal<TotalsDto>({ users: 0, posts: 0, banned: 0, reports: 0 });
   users = signal<UsersDTO[]>([]);
   weeklyPosts = signal<WeeklyPosts[]>([]);
   topReportedUsers = signal<TopReportedDto[]>([]);
+  Posts = signal<PostDTO[]>([]);
   activeTab = 0;
   today = '';
-  postFilter: 'all' | 'visible' | 'hidden' | 'removed' = 'all';
   reportFilter: 'all' | 'pending' | 'resolved' | 'dismissed' = 'all';
   statCards = computed<StatCard[]>(() => [
     {
@@ -126,75 +136,6 @@ export class AdminDashboardComponent implements OnInit {
       color: 'muted',
     },
   ]);
-
-  posts: Post[] = [
-    {
-      id: 1,
-      author: 'Omar Tahiri',
-      authorAvatar: 'OT',
-      content: 'Controversial take on local politics...',
-      category: 'Politics',
-      likes: 234,
-      reports: 7,
-      status: 'visible',
-      date: '2h ago',
-    },
-    {
-      id: 2,
-      author: 'Karim Benali',
-      authorAvatar: 'KB',
-      content: 'Best hiking spots in the Atlas Mountains 🏔️',
-      category: 'Travel',
-      likes: 891,
-      reports: 0,
-      status: 'visible',
-      date: '5h ago',
-    },
-    {
-      id: 3,
-      author: 'Nadia Chraibi',
-      authorAvatar: 'NC',
-      content: 'Spam product links and fake discounts...',
-      category: 'Spam',
-      likes: 3,
-      reports: 14,
-      status: 'removed',
-      date: '1d ago',
-    },
-    {
-      id: 4,
-      author: 'Lina Moussaoui',
-      authorAvatar: 'LM',
-      content: 'Misleading health information about vaccines',
-      category: 'Health',
-      likes: 45,
-      reports: 9,
-      status: 'hidden',
-      date: '2d ago',
-    },
-    {
-      id: 5,
-      author: 'Yassine Alaoui',
-      authorAvatar: 'YA',
-      content: 'New café opening in Gueliz — must visit!',
-      category: 'Food',
-      likes: 562,
-      reports: 0,
-      status: 'visible',
-      date: '3d ago',
-    },
-    {
-      id: 6,
-      author: 'Hamza Berrada',
-      authorAvatar: 'HB',
-      content: 'Photography walk around the medina',
-      category: 'Art',
-      likes: 1204,
-      reports: 0,
-      status: 'visible',
-      date: '4d ago',
-    },
-  ];
 
   reports: Report[] = [
     {
@@ -292,6 +233,27 @@ export class AdminDashboardComponent implements OnInit {
 
     this.adminService.getTopReported().subscribe((reports) => this.topReportedUsers.set(reports));
     this.loadUsers();
+    this.loadPosts();
+  }
+
+  loadPosts() {
+    if (this.isPostsLoading) return;
+    this.isPostsLoading = true;
+    let status: boolean | undefined;
+
+    if (this.currentPostFilter === 'visible') {
+      status = true;
+    } else if (this.currentPostFilter === 'hidden') {
+      status = false;
+    }
+
+    this.adminService.getAllPosts(this.currentPostPage, 10, status).subscribe({
+      next: (res: PageResponse1) => {
+        this.currentPostPage++;
+        this.Posts.update((current: PostDTO[]) => [...current, ...res.content]);
+        this.isPostsLoading = false;
+      },
+    });
   }
 
   loadUsers() {
@@ -322,11 +284,12 @@ export class AdminDashboardComponent implements OnInit {
     this.users.set([]);
 
     this.loadUsers();
-    console.log(1, this.users());
   }
-  get filteredPosts(): Post[] {
-    if (this.postFilter === 'all') return this.posts;
-    return this.posts.filter((p) => p.status === this.postFilter);
+  FilteredPosts(filter: 'all' | 'visible' | 'hidden') {
+    this.currentPostFilter = filter;
+    this.currentPostPage = 0;
+    this.Posts.set([]);
+    this.loadPosts();
   }
 
   get filteredReports(): Report[] {
@@ -374,7 +337,9 @@ export class AdminDashboardComponent implements OnInit {
             return true;
           });
         });
-        this.snackbar.open(`user ${user.status? 'banned' : 'unbanned'} seccefelly`, 'Close', { duration: 3000 });
+        this.snackbar.open(`user ${user.status ? 'banned' : 'unbanned'} seccefelly`, 'Close', {
+          duration: 3000,
+        });
       },
       error: (err) => {
         let errorM = err || err?.error || 'Faild to ban this user ';
@@ -401,22 +366,21 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.deleteUser(user.username).subscribe({
       next: () => {
         this.users.update((list) => list.filter((u) => u.username !== user.username));
-                this.snackbar.open('user Delleted  seccefelly', 'Close', { duration: 3000 });
-
+        this.snackbar.open('user Delleted  seccefelly', 'Close', { duration: 3000 });
       },
-      error : (err) =>{
+      error: (err) => {
         let errorM = err || err?.error || 'Faild to delete this  user ';
         this.snackbar.open(errorM, 'Close', { duration: 3000 });
       },
     });
   }
 
-  togglePostVisibility(post: Post) {
-    post.status = post.status === 'visible' ? 'hidden' : 'visible';
+  togglePostVisibility(post: PostDTO) {
+    // post.status = post.status === 'visible' ? 'hidden' : 'visible';
   }
 
-  removePost(post: Post) {
-    post.status = 'removed';
+  removePost(post: PostDTO) {
+    // post.status = 'removed';
   }
 
   resolveReport(report: Report) {

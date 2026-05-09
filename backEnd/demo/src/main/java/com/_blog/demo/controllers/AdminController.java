@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.Response;
+import com._blog.demo.dto.dashboard.PostsDTO;
 import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.dashboard.TopReportedDTO;
 import com._blog.demo.dto.dashboard.UsersDTO;
@@ -83,14 +84,23 @@ public class AdminController {
     }
 
     @GetMapping("stats/users")
-    public Page<UsersDTO> getAllUsres(
+    public ResponseEntity<Page<UsersDTO>> getAllUsres(
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) Boolean status) {
 
         Page<UsersDTO> result = AdminService.getAllUsers(size, page, status);
 
-        return result;
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("stats/posts")
+    public ResponseEntity<Page<PostsDTO>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Boolean status) {
+        Page<PostsDTO> posts = AdminService.getAllPosts(page, size, status);
+        return ResponseEntity.ok(posts);
     }
 
 }

@@ -767,3 +767,9 @@ overflow-x: auto;
   align-items: center;
   color: var(--muted);
 }
+
+.href {
+  text-decoration: none;
+  color: inherit;
+  display: inli;
+}

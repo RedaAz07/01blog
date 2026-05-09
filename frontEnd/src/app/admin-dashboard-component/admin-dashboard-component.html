@@ -170,28 +170,24 @@
           <h1 class="page-title">User Management</h1>
           <p class="page-sub">{{ totals().users }} total users registered</p>
         </div>
-          <div class="filter-pills">
-            <button
-              class="pill"
-              [class.active]="currentFilter == 'all'"
-              (click)="FilterUsers('all')"
-            >
-              All
-            </button>
-            <button
-              class="pill"
-              [class.active]="currentFilter == 'active'"
-              (click)="FilterUsers('active')"
-            >
-              Active
-            </button>
-            <button
-              class="pill"
-              [class.active]="currentFilter  == 'banned'"
-              (click)="FilterUsers('banned')"
-            >
-              Banned
-            </button>
+        <div class="filter-pills">
+          <button class="pill" [class.active]="currentFilter == 'all'" (click)="FilterUsers('all')">
+            All
+          </button>
+          <button
+            class="pill"
+            [class.active]="currentFilter == 'active'"
+            (click)="FilterUsers('active')"
+          >
+            Active
+          </button>
+          <button
+            class="pill"
+            [class.active]="currentFilter == 'banned'"
+            (click)="FilterUsers('banned')"
+          >
+            Banned
+          </button>
         </div>
       </header>
 
@@ -209,16 +205,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of users()" [class]=" u.status ? 'row-active' : 'row-banned'">
+            <tr *ngFor="let u of users()" [class]="u.status ? 'row-active' : 'row-banned'">
               <td>
                 <div class="user-cell">
                   <div class="avatar avatar-sm" [class]="u.status ? 'active' : 'banned'">
                     {{ u.username.charAt(0) }}
                   </div>
-                  <div>
-                    <p class="user-name">{{ u.firstName }} {{ u.lastName }}</p>
-                    <p class="user-email">{{ u.username }}</p>
-                  </div>
+                  <a class="href" [routerLink]="['/profile', u.username]">
+                    <div>
+                      <p class="user-name">{{ u.firstName }} {{ u.lastName }}</p>
+                      <p class="user-email">{{ u.username }}</p>
+                    </div>
+                  </a>
                 </div>
               </td>
               <td>
@@ -231,20 +229,20 @@
               </td>
               <td class="num-cell">{{ u.posts }}</td>
               <td class="num-cell" [class.danger-num]="u.reports > 4">{{ u.reports }}</td>
-              <td class="muted-cell">{{ u.joined}}</td>
+              <td class="muted-cell">{{ u.joined }}</td>
               <td>
                 <div class="action-btns">
                   <button
                     class="icon-btn ban"
                     [matTooltip]="!u.status ? 'Unban user' : 'Ban user'"
-                  (click)="openBanConfirm(u)"
+                    (click)="openBanConfirm(u)"
                   >
                     <mat-icon>{{ !u.status ? 'lock_open' : 'block' }}</mat-icon>
                   </button>
                   <button
                     class="icon-btn delete"
                     [matTooltip]="'Delete user'"
-                   (click)="openDeleteConfirm(u)"
+                    (click)="openDeleteConfirm(u)"
                   >
                     <mat-icon>delete_outline</mat-icon>
                   </button>
@@ -264,52 +262,46 @@
       <header class="page-header">
         <div>
           <h1 class="page-title">Content Moderation</h1>
-          <p class="page-sub">{{ posts.length }} posts under review</p>
+          <p class="page-sub">{{ totals().posts }} posts under review</p>
         </div>
         <div class="filter-pills">
-          <button class="pill" [class.active]="postFilter === 'all'" (click)="postFilter = 'all'">
+          <button
+            class="pill"
+            [class.active]="currentPostFilter === 'all'"
+            (click)="FilteredPosts('all')"
+          >
             All
           </button>
           <button
             class="pill"
-            [class.active]="postFilter === 'visible'"
-            (click)="postFilter = 'visible'"
+            [class.active]="currentPostFilter === 'visible'"
+            (click)="FilteredPosts('visible')"
           >
             Visible
           </button>
           <button
             class="pill"
-            [class.active]="postFilter === 'hidden'"
-            (click)="postFilter = 'hidden'"
+            [class.active]=" currentPostFilter=== 'hidden'"
+            (click)="FilteredPosts('hidden')"
           >
             Hidden
-          </button>
-          <button
-            class="pill"
-            [class.active]="postFilter === 'removed'"
-            (click)="postFilter = 'removed'"
-          >
-            Removed
           </button>
         </div>
       </header>
 
       <div class="posts-grid">
-        <div class="post-card" *ngFor="let p of filteredPosts" [class]="'post-' + p.status">
+        <div class="post-card" *ngFor="let p of Posts()" [class]="p.status ? 'post-active' : 'post-hidden'">
           <div class="post-header">
             <div class="user-cell">
-              <div class="avatar avatar-sm" [class]="p.reports > 5 ? 'banned' : 'active'">
-                {{ p.authorAvatar }}
+              <div class="avatar avatar-sm" >
+                {{ p.author.charAt(0) }}
               </div>
               <div>
                 <p class="user-name">{{ p.author }}</p>
                 <p class="user-email">{{ p.date }}</p>
               </div>
             </div>
-            <div class="post-meta-right">
-              <span class="category-tag">{{ p.category }}</span>
-              <span class="status-chip" [class]="p.status">{{ p.status }}</span>
-            </div>
+            
           </div>
           <p class="post-content">{{ p.content }}</p>
           <div class="post-footer">
@@ -322,21 +314,22 @@
             <div class="action-btns">
               <button
                 class="icon-btn warn"
-                [matTooltip]="p.status === 'visible' ? 'Hide post' : 'Unhide post'"
+                [matTooltip]="!p.status? 'Hide post' : 'Unhide post'"
                 (click)="togglePostVisibility(p)"
-                [disabled]="p.status === 'removed'"
               >
-                <mat-icon>{{ p.status === 'visible' ? 'visibility_off' : 'visibility' }}</mat-icon>
+                <mat-icon>{{ p.status? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               <button
                 class="icon-btn delete"
                 [matTooltip]="'Remove post'"
                 (click)="removePost(p)"
-                [disabled]="p.status === 'removed'"
               >
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </div>
+          </div>
+          <div #postcrollAnchor class="scroll-anchor">
+            <span *ngIf="isPostsLoading">Loading older posts...</span>
           </div>
         </div>
       </div>

@@ -12,25 +12,30 @@ import com._blog.demo.entities.Post;
 
 @Repository
 public interface postRepository extends JpaRepository<Post, Long> {
+  @Override
+  Page<Post> findAll(Pageable pageable);
 
-     List<Post> findTop5ByTitleContainingIgnoreCase(String query);
+  Page<Post> findByStatus(Pageable pageable, boolean status);
 
-     Page<Post> findByUserUsername(String username, Pageable pageable);
-@Query(value = """
-    SELECT
-      d.day AS day,
-      COALESCE(COUNT(p.id), 0) AS count
-    FROM (
-      SELECT generate_series(
-        CURRENT_DATE - INTERVAL '6 days',
-        CURRENT_DATE,
-        INTERVAL '1 day'
-      )::date AS day
-    ) d
-    LEFT JOIN posts p
-      ON DATE(p.timestamp) = d.day
-    GROUP BY d.day
-    ORDER BY d.day
-""", nativeQuery = true)
-List<Object[]> getPostsLast7Days();
+  List<Post> findTop5ByTitleContainingIgnoreCase(String query);
+
+  Page<Post> findByUserUsername(String username, Pageable pageable);
+
+  @Query(value = """
+          SELECT
+            d.day AS day,
+            COALESCE(COUNT(p.id), 0) AS count
+          FROM (
+            SELECT generate_series(
+              CURRENT_DATE - INTERVAL '6 days',
+              CURRENT_DATE,
+              INTERVAL '1 day'
+            )::date AS day
+          ) d
+          LEFT JOIN posts p
+            ON DATE(p.timestamp) = d.day
+          GROUP BY d.day
+          ORDER BY d.day
+      """, nativeQuery = true)
+  List<Object[]> getPostsLast7Days();
 }
