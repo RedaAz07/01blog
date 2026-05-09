@@ -13,7 +13,7 @@ export interface PostDTO {
   id: number;
   author: string;
   authorAvatar: string;
-  titre: string;
+  title: string;
   content: string;
   likes: number;
   reports: number;

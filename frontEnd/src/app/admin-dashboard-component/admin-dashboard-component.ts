@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../components/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { TimeAgoPipe } from '../time-ago-pipe';
 
 export interface Report {
   id: number;
@@ -55,6 +56,7 @@ export interface StatCard {
     MatTooltipModule,
     MatBadgeModule,
     RouterLink,
+    TimeAgoPipe,
   ],
   templateUrl: './admin-dashboard-component.html',
   styleUrls: ['./admin-dashboard-component.css'],
@@ -90,6 +92,8 @@ export class AdminDashboardComponent implements OnInit {
       const options = { root: null, rootMargin: '0px', threshold: 0.1 };
       this.PostObserver = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting && !this.isPostsLoading) {
+          console.log(this.Posts());
+
           this.loadPosts();
         }
       }, options);
@@ -249,8 +253,42 @@ export class AdminDashboardComponent implements OnInit {
 
     this.adminService.getAllPosts(this.currentPostPage, 10, status).subscribe({
       next: (res: PageResponse1) => {
+        res.content.map((c) => {
+          try {
+            const editorData = JSON.parse(c.content);
+
+            const text = editorData.blocks
+              ?.filter((b: any) => !['image', 'video'].includes(b.type))
+              ?.map((b: any) => {
+                switch (b.type) {
+                  case 'paragraph':
+                    return b.data.text;
+
+                  case 'header':
+                    return b.data.text;
+
+                  case 'list':
+                    return b.data.items.join(' ');
+
+                  case 'quote':
+                    return b.data.text;
+
+                  default:
+                    return '';
+                }
+              })
+              .join(' ');
+
+            c.content = text;
+          } catch (e) {
+            c.content = '';
+          }
+        });
+
         this.currentPostPage++;
+
         this.Posts.update((current: PostDTO[]) => [...current, ...res.content]);
+
         this.isPostsLoading = false;
       },
     });

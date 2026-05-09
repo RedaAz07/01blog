@@ -290,7 +290,7 @@
       </header>
 
       <div class="posts-grid">
-        <div class="post-card" *ngFor="let p of Posts()" [class]="p.status ? 'post-active' : 'post-hidden'">
+        <div class="post-card" *ngFor="let p of Posts()" [class]="p.status ? 'post-visible' : 'post-hidden'">
           <div class="post-header">
             <div class="user-cell">
               <div class="avatar avatar-sm" >
@@ -298,12 +298,14 @@
               </div>
               <div>
                 <p class="user-name">{{ p.author }}</p>
-                <p class="user-email">{{ p.date }}</p>
+                <p class="user-email">{{ p.date | timeAgo }}</p>
               </div>
             </div>
             
           </div>
-          <p class="post-content">{{ p.content }}</p>
+          <h5 class="post-content">{{ p.title }}</h5>
+
+          <p class="post-content">{{ p.content.length >200? p.content.slice(0,200) + '...' : p.content }}</p>
           <div class="post-footer">
             <div class="post-stats">
               <span class="post-stat"><mat-icon>favorite_border</mat-icon> {{ p.likes }}</span>
@@ -314,7 +316,7 @@
             <div class="action-btns">
               <button
                 class="icon-btn warn"
-                [matTooltip]="!p.status? 'Hide post' : 'Unhide post'"
+                [matTooltip]="p.status? 'Hide post' : 'Unhide post'"
                 (click)="togglePostVisibility(p)"
               >
                 <mat-icon>{{ p.status? 'visibility_off' : 'visibility' }}</mat-icon>
@@ -328,7 +330,7 @@
               </button>
             </div>
           </div>
-          <div #postcrollAnchor class="scroll-anchor">
+          <div #postScrollAnchor class="scroll-anchor">
             <span *ngIf="isPostsLoading">Loading older posts...</span>
           </div>
         </div>
