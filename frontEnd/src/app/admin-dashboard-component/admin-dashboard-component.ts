@@ -338,14 +338,11 @@ export class AdminDashboardComponent implements OnInit {
   get pendingReports(): number {
     return this.reports.filter((r) => r.status === 'pending').length;
   }
-
+  //used
   get maxPostCount(): number {
     return Math.max(...this.weeklyPosts().map((p) => p.count), 0);
   }
 
-  get categoryTotal(): number {
-    return this.categoryData.reduce((s, c) => s + c.count, 0);
-  }
   openBanConfirm(user: UsersDTO) {
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
@@ -413,12 +410,77 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  togglePostVisibility(post: PostDTO) {
-    // post.status = post.status === 'visible' ? 'hidden' : 'visible';
+  openHideConfermation(Post: PostDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently hide this post. Continue?`,
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.hidePost(Post);
+      }
+    });
+  }
+  openDeleteConfermation(Post: PostDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently delete this post. Continue?`,
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deletePost(Post);
+      }
+    });
   }
 
-  removePost(post: PostDTO) {
-    // post.status = 'removed';
+  deletePost(Post: PostDTO) {
+    this.adminService.deletePost(Post.id).subscribe({
+      next: () => {
+        this.Posts.update((list) => list.filter((p) => p.id != Post.id));
+        this.snackbar.open(`Post deleted succefully`, 'close', {
+          duration: 3000,
+        });
+      },
+      error: () => {
+        this.snackbar.open(`Faild  to delete this Post`, 'close', {
+          duration: 3000,
+        });
+      },
+    });
+  }
+
+  hidePost(Post: PostDTO) {
+    this.adminService.hidePost(Post.id).subscribe({
+      next: () => {
+        this.Posts.update((list) => {
+          const updated = list.map((p) => (p.id === Post.id ? { ...p, status: !p.status } : p));
+
+          return updated.filter((p) => {
+            if (this.currentPostFilter === 'visible') return p.status === true;
+            if (this.currentPostFilter === 'hidden') return p.status === false;
+            return true;
+          });
+        });
+
+        this.snackbar.open(`Post ${Post.status ? 'hide' : 'unhide '}  succefully`, 'close', {
+          duration: 3000,
+        });
+      },
+      error: (err) => {
+        let errorMsg = err || err?.Error || 'faild to hide this post';
+        this.snackbar.open(errorMsg, 'close', {
+          duration: 3000,
+        });
+      },
+    });
   }
 
   resolveReport(report: Report) {

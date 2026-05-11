@@ -29,6 +29,8 @@ public class Report {
     private String reason;
     @Column(name = "timestamp", nullable = false)
     private Date timestamp;
+    @Column(name = "status")
+    private boolean status;
     @ManyToOne
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;

@@ -11,13 +11,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.dashboard.PostsDTO;
+import com._blog.demo.dto.dashboard.ReportsDTO;
 import com._blog.demo.dto.dashboard.Stats;
 import com._blog.demo.dto.dashboard.TopReportedDTO;
 import com._blog.demo.dto.dashboard.UsersDTO;
 import com._blog.demo.dto.dashboard.WeeklyPosts;
-import com._blog.demo.dto.post.PostResponseDTO;
-import com._blog.demo.dto.report.ReportResponseDTO;
-import com._blog.demo.dto.userDTO;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.Report;
 import com._blog.demo.entities.User;
@@ -42,74 +40,44 @@ public class AdminService {
     @Autowired
     private likeRepository likeRepository;
 
-    public Page<ReportResponseDTO> getPostReports(String username, int page, int size) {
-        User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+    public Page<ReportsDTO> getReports(int page, int size, Boolean status) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        Page<Report> postPage = reportRepository.findByReportedPostIsNotNull(pageable);
+        Page<Report> reports;
 
-        return postPage
-                .map(report -> mapToReportDTO(report, auth));
-    }
+        if (status == null) {
+            reports = reportRepository.findAll(pageable);
 
-    public Page<ReportResponseDTO> getUserReports(String username, int page, int size) {
-        User auth = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        } else if (status) {
+            reports = reportRepository.findByStatus(true, pageable);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        Page<Report> userReports = reportRepository.findByReportedPostIsNull(pageable);
-
-        return userReports
-                .map(report -> mapToReportDTO(report, auth));
-    }
-
-    private ReportResponseDTO mapToReportDTO(Report report, User auth) {
-        ReportResponseDTO dto = new ReportResponseDTO();
-        dto.setId(report.getId());
-        dto.setReason(report.getReason());
-        dto.setCreatedAt(report.getTimestamp());
-
-        // Use the smaller helper methods for the complex objects
-        dto.setReporter(mapToUserDTO(report.getReporter()));
-        dto.setReported(mapToUserDTO(report.getReported()));
-
-        // Safely check for null before mapping the post! (Fixes the crash)
-        if (report.getReportedPost() != null) {
-            dto.setReportedPost(mapToPostDTO(report.getReportedPost(), auth));
+        } else {
+            reports = reportRepository.findByStatus(false, pageable);
         }
 
-        return dto;
-    }
-
-    private userDTO mapToUserDTO(User u) {
-        if (u == null) {
-            return null;
-        }
-        userDTO dto = new userDTO();
-        dto.setUsername(u.getUsername());
-        dto.setEmail(u.getEmail());
-        dto.setFirstName(u.getFirstName());
-        dto.setLastName(u.getLastName());
-        dto.setBirthDate(u.getBirthDate());
-        return dto;
-    }
-
-    private PostResponseDTO mapToPostDTO(Post p, User auth) {
-        if (p == null) {
-            return null;
-        }
-
-        PostResponseDTO dto = new PostResponseDTO(
+        return reports.map(p -> new ReportsDTO(
                 p.getId(),
-                p.getTitle(),
-                p.getContent(),
-                p.getUser() != null ? p.getUser().getUsername() : "Unknown",
-                p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                likeRepository.existsByUserAndPost(auth, p),
-                commentRepository.countByPost(p),
-                likeRepository.countByPost(p));
-        return dto;
+                p.getReported().getUsername(),
+                p.getReporter().getUsername(),
+                p.getReason(),
+                p.getTimestamp(),
+                p.isStatus(),
+                p.getReportedPost() != null ? "POST" : "USER"));
+    }
+
+    public String ResolveReports(Long id) {
+        Report report = reportRepository.findById(id).orElseThrow(() -> new RuntimeException("report not found"));
+        if (report.isStatus()) {
+            report.setStatus(false);
+            reportRepository.save(report);
+            return "report resolved Seccefully";
+        } else {
+            report.setStatus(true);
+            reportRepository.save(report);
+            return "report resolved Seccefully";
+        }
+
     }
 
     public String banUser(String username) {
@@ -139,6 +107,12 @@ public class AdminService {
         }
         userRepository.delete(user);
         return "User Deleted seccefully";
+    }
+
+    public String deletePost(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not Found"));
+        postRepository.delete(post);
+        return "post deleted seccefully";
     }
 
     public String hidePost(String postId) {

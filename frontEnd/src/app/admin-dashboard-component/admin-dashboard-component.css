@@ -35,7 +35,7 @@
   flex-direction: column;
   padding: 28px 0;
   position: sticky;
-  top: 0;
+  top: 8%;
   height: 100vh;
   box-shadow: 4px 0 24px rgba(9, 20, 19, 0.05);
 }

@@ -281,7 +281,7 @@
           </button>
           <button
             class="pill"
-            [class.active]=" currentPostFilter=== 'hidden'"
+            [class.active]="currentPostFilter === 'hidden'"
             (click)="FilteredPosts('hidden')"
           >
             Hidden
@@ -290,10 +290,14 @@
       </header>
 
       <div class="posts-grid">
-        <div class="post-card" *ngFor="let p of Posts()" [class]="p.status ? 'post-visible' : 'post-hidden'">
+        <div
+          class="post-card"
+          *ngFor="let p of Posts()"
+          [class]="p.status ? 'post-visible' : 'post-hidden'"
+        >
           <div class="post-header">
             <div class="user-cell">
-              <div class="avatar avatar-sm" >
+              <div class="avatar avatar-sm">
                 {{ p.author.charAt(0) }}
               </div>
               <div>
@@ -301,11 +305,12 @@
                 <p class="user-email">{{ p.date | timeAgo }}</p>
               </div>
             </div>
-            
           </div>
           <h5 class="post-content">{{ p.title }}</h5>
 
-          <p class="post-content">{{ p.content.length >200? p.content.slice(0,200) + '...' : p.content }}</p>
+          <p class="post-content">
+            {{ p.content.length > 200 ? p.content.slice(0, 200) + '...' : p.content }}
+          </p>
           <div class="post-footer">
             <div class="post-stats">
               <span class="post-stat"><mat-icon>favorite_border</mat-icon> {{ p.likes }}</span>
@@ -316,23 +321,23 @@
             <div class="action-btns">
               <button
                 class="icon-btn warn"
-                [matTooltip]="p.status? 'Hide post' : 'Unhide post'"
-                (click)="togglePostVisibility(p)"
+                [matTooltip]="p.status ? 'Hide post' : 'Unhide post'"
+                (click)="openHideConfermation(p)"
               >
-                <mat-icon>{{ p.status? 'visibility_off' : 'visibility' }}</mat-icon>
+                <mat-icon>{{ p.status ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               <button
                 class="icon-btn delete"
                 [matTooltip]="'Remove post'"
-                (click)="removePost(p)"
+                (click)="openDeleteConfermation(p)"
               >
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </div>
           </div>
-          <div #postScrollAnchor class="scroll-anchor">
-            <span *ngIf="isPostsLoading">Loading older posts...</span>
-          </div>
+        </div>
+        <div #postScrollAnchor class="scroll-anchor">
+          <span *ngIf="isPostsLoading">Loading older posts...</span>
         </div>
       </div>
     </div>

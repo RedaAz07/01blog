@@ -119,4 +119,11 @@ export class AdminDashboard {
   deleteUser(username: string): Observable<any> {
     return this.http.delete<any>(`http://localhost:8080/api/admin/deleteUser/${username}`, {});
   }
+
+  hidePost(id: number): Observable<any> {
+    return this.http.put<any>(`http://localhost:8080/api/admin/hidePost/${id}`, {});
+  }
+  deletePost(id : number): Observable<any> {
+    return this.http.delete<any>(`http://localhost:8080/api/admin/deletePost/${id}`, {});
+  }
 }

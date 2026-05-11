@@ -17,6 +17,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     // Spring translates this to: SELECT * FROM reports WHERE reported_post_id IS
     // NOT NULL;
 
+    @Override
+    Page<Report> findAll(Pageable pageable);
+
+    Page<Report> findByStatus(boolean status, Pageable pageable);
+
     Page<Report> findByReportedPostIsNotNull(Pageable pageable);
 
     // Spring translates this to: SELECT * FROM reports WHERE reported_post_id IS
