@@ -20,6 +20,20 @@ export interface PostDTO {
   status: boolean;
   date: string;
 }
+export interface ReportDTO {
+  id: number;
+  reported: string;
+  reporter: string;
+  reasen: string;
+  date: string;
+  status: boolean;
+  type: string;
+}
+
+export interface PageReportResponse {
+  content: ReportDTO[];
+  last: boolean;
+}
 
 export interface UsersDTO {
   id: number;
@@ -65,6 +79,9 @@ export class AdminDashboard {
 
   private postSubject = new BehaviorSubject<PostDTO[]>([]);
   public posts$ = this.postSubject.asObservable();
+
+  private reportSubject = new BehaviorSubject<ReportDTO[]>([]);
+  public reports$ = this.reportSubject.asObservable();
 
   baseUrl = 'http://localhost:8080/api/admin/stats';
 
@@ -112,6 +129,27 @@ export class AdminDashboard {
     );
   }
 
+
+
+getAllReports(page: number, size: number = 10, status?: boolean): Observable<PageReportResponse> {
+    let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    if (status !== undefined) {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<PageReportResponse>(`http://localhost:8080/api/admin/reports`, { params }).pipe(
+      tap((res) => {
+        const currentReport = this.reportSubject.value;
+        const comninedList = [...currentReport, ...res.content];
+        this.reportSubject.next(comninedList);
+      }),
+    );
+  }
+
+ ResolveReport(id: number): Observable<any> {
+    return this.http.put<any>(`http://localhost:8080/api/admin/reports/${id}`, {});
+  }
+
   banUser(username: string): Observable<any> {
     return this.http.put<any>(`http://localhost:8080/api/admin/banUser/${username}`, {});
   }
@@ -123,7 +161,7 @@ export class AdminDashboard {
   hidePost(id: number): Observable<any> {
     return this.http.put<any>(`http://localhost:8080/api/admin/hidePost/${id}`, {});
   }
-  deletePost(id : number): Observable<any> {
+  deletePost(id: number): Observable<any> {
     return this.http.delete<any>(`http://localhost:8080/api/admin/deletePost/${id}`, {});
   }
 }

@@ -1,4 +1,13 @@
-import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,9 +18,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
 import {
   AdminDashboard,
+  PageReportResponse,
   PageResponse,
   PageResponse1,
   PostDTO,
+  ReportDTO,
   TopReportedDto,
   TotalsDto,
   UsersDTO,
@@ -22,18 +33,7 @@ import { ConfirmDialog } from '../components/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { TimeAgoPipe } from '../time-ago-pipe';
-
-export interface Report {
-  id: number;
-  type: 'user' | 'post';
-  targetName: string;
-  targetAvatar: string;
-  reason: string;
-  reportedBy: string;
-  severity: 'low' | 'medium' | 'high';
-  date: string;
-  status: 'pending' | 'resolved' | 'dismissed';
-}
+import { single } from 'rxjs';
 
 export interface StatCard {
   label: string;
@@ -61,7 +61,7 @@ export interface StatCard {
   templateUrl: './admin-dashboard-component.html',
   styleUrls: ['./admin-dashboard-component.css'],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   snackbar = inject(MatSnackBar);
 
   currentFilter: 'all' | 'active' | 'banned' = 'all';
@@ -70,33 +70,60 @@ export class AdminDashboardComponent implements OnInit {
   isUsersLoading = false;
   currentPostPage = 0;
   isPostsLoading = false;
+
+  currentReportPage = 0;
+  isReportsLoading = false;
+
   private userObserver!: IntersectionObserver;
   private PostObserver!: IntersectionObserver;
+  private ReportObserver!: IntersectionObserver;
 
   @ViewChild('userScrollAnchor') set setupUserAnchor(element: ElementRef) {
-    if (element && !this.userObserver) {
-      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
-      this.userObserver = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !this.isUsersLoading) {
-          console.log(this.users());
-          this.loadUsers();
-        }
-      }, options);
+    if (element) {
+      if (this.userObserver) this.userObserver.disconnect();
+
+      this.userObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !this.isUsersLoading) {
+            this.loadUsers();
+          }
+        },
+        { root: null, rootMargin: '0px', threshold: 0.1 },
+      );
 
       this.userObserver.observe(element.nativeElement);
     }
   }
 
-  @ViewChild('postScrollAnchor') set setupPostAnchor(element: ElementRef) {
-    if (element && !this.PostObserver) {
-      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
-      this.PostObserver = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !this.isPostsLoading) {
-          console.log(this.Posts());
+  @ViewChild('reportScrollAnchor') set setupReportAnchor(element: ElementRef) {
+    if (element) {
+      if (this.ReportObserver) this.ReportObserver.disconnect();
 
-          this.loadPosts();
-        }
-      }, options);
+      this.ReportObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !this.isReportsLoading) {
+            this.loadReports();
+          }
+        },
+        { root: null, rootMargin: '0px', threshold: 0.1 },
+      );
+
+      this.ReportObserver.observe(element.nativeElement);
+    }
+  }
+
+  @ViewChild('postScrollAnchor') set setupPostAnchor(element: ElementRef) {
+    if (element) {
+      if (this.PostObserver) this.PostObserver.disconnect();
+
+      this.PostObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !this.isPostsLoading) {
+            this.loadPosts();
+          }
+        },
+        { root: null, rootMargin: '0px', threshold: 0.1 },
+      );
 
       this.PostObserver.observe(element.nativeElement);
     }
@@ -104,12 +131,14 @@ export class AdminDashboardComponent implements OnInit {
 
   totals = signal<TotalsDto>({ users: 0, posts: 0, banned: 0, reports: 0 });
   users = signal<UsersDTO[]>([]);
+  reports = signal<ReportDTO[]>([]);
+
   weeklyPosts = signal<WeeklyPosts[]>([]);
   topReportedUsers = signal<TopReportedDto[]>([]);
   Posts = signal<PostDTO[]>([]);
   activeTab = 0;
   today = '';
-  reportFilter: 'all' | 'pending' | 'resolved' | 'dismissed' = 'all';
+  reportFilter: 'all' | 'pending' | 'resolved' = 'all';
   statCards = computed<StatCard[]>(() => [
     {
       label: 'Total Users',
@@ -141,82 +170,6 @@ export class AdminDashboardComponent implements OnInit {
     },
   ]);
 
-  reports: Report[] = [
-    {
-      id: 1,
-      type: 'user',
-      targetName: 'Omar Tahiri',
-      targetAvatar: 'OT',
-      reason: 'Harassment in comments',
-      reportedBy: 'Karim Benali',
-      severity: 'high',
-      date: '1h ago',
-      status: 'pending',
-    },
-    {
-      id: 2,
-      type: 'post',
-      targetName: 'Spam product post',
-      targetAvatar: 'NC',
-      reason: 'Spam / misleading content',
-      reportedBy: 'Sara El Fassi',
-      severity: 'medium',
-      date: '3h ago',
-      status: 'resolved',
-    },
-    {
-      id: 3,
-      type: 'user',
-      targetName: 'Lina Moussaoui',
-      targetAvatar: 'LM',
-      reason: 'Spreading misinformation',
-      reportedBy: 'Yassine Alaoui',
-      severity: 'high',
-      date: '6h ago',
-      status: 'pending',
-    },
-    {
-      id: 4,
-      type: 'post',
-      targetName: 'Misleading health post',
-      targetAvatar: 'LM',
-      reason: 'Dangerous health claims',
-      reportedBy: 'Multiple users',
-      severity: 'high',
-      date: '1d ago',
-      status: 'pending',
-    },
-    {
-      id: 5,
-      type: 'user',
-      targetName: 'Hamza Berrada',
-      targetAvatar: 'HB',
-      reason: 'Suspected fake account',
-      reportedBy: 'Anonymous',
-      severity: 'low',
-      date: '2d ago',
-      status: 'dismissed',
-    },
-    {
-      id: 6,
-      type: 'post',
-      targetName: 'Political post',
-      targetAvatar: 'OT',
-      reason: 'Inciting content',
-      reportedBy: 'Nadia Chraibi',
-      severity: 'medium',
-      date: '2d ago',
-      status: 'pending',
-    },
-  ];
-
-  categoryData = [
-    { label: 'Politics', count: 3420, color: '#408a71' },
-    { label: 'Travel', count: 5810, color: '#285a48' },
-    { label: 'Food', count: 4200, color: '#b0e4cc' },
-    { label: 'Health', count: 2100, color: '#6b8f82' },
-    { label: 'Art', count: 2810, color: '#234b3e' },
-  ];
   constructor(
     private adminService: AdminDashboard,
     private dialog: MatDialog,
@@ -238,6 +191,7 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getTopReported().subscribe((reports) => this.topReportedUsers.set(reports));
     this.loadUsers();
     this.loadPosts();
+    this.loadReports();
   }
 
   loadPosts() {
@@ -281,7 +235,7 @@ export class AdminDashboardComponent implements OnInit {
 
             c.content = text;
           } catch (e) {
-            c.content = '';
+            c.content = c.content ? c.content.substring(0, 200) : '';
           }
         });
 
@@ -313,12 +267,39 @@ export class AdminDashboardComponent implements OnInit {
       },
     });
   }
+  loadReports() {
+    if (this.isReportsLoading) return;
+    this.isReportsLoading = true;
+    let status: boolean | undefined;
 
+    if (this.reportFilter === 'resolved') {
+      status = true;
+    } else if (this.reportFilter === 'pending') {
+      status = false;
+    }
+
+    this.adminService.getAllReports(this.currentReportPage, 10, status).subscribe({
+      next: (res: PageReportResponse) => {
+        this.currentReportPage++;
+        this.reports.update((current: ReportDTO[]) => [...current, ...res.content]);
+        this.isReportsLoading = false;
+      },
+    });
+  }
+  FilterReport(filter: 'all' | 'resolved' | 'pending') {
+    this.reportFilter = filter;
+
+    this.currentReportPage = 0;
+
+    this.reports.set([]);
+    this.isReportsLoading = false;
+    this.loadReports();
+  }
   FilterUsers(filter: 'all' | 'active' | 'banned') {
     this.currentFilter = filter;
 
     this.currentUserPage = 0;
-
+    this.isUsersLoading = false;
     this.users.set([]);
 
     this.loadUsers();
@@ -326,21 +307,14 @@ export class AdminDashboardComponent implements OnInit {
   FilteredPosts(filter: 'all' | 'visible' | 'hidden') {
     this.currentPostFilter = filter;
     this.currentPostPage = 0;
+    this.isPostsLoading = false;
     this.Posts.set([]);
     this.loadPosts();
   }
 
-  get filteredReports(): Report[] {
-    if (this.reportFilter === 'all') return this.reports;
-    return this.reports.filter((r) => r.status === this.reportFilter);
-  }
-
-  get pendingReports(): number {
-    return this.reports.filter((r) => r.status === 'pending').length;
-  }
   //used
   get maxPostCount(): number {
-    return Math.max(...this.weeklyPosts().map((p) => p.count), 0);
+    return Math.max(...this.weeklyPosts().map((p) => p.count), 1);
   }
 
   openBanConfirm(user: UsersDTO) {
@@ -483,11 +457,82 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  resolveReport(report: Report) {
-    report.status = 'resolved';
+  openResolveConfermation(report: ReportDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently resolve this Reports. Continue?`,
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.resolveReport(report);
+      }
+    });
   }
 
-  dismissReport(report: Report) {
-    report.status = 'dismissed';
+  resolveReport(report: ReportDTO) {
+    this.adminService.ResolveReport(report.id).subscribe({
+      next: () => {
+        this.reports.update((list) => {
+          const updated = list.map((p) => (p.id === report.id ? { ...p, status: !p.status } : p));
+
+          return updated.filter((p) => {
+            if (this.reportFilter === 'resolved') return p.status === true;
+            if (this.reportFilter === 'pending') return p.status === false;
+            return true;
+          });
+        });
+
+        this.snackbar.open(
+          `Report ${report.status ? 'Resolved' : 'Unresolved'}  succefully`,
+          'close',
+          {
+            duration: 3000,
+          },
+        );
+      },
+      error: (err) => {
+        let errorMsg = err || err?.Error || 'faild to Resolve this Report';
+        this.snackbar.open(errorMsg, 'close', {
+          duration: 3000,
+        });
+      },
+    });
+  }
+  ngOnDestroy() {
+    if (this.userObserver) this.userObserver.disconnect();
+    if (this.PostObserver) this.PostObserver.disconnect();
+    if (this.ReportObserver) this.ReportObserver.disconnect();
+  }
+  post = signal<PostDTO | null>(null);
+  shouldOpen = false;
+  textBlocks: any[] = [];
+  mediaBlocks: any[] = [];
+  currentSlide = 0;
+
+  togglePost(post: PostDTO) {
+    this.shouldOpen = true;
+    this.post.set(post);
+
+    const editorData = JSON.parse(post.content);
+
+    const blocks = editorData.blocks || [];
+
+    this.textBlocks = blocks.filter((b: any) => b.type === 'paragraph' || b.type === 'header');
+
+    this.mediaBlocks = blocks.filter((b: any) => b.type === 'image' || b.type === 'video');
+  }
+
+  prevSlide() {
+    if (this.currentSlide > 0) this.currentSlide--;
+  }
+  nextSlide() {
+    if (this.currentSlide < this.mediaBlocks.length - 1) this.currentSlide++;
+  }
+  goToSlide(i: number) {
+    this.currentSlide = i;
   }
 }
