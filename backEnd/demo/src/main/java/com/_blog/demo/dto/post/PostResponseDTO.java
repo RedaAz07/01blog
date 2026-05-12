@@ -6,6 +6,7 @@ public record PostResponseDTO(Long id,
         String authorUsername,
         String timestamp,
         boolean isLiked,
+        boolean status,
         int nbrComments,
         int nbrLikes) {
 

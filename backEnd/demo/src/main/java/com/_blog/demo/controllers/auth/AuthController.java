@@ -14,8 +14,6 @@ import com._blog.demo.dto.RegisterRequestDTO;
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.auth.AuthResponseDTO;
 import com._blog.demo.dto.auth.LoginRequestDTO;
-import com._blog.demo.entities.User;
-import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.security.CustomUserDetailsService;
 import com._blog.demo.security.JwtUtil;
@@ -62,10 +60,7 @@ public class AuthController {
 
         // C. Print a brand new JWT wristband for them
         final String jwt = jwtUtil.generateToken(userDetails);
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> ApiException.notFound("User not found"));
-        if (!user.isStatus()) {
-            throw ApiException.forbidden("Your account is blocked");
-        }
+     
 
         // D. Send the wristband back to Angular
         return ResponseEntity.ok(new AuthResponseDTO(jwt));

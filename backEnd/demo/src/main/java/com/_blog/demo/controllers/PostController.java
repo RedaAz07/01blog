@@ -78,8 +78,9 @@ class PostController {
     @GetMapping("/owner/{username}")
     public ResponseEntity<Page<PostResponseDTO>> getAllPostsByOwner(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size, @PathVariable String username) {
-        Page<PostResponseDTO> posts = PostService.getAllPostsByOwner(page, size, username);
+            @RequestParam(defaultValue = "10") int size, @PathVariable String username, Principal principal) {
+        String CurrentUsername = principal.getName();
+        Page<PostResponseDTO> posts = PostService.getAllPostsByOwner(page, size, username, CurrentUsername);
         return ResponseEntity.ok(posts);
     }
 

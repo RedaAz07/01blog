@@ -1,4 +1,4 @@
-<article class="blog-card">
+<article class="blog-card"  [class] ="post.status?'visible' : 'hide'">
   <div class="blog-card-header">
      <a  class="href" [routerLink]="['/profile', post.authorUsername]">
       <div class="pp-circle1">{{ post.authorUsername.charAt(0) | uppercase }}</div>

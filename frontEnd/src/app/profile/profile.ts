@@ -123,7 +123,6 @@ export class Profile implements OnInit {
         this.isPostLoading = false;
       },
       error: (err) => {
-        console.log(err);
         this.isPostLoading = false;
       },
     });
@@ -138,7 +137,6 @@ export class Profile implements OnInit {
       next: (profile: any) => {
         this.user.set(profile);
         this.isFollowing.set(profile.FollowingBYMe);
-        console.log(profile.FollowingBYMe);
       },
       error: (err) => {
         this.router.navigate(['/home']);

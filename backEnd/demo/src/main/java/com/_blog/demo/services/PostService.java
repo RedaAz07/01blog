@@ -53,6 +53,7 @@ public class PostService {
 
                 savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
+                savedPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, savedPost),
                 commentRepository.countByPost(savedPost),
                 likeRepository.countByPost(savedPost));
@@ -64,7 +65,7 @@ public class PostService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        Page<Post> postPage = postRepository.findAll(pageable);
+        Page<Post> postPage = postRepository.findFeedForUser(username, pageable);
 
         return postPage.map(p -> {
             PostResponseDTO postDto = new PostResponseDTO(
@@ -74,6 +75,7 @@ public class PostService {
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
 
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
+                    p.isStatus(),
                     likeRepository.existsByUserAndPost(auth, p),
                     commentRepository.countByPost(p),
                     likeRepository.countByPost(p));
@@ -98,6 +100,7 @@ public class PostService {
                 existingPost.getContent(),
                 existingPost.getUser() != null ? existingPost.getUser().getUsername() : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
+                existingPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost));
@@ -128,32 +131,37 @@ public class PostService {
                 existingPost.getUser() != null ? existingPost.getUser().getUsername()
                         : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
+                existingPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost));
         return response;
     }
 
-    public Page<PostResponseDTO> getAllPostsByOwner(int page, int size, String username) {
-        User owner = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
+    public Page<PostResponseDTO> getAllPostsByOwner(int page, int size, String username, String currentUsername) {
 
+        // 1. We only really need the CurrentUser to check for likes later
+        User currentUser = UserRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> ApiException.notFound("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Post> postPage;
 
-        Page<Post> postPage = postRepository.findByUserUsername(username, pageable);
+        if (username.equals(currentUsername)) {
+            postPage = postRepository.findByUserUsername(username, pageable);
+        } else {
+            postPage = postRepository.findByUserUsernameAndStatusTrue(username, pageable);
+        }
 
-        return postPage.map(p -> {
-            PostResponseDTO postDto = new PostResponseDTO(
-                    p.getId(),
-                    p.getTitle(),
-                    p.getContent(),
-                    p.getUser() != null ? p.getUser().getUsername() : "Unknown",
-
-                    p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                    likeRepository.existsByUserAndPost(owner, p),
-                    commentRepository.countByPost(p),
-                    likeRepository.countByPost(p));
-            return postDto;
-        });
+        return postPage.map(p -> new PostResponseDTO(
+                p.getId(),
+                p.getTitle(),
+                p.getContent(),
+                p.getUser() != null ? p.getUser().getUsername() : "Unknown",
+                p.getTimestamp() != null ? p.getTimestamp().toString() : null,
+                p.isStatus(),
+                likeRepository.existsByUserAndPost(currentUser, p),
+                commentRepository.countByPost(p),
+                likeRepository.countByPost(p)));
     }
 }

@@ -26,6 +26,7 @@ export interface PostResponseDTO {
   content: string;
   author: string;
   timestamp: string;
+  status : boolean;
   liked: boolean;
   commentsCount: number;
   likesCount: number;

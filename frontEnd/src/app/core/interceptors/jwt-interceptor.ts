@@ -28,6 +28,17 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         localStorage.removeItem('jwt_token');
         router.navigate(['/login']);
       }
+      if (error.status === 403) {
+        localStorage.removeItem('jwt_token');
+        router.navigate(['/login']);
+        snackBar.open(backendMessage, 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'end',
+          verticalPosition: 'bottom',
+        });
+        return throwError(() => error);
+      }
 
       snackBar.open(backendMessage, 'Close', {
         duration: 5000,

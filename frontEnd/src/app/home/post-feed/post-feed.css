@@ -15,6 +15,9 @@
 /* =========================================
    CARD
 ========================================= */
+.hide{
+  border-left:1px solid  #dc2626 ;
+}
 .blog-card {
   background: var(--white);
   border-radius: 12px;

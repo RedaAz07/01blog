@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com._blog.demo.entities.Post;
@@ -15,11 +16,18 @@ public interface postRepository extends JpaRepository<Post, Long> {
   @Override
   Page<Post> findAll(Pageable pageable);
 
+  @Query("SELECT p FROM Post p WHERE p.user IN (SELECT f FROM User u JOIN u.following f WHERE u.username = :username) AND p.status = true")
+  Page<Post> findFeedForUser(@Param("username") String username, Pageable pageable);
+
   Page<Post> findByStatus(Pageable pageable, boolean status);
 
   List<Post> findTop5ByTitleContainingIgnoreCase(String query);
 
+  // Gets ALL posts (for the owner)
   Page<Post> findByUserUsername(String username, Pageable pageable);
+
+  // Gets ONLY visible posts (for guests)
+  Page<Post> findByUserUsernameAndStatusTrue(String username, Pageable pageable);
 
   @Query(value = """
           SELECT
