@@ -52,7 +52,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
           snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
           closePostModal();
         },
-        error: (err) => snackbar.open('Failed to update post.', 'Close', { duration: 3000 }),
+        error: () => {},
       });
     } else {
       postService.createPost(requestPayload).subscribe({
@@ -60,8 +60,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
           postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
           closePostModal();
         },
-        error: (err) =>
-          alert('Sorry, something went wrong while saving your post. Please try again.'),
+        error: () => {},
       });
     }
   };
@@ -87,12 +86,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
 
       postService.reportPost(reportData).subscribe({
         next: () => snackbar.open('Post reported successfully!', 'Close', { duration: 3000 }),
-        error: (err) => {
-          console.log(err);
-
-          let errorM = err?.error?.reason || err.error || 'Failed to report';
-          snackbar.open(errorM, 'Close', { duration: 5000 });
-        },
+        error: () => {},
       });
     });
   };
@@ -108,10 +102,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
           postsSignal.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
           snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
         },
-        error: (err) =>
-          snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-            duration: 3000,
-          }),
+        error: () => {},
       });
     }
   };

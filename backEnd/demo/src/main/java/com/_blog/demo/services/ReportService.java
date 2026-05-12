@@ -9,6 +9,7 @@ import com._blog.demo.dto.report.ReportRequestDTO;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.Report;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.ReportRepository;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.postRepository;
@@ -25,21 +26,21 @@ public class ReportService {
 
     public String createReport(ReportRequestDTO entity, String username) {
 
-        User reporter = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Reporter not found"));
-        User reportedUser = UserRepository.findByUsername(entity.getReported()).orElseThrow(() -> new RuntimeException("Reported user not found"));
+        User reporter = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("Reporter not found"));
+        User reportedUser = UserRepository.findByUsername(entity.getReported()).orElseThrow(() -> ApiException.notFound("Reported user not found"));
         if (reportedUser.getId().equals(reporter.getId())) {
-            throw new RuntimeException("You cannot report yourself");
+            throw ApiException.badRequest("You cannot report yourself");
         }
 
         Post reportedPost = null;
         if (entity.getReportedPost() != null) {
-            reportedPost = postRepository.findById(entity.getReportedPost()).orElseThrow(() -> new RuntimeException("Reported post not found"));
+            reportedPost = postRepository.findById(entity.getReportedPost()).orElseThrow(() -> ApiException.notFound("Reported post not found"));
         }
         if (reportedPost != null && reportedPost.getUser().getId().equals(reporter.getId())) {
-            throw new RuntimeException("You cannot report your own post");
+            throw ApiException.badRequest("You cannot report your own post");
         }
         if (reportedPost != null && !reportedPost.getUser().getId().equals(reportedUser.getId())) {
-            throw new RuntimeException("the reported post does not belong to the reported user");
+            throw ApiException.badRequest("The reported post does not belong to the reported user");
         }
 /*         if (reportedPost == null && reportRepository.existsByReporterAndReportedAndReportedPostIsNull(reporter, reportedUser)) {
             throw new RuntimeException("You have already reported this user");

@@ -350,10 +350,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           duration: 3000,
         });
       },
-      error: (err) => {
-        let errorM = err || err?.error || 'Faild to ban this user ';
-        this.snackbar.open(errorM, 'Close', { duration: 3000 });
-      },
+      error: () => {},
     });
   }
   openDeleteConfirm(user: UsersDTO) {
@@ -377,10 +374,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.users.update((list) => list.filter((u) => u.username !== user.username));
         this.snackbar.open('user Delleted  seccefelly', 'Close', { duration: 3000 });
       },
-      error: (err) => {
-        let errorM = err || err?.error || 'Faild to delete this  user ';
-        this.snackbar.open(errorM, 'Close', { duration: 3000 });
-      },
+      error: () => {},
     });
   }
 
@@ -423,11 +417,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           duration: 3000,
         });
       },
-      error: () => {
-        this.snackbar.open(`Faild  to delete this Post`, 'close', {
-          duration: 3000,
-        });
-      },
+      error: () => {},
     });
   }
 
@@ -448,12 +438,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           duration: 3000,
         });
       },
-      error: (err) => {
-        let errorMsg = err || err?.Error || 'faild to hide this post';
-        this.snackbar.open(errorMsg, 'close', {
-          duration: 3000,
-        });
-      },
+      error: () => {},
     });
   }
 
@@ -494,12 +479,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           },
         );
       },
-      error: (err) => {
-        let errorMsg = err || err?.Error || 'faild to Resolve this Report';
-        this.snackbar.open(errorMsg, 'close', {
-          duration: 3000,
-        });
-      },
+      error: () => {},
     });
   }
   ngOnDestroy() {

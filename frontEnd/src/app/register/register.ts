@@ -45,10 +45,7 @@ export class Register {
         this.router.navigate(['/login']);
         this.snackbar.open('Registration successful! Please log in.', 'Close', { duration: 3000 });
       },
-      error: (err) => {
-        let errMsg = err.error?.message || 'Registration failed';
-        this.snackbar.open(errMsg, 'Close', { duration: 5000 });
-      },
+      error: () => {},
     });
   }
 }

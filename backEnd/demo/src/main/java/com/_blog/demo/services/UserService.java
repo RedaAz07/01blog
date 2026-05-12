@@ -10,6 +10,7 @@ import com._blog.demo.dto.RegisterRequestDTO;
 import com._blog.demo.dto.auth.EditProfileRequestDTO;
 import com._blog.demo.dto.userDTO;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository; // The DTO we talked about!
 
 @Service
@@ -38,10 +39,10 @@ public class UserService {
 
     public String registerNewUser(RegisterRequestDTO request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username is already taken!");
+            throw ApiException.conflict("Username is already taken!");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already in use!");
+            throw ApiException.conflict("Email is already in use!");
         }
 
         User newUser = new User();
@@ -54,7 +55,7 @@ public class UserService {
             newUser.setPassword(passwordEncoder.encode(request.getPassword()));
             newUser.setBirthDate(request.getBirthDate());
         } catch (Exception e) {
-            throw new RuntimeException("all fields are required!");
+            throw ApiException.badRequest("all fields are required!");
         }
         newUser.setBio(request.getBio());
         newUser.setProfilePictureUrl(request.getProfilePictureUrl());
@@ -66,7 +67,7 @@ public class UserService {
 
     public userDTO getCurrentUser(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> ApiException.notFound("User not found with username: " + username));
         userDTO dto = new userDTO();
         dto.setUsername(user.getUsername());
         dto.setRole(user.getRole());
@@ -85,7 +86,7 @@ public class UserService {
     public List<userDTO> getSuggestions(String username) {
         List<User> suggestedUsers = userRepository.findRandomUsers(
                 userRepository.findByUsername(username)
-                        .orElseThrow(() -> new RuntimeException("User not found with username: " + username))
+                        .orElseThrow(() -> ApiException.notFound("User not found with username: " + username))
                         .getId());
         return suggestedUsers.stream().map(user -> {
             userDTO dto = new userDTO();
@@ -98,7 +99,7 @@ public class UserService {
             dto.setProfilePictureUrl(user.getProfilePictureUrl());
             dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
                     userRepository.findByUsername(username)
-                            .orElseThrow(() -> new RuntimeException("User not found with username: " + username))
+                            .orElseThrow(() -> ApiException.notFound("User not found with username: " + username))
                             .getId())));
             return dto;
         }).toList();
@@ -107,7 +108,7 @@ public class UserService {
 
     public userDTO getUserByUsername(String username, String currentUsername) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> ApiException.notFound("User not found with username: " + username));
         userDTO dto = new userDTO();
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
@@ -122,7 +123,7 @@ public class UserService {
         dto.setStatus(user.isStatus());
         dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
                 userRepository.findByUsername(currentUsername)
-                        .orElseThrow(() -> new RuntimeException("User not found with username: " + currentUsername))
+                        .orElseThrow(() -> ApiException.notFound("User not found with username: " + currentUsername))
                         .getId())));
         dto.setProfilePictureUrl(user.getProfilePictureUrl());
         return dto;
@@ -130,22 +131,22 @@ public class UserService {
 
     public userDTO editProfile(String username, EditProfileRequestDTO request, String currentUsername) {
         if (username.equals("admin")) {
-            throw new RuntimeException("as an Admin you can't edit  the username ");
+            throw ApiException.forbidden("As an admin, this profile cannot be edited here.");
         }
         if (!username.equals(currentUsername)) {
-            throw new RuntimeException("You can only edit your own profile!");
+            throw ApiException.forbidden("You can only edit your own profile!");
         }
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> ApiException.notFound("User not found with username: " + username));
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
             if (userRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException("Username is already taken!");
+                throw ApiException.conflict("Username is already taken!");
             }
             user.setUsername(request.getUsername());
         }
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Email is already in use!");
+                throw ApiException.conflict("Email is already in use!");
             }
             user.setEmail(request.getEmail());
         }

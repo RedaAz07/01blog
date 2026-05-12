@@ -49,10 +49,7 @@ export class Login {
         this.router.navigate(['/home']);
         this.snackbar.open('Login successful!', 'Close', { duration: 3000 });
       },
-      error: (err) => {
-        let errMsg = err.error?.message || 'bad credentials';
-        this.snackbar.open('Login failed: ' + errMsg, 'Close', { duration: 5000 });
-      },
+      error: () => {},
     });
   }
 }

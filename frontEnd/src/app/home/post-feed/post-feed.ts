@@ -102,8 +102,6 @@ export class PostFeed implements OnInit, OnDestroy {
       error: (error) => {
         this.localIsLiked.update((liked) => !liked);
         this.localLikeCount.update((count) => (this.localIsLiked() ? count + 1 : count - 1));
-
-        this.snackbar.open('Error liking post', 'Close', { duration: 3000 });
       },
     });
   }
@@ -147,9 +145,7 @@ export class PostFeed implements OnInit, OnDestroy {
         this.Comments.update((currentList) => [createdComment, ...currentList]);
         this.snackbar.open('Comment added!', 'Close', { duration: 2000 });
       },
-      error: (error) => {
-        this.snackbar.open('Error adding comment', 'Close', { duration: 3000 });
-      },
+      error: () => {},
     });
   }
 
@@ -172,9 +168,7 @@ export class PostFeed implements OnInit, OnDestroy {
         this.Comments.update((currentList) => currentList.filter((c) => c.id !== comment.id));
         this.snackbar.open('Comment deleted!', 'Close', { duration: 2000 });
       },
-      error: (error) => {
-        this.snackbar.open('Error deleting comment', 'Close', { duration: 3000 });
-      },
+      error: () => {},
     });
   }
 

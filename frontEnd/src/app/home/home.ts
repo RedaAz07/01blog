@@ -104,10 +104,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
         console.error('Failed to toggle follow', err);
 
         user.followingBYMe = !user.followingBYMe;
-
-        this.snackbar.open('Sorry, something went wrong. Please try again.', 'Close', {
-          duration: 3000,
-        });
       },
     });
   }

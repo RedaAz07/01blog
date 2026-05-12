@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com._blog.demo.exceptions.ApiException;
+
 public class FileValidator {
 
   
@@ -19,23 +21,23 @@ public class FileValidator {
     public static void validateMediaFile(MultipartFile file) {
         
         if (file.isEmpty()) {
-            throw new RuntimeException("Cannot upload an empty file!");
+            throw ApiException.badRequest("Cannot upload an empty file!");
         }
 
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !originalFilename.contains(".")) {
-            throw new RuntimeException("File must have an extension!");
+            throw ApiException.badRequest("File must have an extension!");
         }
         
         String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
         
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new RuntimeException("Invalid file extension! We don't accept ." + extension);
+            throw ApiException.badRequest("Invalid file extension! We don't accept ." + extension);
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType)) {
-            throw new RuntimeException("Invalid file content type! Rejected: " + contentType);
+            throw ApiException.badRequest("Invalid file content type! Rejected: " + contentType);
         }
     }
 }

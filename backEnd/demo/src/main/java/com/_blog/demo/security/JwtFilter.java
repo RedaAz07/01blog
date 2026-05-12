@@ -57,7 +57,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
                 if (!userDetails.isEnabled()) {
-                    throw new RuntimeException("your account is blocked");
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Your account is blocked");
+                    return;
                 }
                 // 6. Ask the JwtUtil machine if the wristband is valid and not expired
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {

@@ -14,6 +14,7 @@ import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
@@ -35,7 +36,7 @@ public class PostService {
 
     public PostResponseDTO createPost(PostRequestDTO request, String author) {
 
-        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
 
         Post newPost = new Post();
         newPost.setTitle(request.title());
@@ -59,7 +60,7 @@ public class PostService {
     }
 
     public Page<PostResponseDTO> getAllPosts(int page, int size, String username) {
-        User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
@@ -81,11 +82,11 @@ public class PostService {
     }
 
     public PostResponseDTO updatePost(PostUpdatReqDTO request, String author) {
-        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> ApiException.notFound("Post not found"));
         if (!existingPost.getUser().getId().equals(auth.getId())) {
-            throw new RuntimeException("You are not authorized to update this post");
+            throw ApiException.forbidden("You are not authorized to update this post");
         }
 
         existingPost.setTitle(request.getTitle());
@@ -104,11 +105,11 @@ public class PostService {
     }
 
     public String deletePost(Long id, String author) {
-        User auth = UserRepository.findByUsername(author).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> ApiException.notFound("Post not found"));
         if (!existingPost.getUser().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
-            throw new RuntimeException("You are not authorized to delete this post");
+            throw ApiException.forbidden("You are not authorized to delete this post");
         }
 
         postRepository.delete(existingPost);
@@ -116,9 +117,9 @@ public class PostService {
     }
 
     public PostResponseDTO findPostById(Long id, String username) {
-        User auth = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> ApiException.notFound("Post not found"));
 
         PostResponseDTO response = new PostResponseDTO(
                 existingPost.getId(),
@@ -134,7 +135,7 @@ public class PostService {
     }
 
     public Page<PostResponseDTO> getAllPostsByOwner(int page, int size, String username) {
-        User owner = UserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User owner = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
 
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());

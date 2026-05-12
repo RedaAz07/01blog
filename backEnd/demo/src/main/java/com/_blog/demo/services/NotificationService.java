@@ -14,6 +14,7 @@ import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.entities.Notification;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
@@ -51,10 +52,10 @@ public class NotificationService {
     private postRepository postRepository;
 
     public void createNotification(String senderUsername, PostResponseDTO post) {
-        Post currPost = postRepository.findById(post.id()).orElseThrow(() -> new RuntimeException("Post not found with id: " + post.id()));
+        Post currPost = postRepository.findById(post.id()).orElseThrow(() -> ApiException.notFound("Post not found with id: " + post.id()));
 
         User sender = UserRepository.findByUsername(senderUsername)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + senderUsername));
+                .orElseThrow(() -> ApiException.notFound("User not found with username: " + senderUsername));
         for (User follower : sender.getFollowers()) {
             Notification notification = new Notification();
             notification.setSender(sender);
@@ -72,12 +73,12 @@ public class NotificationService {
         try {
             notificationId = Long.parseLong(id);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid notification ID format: " + id);
+            throw ApiException.badRequest("Invalid notification ID format: " + id);
         }
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found with id: " + id));
+                .orElseThrow(() -> ApiException.notFound("Notification not found with id: " + id));
         if (!notification.getReceiver().getUsername().equals(username)) {
-            throw new RuntimeException("You are not authorized to mark this notification as read");
+            throw ApiException.forbidden("You are not authorized to mark this notification as read");
         }
         notification.setRead(true);
         notificationRepository.save(notification);

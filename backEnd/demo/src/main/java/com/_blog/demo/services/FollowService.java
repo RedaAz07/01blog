@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com._blog.demo.dto.follow.FollowResponseDTO;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository;
 
 @Service
@@ -20,14 +21,14 @@ public class FollowService {
     public boolean toggleFollow(String myUsername, String targetUsername) {
 
         if (myUsername.equals(targetUsername)) {
-            throw new RuntimeException("Bro, you cannot follow yourself!");
+            throw ApiException.badRequest("You cannot follow yourself.");
         }
 
         User me = userRepository.findByUsername(myUsername)
-                .orElseThrow(() -> new RuntimeException("Your user not found"));
+                .orElseThrow(() -> ApiException.notFound("Your user not found"));
 
         User targetUser = userRepository.findByUsername(targetUsername)
-                .orElseThrow(() -> new RuntimeException("Target user not found"));
+                .orElseThrow(() -> ApiException.notFound("Target user not found"));
 
         if (me.getFollowing().contains(targetUser)) {
             me.getFollowing().remove(targetUser);
@@ -42,9 +43,9 @@ public class FollowService {
 
     public List<FollowResponseDTO> getFollowing(String username, String myUsername) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> ApiException.notFound("User not found"));
         if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
-            throw new RuntimeException("You can only see the following list of users you follow");
+            throw ApiException.forbidden("You can only see the following list of users you follow");
         }
 
         List<User> following = user.getFollowing();
@@ -60,9 +61,9 @@ public class FollowService {
 
     public List<FollowResponseDTO> getFollowers(String username, String myUsername) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> ApiException.notFound("User not found"));
         if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
-            throw new RuntimeException("You can only see the followers list of users you follow");
+            throw ApiException.forbidden("You can only see the followers list of users you follow");
         }
         List<User> followers = user.getFollowers();
         return followers.stream()

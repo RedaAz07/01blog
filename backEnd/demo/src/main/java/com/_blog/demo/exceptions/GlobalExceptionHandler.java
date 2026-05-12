@@ -1,32 +1,107 @@
 package com._blog.demo.exceptions;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @RestControllerAdvice // Tells Spring: "Send all crashes here!"
 public class GlobalExceptionHandler {
 
-    // 1. Catch the DTO @Valid Exceptions
+    // ────────────────────────────────────────────────────────
+    // 1. 400 BAD REQUEST (Validation Errors from DTOs)
+    // ────────────────────────────────────────────────────────
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        
+    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> validationErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage())
+            validationErrors.put(error.getField(), error.getDefaultMessage())
         );
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("message", "Invalid data provided");
+        body.put("fieldErrors", validationErrors); // Attach the specific field errors here
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeExceptions(RuntimeException ex) {
-        // Return a 400 BAD REQUEST with your custom error message
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    // ────────────────────────────────────────────────────────
+    // 2. 404 NOT FOUND (When a DB search comes up empty)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleNotFound(EntityNotFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    // ────────────────────────────────────────────────────────
+    // 3. 409 CONFLICT (Duplicate usernames, emails, etc.)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataConflict(DataIntegrityViolationException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "Database conflict: Duplicate entry or foreign key violation.");
+    }
+
+    // ────────────────────────────────────────────────────────
+    // 4. 401 UNAUTHORIZED (Wrong password / Bad JWT)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid username or password.");
+    }
+
+    // ────────────────────────────────────────────────────────
+    // 5. 403 FORBIDDEN (Logged in, but not allowed to do this)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.");
+    }
+
+    // ────────────────────────────────────────────────────────
+    // 6. 400 BAD REQUEST (For your custom RuntimeExceptions)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<Object> handleApiException(ApiException ex) {
+        return buildErrorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    // ────────────────────────────────────────────────────────
+    // 7. 500 INTERNAL SERVER ERROR (The Catch-All for unknown bugs)
+    // ────────────────────────────────────────────────────────
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleAllOtherExceptions(Exception ex) {
+        // Log the exact error to your console so you can fix it later
+        ex.printStackTrace(); 
+        
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred on the server.");
+    }
+
+  
+    private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+
+        return new ResponseEntity<>(body, status);
     }
 }

@@ -19,6 +19,7 @@ import com._blog.demo.dto.dashboard.WeeklyPosts;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.Report;
 import com._blog.demo.entities.User;
+import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.ReportRepository;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
@@ -67,7 +68,7 @@ public class AdminService {
     }
 
     public String ResolveReports(Long id) {
-        Report report = reportRepository.findById(id).orElseThrow(() -> new RuntimeException("report not found"));
+        Report report = reportRepository.findById(id).orElseThrow(() -> ApiException.notFound("Report not found"));
         if (report.isStatus()) {
             report.setStatus(false);
             reportRepository.save(report);
@@ -81,10 +82,10 @@ public class AdminService {
     }
 
     public String banUser(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
 
         if (user.getRole().equals("ROLE_ADMIN")) {
-            throw new RuntimeException("Bro are u crazy ");
+            throw ApiException.forbidden("Admin users cannot be banned from this endpoint.");
         }
         if (user.isStatus()) {
 
@@ -101,16 +102,16 @@ public class AdminService {
 
     public String deleteUser(String username) {
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
         if (user.getRole().equals("ROLE_ADMIN")) {
-            throw new RuntimeException("Bro are u crazy ");
+            throw ApiException.forbidden("Admin users cannot be deleted from this endpoint.");
         }
         userRepository.delete(user);
         return "User Deleted seccefully";
     }
 
     public String deletePost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not Found"));
+        Post post = postRepository.findById(id).orElseThrow(() -> ApiException.notFound("Post not found"));
         postRepository.delete(post);
         return "post deleted seccefully";
     }
@@ -120,11 +121,11 @@ public class AdminService {
         try {
             Id = Long.parseLong(postId);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid  ID format: ");
+            throw ApiException.badRequest("Invalid ID format: " + postId);
         }
         // user user = userRepository.findByUsername(username).orElseThrow(() -> new
         // RuntimeException("Post not found"));
-        Post post = postRepository.findById(Id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(Id).orElseThrow(() -> ApiException.notFound("Post not found"));
 
         if (post.isStatus()) {
 

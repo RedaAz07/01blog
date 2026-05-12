@@ -124,7 +124,6 @@ export class Profile implements OnInit {
       },
       error: (err) => {
         console.log(err);
-        this.snackbar.open('Failed to load more posts.', 'Close', { duration: 3000 });
         this.isPostLoading = false;
       },
     });
@@ -167,10 +166,7 @@ export class Profile implements OnInit {
         this.showEditModal = false;
         this.snackbar.open('Profile updated successfully!', 'Close', { duration: 3000 });
       },
-      error: (err) => {
-        let errMsg = err.error?.message || 'Failed to update profile';
-        this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
-      },
+      error: () => {},
     });
   }
 
@@ -189,10 +185,7 @@ export class Profile implements OnInit {
           });
         }
       },
-      error: (err) => {
-        let errMsg = err.error?.message || 'Failed to update follow status';
-        this.snackbar.open('Error: ' + errMsg, 'Close', { duration: 5000 });
-      },
+      error: () => {},
     });
   }
 
@@ -223,12 +216,7 @@ export class Profile implements OnInit {
         .subscribe({
           next: () =>
             this.snackbar.open('User reported successfully!', 'Close', { duration: 3000 }),
-          error: (err) => {
-            console.log(err);
-
-            let errorM = err?.error?.reason || err.error || 'Failed to report';
-            this.snackbar.open(errorM, 'Close', { duration: 5000 });
-          },
+          error: () => {},
         });
     });
   }

@@ -1,5 +1,6 @@
 package com._blog.demo.controllers;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,28 +25,20 @@ public class MediaController {
     }
 
     @PostMapping("/editor-upload")
-    public ResponseEntity<Map<String, Object>> uploadEditorImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, Object>> uploadEditorImage(@RequestParam("file") MultipartFile file) throws IOException {
 
         Map<String, Object> response = new HashMap<>();
+        FileValidator.validateMediaFile(file);
 
-        try {
-            FileValidator.validateMediaFile(file);
+        String url = mediaUploadService.uploadFile(file);
 
-            String url = mediaUploadService.uploadFile(file);
+        response.put("success", 1);
 
-            response.put("success", 1);
+        Map<String, String> fileData = new HashMap<>();
+        fileData.put("url", url);
+        response.put("file", fileData);
 
-            Map<String, String> fileData = new HashMap<>();
-            fileData.put("url", url);
-            response.put("file", fileData);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            System.err.println("🚨#####################################################################" + e.getMessage());
-            response.put("success", 0);
-            return ResponseEntity.badRequest().body(response);
-        }
+        return ResponseEntity.ok(response);
     }
 
 }
