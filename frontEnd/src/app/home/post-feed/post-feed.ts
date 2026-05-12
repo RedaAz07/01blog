@@ -23,11 +23,13 @@ import { CommentRequestDTO } from '../../core/services/comment';
 import { TimeAgoPipe } from '../../time-ago-pipe';
 import { R } from '@angular/cdk/keycodes';
 import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-post-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, TimeAgoPipe,RouterLink],
+  imports: [CommonModule, FormsModule, MatIconModule, MatMenuModule, TimeAgoPipe, RouterLink],
   templateUrl: './post-feed.html',
   styleUrls: ['./post-feed.css'],
 })
@@ -61,6 +63,7 @@ export class PostFeed implements OnInit, OnDestroy {
   constructor(
     private likeService: Like,
     private commentService: Comment,
+    private dialog: MatDialog,
   ) {}
   snackbar = inject(MatSnackBar);
   parsedBlocks: any[] = [];
@@ -118,7 +121,6 @@ export class PostFeed implements OnInit, OnDestroy {
     this.isCommentsLoading = true;
     this.commentService.fetchComments(this.currentCommentPage, 5, this.post.id).subscribe({
       next: (response) => {
-
         this.currentCommentPage++;
         this.Comments.update((currentList) => [...currentList, ...response.content]);
         this.isCommentsLoading = false;
@@ -158,10 +160,23 @@ export class PostFeed implements OnInit, OnDestroy {
   reportPost(post: any) {
     this.report.emit(post);
   }
+
+  OpenDeleteConfirmation(comment: CommentResponseDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently delete thid comment . Continue?`,
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteComment(comment);
+      }
+    });
+  }
   deleteComment(comment: CommentResponseDTO) {
-    if (!confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
+    
     this.commentService.deleteComment(comment.id).subscribe({
       next: () => {
         this.localCommentsCount.update((count) => count - 1);

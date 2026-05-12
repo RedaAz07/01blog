@@ -117,7 +117,7 @@
             <button
               class="delete-comment-btn"
               *ngIf="c.authorUsername === currentUser.username"
-              (click)="deleteComment(c)"
+              (click)="OpenDeleteConfirmation(c)"
             >
               <mat-icon>delete</mat-icon>
             </button>

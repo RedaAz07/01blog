@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PostService, PostRequestDTO, PostUpdateRequestDTO, PostResponseDTO } from './post';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportDialogComponent } from '../../components/report-dialog-component/report-dialog-component';
+import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
 
 export function usePostManager(postsSignal: WritableSignal<any[]>) {
   const dialog = inject(MatDialog);
@@ -92,19 +93,24 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
   };
 
   const deletePost = (post: any) => {
-    if (
-      confirm(
-        `Are you sure you want to delete the post "${post.title}"? This action cannot be undone.`,
-      )
-    ) {
-      postService.deletePost(post.id).subscribe({
-        next: () => {
-          postsSignal.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
-          snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
-        },
-        error: () => {},
-      });
-    }
+    const ref = dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Delete User',
+        message: `This action will permanently remove  this post. Continue?`,
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        postService.deletePost(post.id).subscribe({
+          next: () => {
+            postsSignal.update((currentPosts) => currentPosts.filter((p) => p.id !== post.id));
+            snackbar.open('Post deleted successfully.', 'Close', { duration: 3000 });
+          },
+          error: () => {},
+        });
+      }
+    });
   };
 
   return {
