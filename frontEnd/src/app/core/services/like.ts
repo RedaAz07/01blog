@@ -7,7 +7,8 @@ export interface LikeRequestDTO {
   postId: number;
 }
 export interface LikeResponseDTO {
-  likesCount: number;
+  nbLikes: number;
+  isLiked: boolean;
 }
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class Like {
   constructor(private http: HttpClient) {}
   apiUrl = 'http://localhost:8080/api/likes';
 
-  likePost(postId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${postId}/like`, {});
+  likePost(postId: number): Observable<LikeResponseDTO> {
+    return this.http.post<LikeResponseDTO>(`${this.apiUrl}/${postId}/like`, {});
   }
 }

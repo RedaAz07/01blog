@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com._blog.demo.dto.like.LikeResponseDTO;
 import com._blog.demo.entities.Like;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.User;
@@ -22,21 +23,31 @@ public class LikeService {
     @Autowired
     private likeRepository likeRepository;
 
-    @Transactional // (Don't forget this from our last fix!)
-    public int likeReq(long req, String username) {
+    @Transactional
+    public LikeResponseDTO likeReq(long req, String username) {
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
-        Post post = postRepository.findById(req).orElseThrow(() -> ApiException.notFound("Post not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> ApiException.notFound("User not found"));
+
+        Post post = postRepository.findById(req)
+                .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        boolean isLiked;
 
         if (likeRepository.existsByUserAndPost(user, post)) {
             likeRepository.deleteByUserAndPost(user, post);
-            return likeRepository.countByPost(post);
+            isLiked = false;
         } else {
             Like like = new Like();
             like.setUser(user);
             like.setPost(post);
+
             likeRepository.save(like);
+            isLiked = true;
         }
-        return likeRepository.countByPost(post);
+
+        int count = likeRepository.countByPost(post);
+
+        return new LikeResponseDTO(count, isLiked);
     }
 }

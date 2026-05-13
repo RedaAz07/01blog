@@ -1,11 +1,12 @@
-<article class="blog-card"  [class] ="post.status?'visible' : 'hide'">
+<article class="blog-card" [class]="post.status ? 'visible' : 'hide'">
   <div class="blog-card-header">
-     <a  class="href" [routerLink]="['/profile', post.authorUsername]">
+    <a class="href" [routerLink]="['/profile', post.authorUsername]">
       <div class="pp-circle1">{{ post.authorUsername.charAt(0) | uppercase }}</div>
-     </a>
+    </a>
     <div class="blog-meta">
-     <a  class="href" [routerLink]="['/profile', post.authorUsername]">
-      <span class="blog-author">{{ post.authorUsername }}</span></a>
+      <a class="href" [routerLink]="['/profile', post.authorUsername]">
+        <span class="blog-author">{{ post.authorUsername }}</span></a
+      >
       <span class="blog-time">{{ post.timestamp | timeAgo }}</span>
     </div>
 
@@ -88,14 +89,14 @@
        ACTIONS
   ══════════════════════════════════ -->
   <div class="blog-actions">
-    <button class="action-btn like-btn" [class.liked]="localIsLiked()" (click)="toggleLike()">
-      <mat-icon>{{ localIsLiked() ? 'favorite' : 'favorite_border' }}</mat-icon>
-      <span>{{ localLikeCount() }}</span>
+    <button class="action-btn like-btn" [class.liked]="post.isLiked" (click)="toggleLike()">
+      <mat-icon>{{ post.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <span>{{ post.nbrLikes }}</span>
     </button>
 
     <button class="action-btn comment-btn" (click)="toggleComments(post)">
       <mat-icon>chat_bubble_outline</mat-icon>
-      <span>{{ localCommentsCount() }}</span>
+      <span>{{ post.nbrComments }}</span>
     </button>
   </div>
 

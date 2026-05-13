@@ -66,13 +66,20 @@ export interface SuggestedUser {
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
-export class Home implements OnInit, AfterViewInit, OnDestroy {
-
+export class Home implements OnInit, OnDestroy {
   Posts = signal<PostResponseDTO[]>([]);
   postManager = usePostManager(this.Posts);
   suggestedUsers = signal<any[]>([]);
   @ViewChild('scrollAnchor') set setupScrollAnchor(element: ElementRef) {
-    if (element && this.observer) {
+    if (element) {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      this.observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !this.isLoading) {
+          this.loadMorePosts();
+        }
+      }, { root: null, rootMargin: '0px', threshold: 0.1 });
       this.observer.observe(element.nativeElement);
     }
   }
@@ -89,7 +96,6 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
   toggleFollow(user: any): void {
     user.followingBYMe = !user.followingBYMe;
-
     this.followService.toggleFollow(user.username).subscribe({
       next: () => {
         this.snackbar.open(
@@ -115,19 +121,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.suggestedUsers$ = this.followService.suggestedUsers();
   }
 
-  ngAfterViewInit(): void {
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1, // Triggers when 10% of the invisible div is on screen
-    };
 
-    this.observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !this.isLoading) {
-        this.loadMorePosts();
-      }
-    }, options);
-  }
 
   loadMorePosts(): void {
     if (this.isLoading) return; // Block spam clicks/scrolls
@@ -156,10 +150,5 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
   closeProfileSidebar(): void {
     this.profileSidebarOpen = false;
-  }
-
-  toggleLike(post: Post): void {
-    post.liked = !post.liked;
-    post.likes += post.liked ? 1 : -1;
   }
 }

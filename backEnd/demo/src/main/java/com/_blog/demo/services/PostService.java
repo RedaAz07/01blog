@@ -53,8 +53,8 @@ public class PostService {
 
                 savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
-                savedPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, savedPost),
+                savedPost.isStatus(),
                 commentRepository.countByPost(savedPost),
                 likeRepository.countByPost(savedPost));
         return postDto;
@@ -73,10 +73,9 @@ public class PostService {
                     p.getTitle(),
                     p.getContent(),
                     p.getUser() != null ? p.getUser().getUsername() : "Unknown",
-
                     p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                    p.isStatus(),
                     likeRepository.existsByUserAndPost(auth, p),
+                    p.isStatus(),
                     commentRepository.countByPost(p),
                     likeRepository.countByPost(p));
             return postDto;
@@ -100,8 +99,8 @@ public class PostService {
                 existingPost.getContent(),
                 existingPost.getUser() != null ? existingPost.getUser().getUsername() : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
-                existingPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, existingPost),
+                existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost));
         return updatedPost;
@@ -131,8 +130,8 @@ public class PostService {
                 existingPost.getUser() != null ? existingPost.getUser().getUsername()
                         : "Unknown",
                 existingPost.getTimestamp() != null ? existingPost.getTimestamp().toString() : null,
-                existingPost.isStatus(),
                 likeRepository.existsByUserAndPost(auth, existingPost),
+                existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost));
         return response;
@@ -159,8 +158,8 @@ public class PostService {
                 p.getContent(),
                 p.getUser() != null ? p.getUser().getUsername() : "Unknown",
                 p.getTimestamp() != null ? p.getTimestamp().toString() : null,
-                p.isStatus(),
                 likeRepository.existsByUserAndPost(currentUser, p),
+                p.isStatus(),
                 commentRepository.countByPost(p),
                 likeRepository.countByPost(p)));
     }

@@ -10,8 +10,8 @@ import com._blog.demo.entities.User;
 @Repository
 public interface likeRepository extends JpaRepository<Like, Long> {
 
-        boolean existsByUserAndPost(User user_id, Post post_id);
-        void deleteByUserAndPost(User user_id, Post post_id);
+        boolean existsByUserAndPost(User user, Post post);
+        void deleteByUserAndPost(User user, Post post);
         int countByPost(Post post_id);
         
 }

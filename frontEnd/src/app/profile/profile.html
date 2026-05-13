@@ -145,15 +145,17 @@
       </div>
 
       <div class="posts-feed" *ngIf="Posts().length > 0">
+<ng-container *ngIf="currentUser() as cUser">
         <app-post-feed
           *ngFor="let p of Posts()"
           [post]="p"
-          [currentUser]="currentUser()"
+          [currentUser]="cUser"
           (edit)="postManager.editPost($event)"
           (report)="postManager.reportPost($event)"
           (delete)="postManager.deletePost($event)"
         >
         </app-post-feed>
+        </ng-container>
       </div>
 
       <div class="posts-empty" *ngIf="Posts().length === 0">

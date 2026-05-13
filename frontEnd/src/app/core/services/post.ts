@@ -24,12 +24,12 @@ export interface PostResponseDTO {
   id: number;
   title: string;
   content: string;
-  author: string;
+  authorUsername: string;
   timestamp: string;
-  status : boolean;
-  liked: boolean;
-  commentsCount: number;
-  likesCount: number;
+  status: boolean;
+  isLiked: boolean;
+  nbrLikes: number;
+  nbrComments: number;
 }
 export interface PageResponse {
   content: PostResponseDTO[];
@@ -67,7 +67,11 @@ export class PostService {
     );
   }
 
-  fetchPostsByOwner(pageNumber: number, pageSize: number = 10, username: string): Observable<PageResponse> {
+  fetchPostsByOwner(
+    pageNumber: number,
+    pageSize: number = 10,
+    username: string,
+  ): Observable<PageResponse> {
     let params = new HttpParams()
       .set('page', pageNumber.toString())
       .set('size', pageSize.toString());

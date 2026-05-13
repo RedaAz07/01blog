@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostResponseDTO } from '../../core/services/post';
 import { UserProfileDTO } from '../../core/services/auth';
-import { Like } from '../../core/services/like';
+import { Like, LikeResponseDTO } from '../../core/services/like';
 import { Comment, CommentResponseDTO } from '../../core/services/comment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommentRequestDTO } from '../../core/services/comment';
@@ -34,27 +34,29 @@ import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
   styleUrls: ['./post-feed.css'],
 })
 export class PostFeed implements OnInit, OnDestroy {
-  @Input() post: any;
-  @Input() currentUser: any;
+  @Input() post!: PostResponseDTO;
+  @Input() currentUser!: UserProfileDTO;
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() report = new EventEmitter<any>();
   currentCommentPage = 0;
   isCommentsLoading = false;
-  localLikeCount = signal<number>(0);
-  localIsLiked = signal<boolean>(false);
   Comments = signal<CommentResponseDTO[]>([]);
-  localCommentsCount = signal<number>(0);
   private commentObserver!: IntersectionObserver;
   @ViewChild('commentScrollAnchor') set setupCommentAnchor(element: ElementRef) {
-    if (element && !this.commentObserver) {
-      const options = { root: null, rootMargin: '0px', threshold: 0.1 };
+    if (element) {
+      if (this.commentObserver) {
+        this.commentObserver.disconnect();
+      }
 
-      this.commentObserver = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !this.isCommentsLoading) {
-          this.loadComments();
-        }
-      }, options);
+      this.commentObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !this.isCommentsLoading) {
+            this.loadComments();
+          }
+        },
+        { root: null, rootMargin: '0px', threshold: 0.1 },
+      );
 
       this.commentObserver.observe(element.nativeElement);
     }
@@ -69,17 +71,14 @@ export class PostFeed implements OnInit, OnDestroy {
   parsedBlocks: any[] = [];
   showComments = false;
   newCommentText = '';
-
   mediaBlocks: any[] = [];
   textBlocks: any[] = [];
   currentSlide = 0;
 
   ngOnInit() {
-    if (this.post) {
-      this.localLikeCount.set(this.post.nbrLikes || 0);
-      this.localIsLiked.set(this.post.isLiked || false);
-      this.localCommentsCount.set(this.post.nbrComments || 0);
-    }
+    
+    this.post.nbrComments = Number(this.post.nbrComments) || 0;
+
     if (this.post && this.post.content) {
       try {
         const editorData = JSON.parse(this.post.content);
@@ -91,20 +90,20 @@ export class PostFeed implements OnInit, OnDestroy {
   }
 
   toggleLike() {
-    this.localIsLiked.update((liked) => !liked);
-    this.localLikeCount.update((count) => (this.localIsLiked() ? count + 1 : count - 1));
-
-    this.snackbar.open(this.localIsLiked() ? 'Post liked!' : 'Like removed', 'Close', {
-      duration: 2000,
-    });
-
+    const wasLiked = this.post.isLiked;
+    this.post.isLiked = !wasLiked;
+    this.post.nbrLikes += this.post.isLiked ? 1 : -1;
     this.likeService.likePost(this.post.id).subscribe({
-      next: (realCount) => {
-        this.localLikeCount.set(realCount);
+      next: (response: LikeResponseDTO) => {
+        this.post.nbrLikes = response.nbLikes;
+        this.post.isLiked = response.isLiked;
+        this.snackbar.open(`post ${response.isLiked? 'liked' : 'disliked'} succefully`,'close',{duration:3000})
       },
       error: (error) => {
-        this.localIsLiked.update((liked) => !liked);
-        this.localLikeCount.update((count) => (this.localIsLiked() ? count + 1 : count - 1));
+        this.post.isLiked = wasLiked;
+        this.post.nbrLikes += wasLiked ? 1 : -1;
+        this.snackbar.open(`faild to like this post `,'close',{duration:3000})
+
       },
     });
   }
@@ -142,12 +141,13 @@ export class PostFeed implements OnInit, OnDestroy {
     };
     this.commentService.createComment(commentData).subscribe({
       next: (createdComment) => {
-        this.localCommentsCount.update((count) => count + 1);
         this.newCommentText = '';
         this.Comments.update((currentList) => [createdComment, ...currentList]);
+
+        this.post.nbrComments++;
+
         this.snackbar.open('Comment added!', 'Close', { duration: 2000 });
       },
-      error: () => {},
     });
   }
 
@@ -176,14 +176,13 @@ export class PostFeed implements OnInit, OnDestroy {
     });
   }
   deleteComment(comment: CommentResponseDTO) {
-    
     this.commentService.deleteComment(comment.id).subscribe({
       next: () => {
-        this.localCommentsCount.update((count) => count - 1);
         this.Comments.update((currentList) => currentList.filter((c) => c.id !== comment.id));
+        this.post.nbrComments--;
+
         this.snackbar.open('Comment deleted!', 'Close', { duration: 2000 });
       },
-      error: () => {},
     });
   }
 

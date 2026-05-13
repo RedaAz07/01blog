@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com._blog.demo.dto.like.LikeResponseDTO;
 import com._blog.demo.services.LikeService;
 
 
@@ -20,11 +21,11 @@ public class LikeController {
     private LikeService LikeService;
 
   @PostMapping("/{postId}/like")
-    public ResponseEntity<Integer> toggleLike(@PathVariable Long postId, Principal principal) {
+    public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId, Principal principal) {
         
         String username = principal.getName();
         
-        int newLikeCount = LikeService.likeReq(postId, username);
+        LikeResponseDTO newLikeCount = LikeService.likeReq(postId, username);
         
         return ResponseEntity.ok(newLikeCount);
     }
