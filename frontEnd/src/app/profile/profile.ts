@@ -45,7 +45,7 @@ export interface UserProfile {
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, PostFeed, PostComponent],
   templateUrl: './profile.html',
-  styleUrls: ['./profile.css'],
+  styleUrls: ['./profile.scss'],
 })
 export class Profile implements OnInit {
   isPostLoading = false;
