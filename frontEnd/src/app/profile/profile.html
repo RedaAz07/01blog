@@ -221,7 +221,25 @@
   </div>
 
   <!-- ═══════════════════ MODAL: Followers ═══════════════════ -->
-
+<div class="modal-overlay" *ngIf="showFollowersModal" (click)="showFollowersModal = false">
+    <div class="modal modal-list" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>
+          Followers <span class="count-chip">{{ user()?.followers }}</span>
+        </h2>
+        <button class="close-btn" (click)="showFollowersModal = false">✕</button>
+      </div>
+      <div class="modal-body list-body">
+        <div class="user-row" *ngFor="let f of followersList()">
+          <div class="mini-avatar">{{ f.username.slice(0, 2).toUpperCase() }}</div>
+          <a href="/profile/{{ f.username }}" class="href"
+            ><span class="mini-name">{{ f.username }}</span></a
+          >
+        </div>
+        <p class="empty-hint" *ngIf="followersList().length === 0">you have no followers </p>
+      </div>
+    </div>
+  </div>
   <!-- ═══════════════════ MODAL: Following ═══════════════════ -->
   <div class="modal-overlay" *ngIf="showFollowingModal" (click)="showFollowingModal = false">
     <div class="modal modal-list" (click)="$event.stopPropagation()">
