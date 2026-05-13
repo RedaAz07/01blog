@@ -26,15 +26,21 @@ public class ReportService {
 
     public String createReport(ReportRequestDTO entity, String username) {
 
-        User reporter = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("Reporter not found"));
-        User reportedUser = UserRepository.findByUsername(entity.getReported()).orElseThrow(() -> ApiException.notFound("Reported user not found"));
+        User reporter = UserRepository.findByUsername(username)
+                .orElseThrow(() -> ApiException.notFound("Reporter not found"));
+        User reportedUser = UserRepository.findByUsername(entity.getReported())
+                .orElseThrow(() -> ApiException.notFound("Reported user not found"));
         if (reportedUser.getId().equals(reporter.getId())) {
             throw ApiException.badRequest("You cannot report yourself");
         }
 
         Post reportedPost = null;
         if (entity.getReportedPost() != null) {
-            reportedPost = postRepository.findById(entity.getReportedPost()).orElseThrow(() -> ApiException.notFound("Reported post not found"));
+            reportedPost = postRepository.findById(entity.getReportedPost())
+                    .orElseThrow(() -> ApiException.notFound("Reported post not found"));
+            if (!reportedPost.isStatus()) {
+                throw ApiException.forbidden("this post is hidden, you can't do anything");
+            }
         }
         if (reportedPost != null && reportedPost.getUser().getId().equals(reporter.getId())) {
             throw ApiException.badRequest("You cannot report your own post");
@@ -42,12 +48,7 @@ public class ReportService {
         if (reportedPost != null && !reportedPost.getUser().getId().equals(reportedUser.getId())) {
             throw ApiException.badRequest("The reported post does not belong to the reported user");
         }
-/*         if (reportedPost == null && reportRepository.existsByReporterAndReportedAndReportedPostIsNull(reporter, reportedUser)) {
-            throw new RuntimeException("You have already reported this user");
-        }
-        if (reportedPost != null && reportRepository.existsByReporterAndReportedAndReportedPost(reporter, reportedUser, reportedPost)) {
-            throw new RuntimeException("You have already reported this post of this user");
-        } */
+       
 
         Report newReport = new Report();
         newReport.setReason(entity.getReason());

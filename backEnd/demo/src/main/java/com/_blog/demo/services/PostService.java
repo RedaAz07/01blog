@@ -86,6 +86,10 @@ public class PostService {
         User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(request.getId())
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        if (!existingPost.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
         if (!existingPost.getUser().getId().equals(auth.getId())) {
             throw ApiException.forbidden("You are not authorized to update this post");
         }
@@ -110,6 +114,10 @@ public class PostService {
         User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        if (!existingPost.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
         if (!existingPost.getUser().getId().equals(auth.getId()) && !auth.getRole().equals("ROLE_ADMIN")) {
             throw ApiException.forbidden("You are not authorized to delete this post");
         }
@@ -122,6 +130,10 @@ public class PostService {
         User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        if (!existingPost.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
 
         PostResponseDTO response = new PostResponseDTO(
                 existingPost.getId(),

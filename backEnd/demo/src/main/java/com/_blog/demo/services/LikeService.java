@@ -32,6 +32,10 @@ public class LikeService {
         Post post = postRepository.findById(req)
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
 
+        if (!post.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
+
         boolean isLiked;
 
         if (likeRepository.existsByUserAndPost(user, post)) {

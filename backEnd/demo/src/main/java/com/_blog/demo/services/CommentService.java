@@ -33,6 +33,10 @@ public class CommentService {
         User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        if (!post.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
         Comment newComment = new Comment();
         newComment.setContent(request.getContent());
         newComment.setUser(auth);
@@ -49,6 +53,12 @@ public class CommentService {
 
     public Page<CommentResponseDTO> getComments(int page, int size, Long postId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> ApiException.notFound("Post not found"));
+
+        if (!post.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
 
         Page<Comment> commentsPage = commentRepository.findByPostId(postId, pageable);
         return commentsPage.map(comment -> {
@@ -60,12 +70,19 @@ public class CommentService {
             return dto;
         });
     }
-    
 
     public void deleteComment(Long commentId, String username) {
         User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> ApiException.notFound("Comment not found"));
+
+        Post post = comment.getPost();
+
+        if (!post.isStatus()) {
+            throw ApiException.forbidden("this post is hidden, you can't do anything");
+        }
+
         if (!comment.getUser().getId().equals(auth.getId())) {
             throw ApiException.forbidden("You can only delete your own comments");
         }
