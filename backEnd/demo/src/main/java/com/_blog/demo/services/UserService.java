@@ -130,20 +130,15 @@ public class UserService {
     }
 
     public userDTO editProfile(String username, EditProfileRequestDTO request, String currentUsername) {
-        if (username.equals("admin")) {
-            throw ApiException.forbidden("As an admin, this profile cannot be edited here.");
-        }
+     /*    if (username.equals("admin")) {
+            throw ApiException.badRequest("As an admin, this profile cannot be edited here.");
+        } */
         if (!username.equals(currentUsername)) {
             throw ApiException.forbidden("You can only edit your own profile!");
         }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> ApiException.notFound("User not found with username: " + username));
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                throw ApiException.conflict("Username is already taken!");
-            }
-            user.setUsername(request.getUsername());
-        }
+     
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
                 throw ApiException.conflict("Email is already in use!");

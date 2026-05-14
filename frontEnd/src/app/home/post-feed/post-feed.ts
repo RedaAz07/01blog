@@ -90,9 +90,7 @@ export class PostFeed implements OnInit, OnDestroy {
   }
 
   toggleLike() {
-    const wasLiked = this.post.isLiked;
-    this.post.isLiked = !wasLiked;
-    this.post.nbrLikes += this.post.isLiked ? 1 : -1;
+   
     this.likeService.likePost(this.post.id).subscribe({
       next: (response: LikeResponseDTO) => {
         this.post.nbrLikes = response.nbLikes;
@@ -100,8 +98,7 @@ export class PostFeed implements OnInit, OnDestroy {
         this.snackbar.open(`post ${response.isLiked? 'liked' : 'disliked'} succefully`,'close',{duration:3000})
       },
       error: (error) => {
-        this.post.isLiked = wasLiked;
-        this.post.nbrLikes += wasLiked ? 1 : -1;
+ 
         this.snackbar.open(`faild to like this post `,'close',{duration:3000})
 
       },

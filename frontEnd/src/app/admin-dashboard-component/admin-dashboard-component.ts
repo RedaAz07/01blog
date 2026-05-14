@@ -162,7 +162,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       color: 'warn',
     },
     {
-      label: 'Banned Today',
+      label: 'Banned',
       value: this.totals().banned,
       change: 3,
       icon: 'block',
