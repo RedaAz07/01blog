@@ -1,6 +1,8 @@
 package com._blog.demo.services;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,20 +10,30 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.entities.Post;
+import com._blog.demo.entities.PostImages;
 import com._blog.demo.entities.User;
 import com._blog.demo.exceptions.ApiException;
+import com._blog.demo.repositories.PostImagesRepository;
 import com._blog.demo.repositories.UserRepository;
 import com._blog.demo.repositories.commentRepository;
 import com._blog.demo.repositories.likeRepository;
 import com._blog.demo.repositories.postRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class PostService {
+
+    @Autowired
+    private MediaUploadService mediaUploadService;
+
+    @Autowired
+    private PostImagesRepository postImagesRepository;
 
     @Autowired
     private postRepository postRepository;
@@ -34,29 +46,56 @@ public class PostService {
     @Autowired
     private commentRepository commentRepository;
 
-    public PostResponseDTO createPost(PostRequestDTO request, String author) {
+   @Transactional
+    public PostResponseDTO createPost(String title, String content, List<MultipartFile> files, String author) {
 
-        User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
+        User auth = UserRepository.findByUsername(author)
+                .orElseThrow(() -> ApiException.notFound("User not found"));
 
+        // 1. Save the Post first
         Post newPost = new Post();
-        newPost.setTitle(request.title());
-        newPost.setContent(request.content());
+        newPost.setTitle(title);
+        newPost.setContent(content);
         newPost.setStatus(true);
         newPost.setUser(auth);
         newPost.setTimestamp(new Date());
         Post savedPost = postRepository.save(newPost);
 
+        List<String> uploadedImageUrls = new ArrayList<>();
+
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile f : files) {
+                PostImages images = new PostImages();
+                
+                images.setPost(savedPost); 
+                
+                String url;
+                try {
+                    url = mediaUploadService.uploadFile(f);
+                } catch (Exception e) {
+                    throw ApiException.badRequest("Invalid Media File");
+                }
+                
+                images.setImageUrl(url);
+                postImagesRepository.save(images);
+                uploadedImageUrls.add(url);
+            }
+        }
+
+        // 4. Return the DTO
         PostResponseDTO postDto = new PostResponseDTO(
                 savedPost.getId(),
                 savedPost.getTitle(),
                 savedPost.getContent(),
-
                 savedPost.getUser() != null ? savedPost.getUser().getUsername() : "Unknown",
                 savedPost.getTimestamp() != null ? savedPost.getTimestamp().toString() : null,
                 likeRepository.existsByUserAndPost(auth, savedPost),
                 savedPost.isStatus(),
                 commentRepository.countByPost(savedPost),
-                likeRepository.countByPost(savedPost));
+                likeRepository.countByPost(savedPost)
+                // 💡 PRO TIP: Add 'uploadedImageUrls' to your DTO constructor so Angular can show them!
+        );
+        
         return postDto;
     }
 

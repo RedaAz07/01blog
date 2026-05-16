@@ -1,6 +1,7 @@
 package com._blog.demo.controllers;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.post.PostRequestDTO;
@@ -33,9 +35,12 @@ class PostController {
     private NotificationService NotificationService;
 
     @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> createPost(@Valid @RequestBody PostRequestDTO request, Principal principal) {
+    public ResponseEntity<PostResponseDTO> createPost(
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files, Principal principal) {
         String username = principal.getName();
-        PostResponseDTO result = PostService.createPost(request, username);
+        PostResponseDTO result = PostService.createPost(title ,content, files, username);
 
         NotificationService.createNotification(username, result);
         return ResponseEntity.ok(result);
