@@ -78,7 +78,7 @@ public class UserService {
         dto.setPosts(user.getPosts().size());
         dto.setFollowers(user.getFollowers().size());
         dto.setFollowing(user.getFollowing().size());
-        dto.setNotifications(user.getReceivedNotifications().size());
+        dto.setNotifications((int)user.getReceivedNotifications().stream().filter(f->!f.isRead()).count());
         dto.setProfilePictureUrl(user.getProfilePictureUrl());
         return dto;
     }
