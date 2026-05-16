@@ -2,20 +2,14 @@
 
 <div class="post-modal" [class.open]="isOpen">
 
-  <!-- ── Header ── -->
   <div class="modal-header">
     <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
-    <button class="modal-close" (click)="closeModal()">
-      <mat-icon>close</mat-icon>
-    </button>
+    <button class="modal-close" (click)="closeModal()"><mat-icon>close</mat-icon></button>
   </div>
 
-  <!-- ── Body ── -->
   <div class="modal-body">
-
-    <!-- User row -->
     <div class="modal-user" *ngIf="authService.currentUser$ | async as cUser">
-      <div class="modal-avatar-circle">{{ cUser.username.charAt(0) | uppercase }}</div>
+      <div class="modal-avatar-circle">{{ cUser.username | slice:0:1 | uppercase }}</div>
       <div>
         <span class="modal-username">{{ cUser.username }}</span>
         <span class="modal-user-sub">Publishing to your profile</span>
@@ -24,32 +18,30 @@
 
     <div class="modal-divider"></div>
 
-    <!-- Title -->
-    <input
-      type="text"
-      class="modal-input"
-      placeholder="Post title *"
-      [(ngModel)]="postTitle"  >
+    <input type="text" class="modal-input" placeholder="Post title *" [(ngModel)]="postTitle">
 
-    <!-- Editor.js -->
     <span class="editor-label">Content</span>
-    <div class="editor-container">
-      <div id="editorjs"></div>
+    <textarea class="modal-input" rows="4" placeholder="What's on your mind, bro?" [(ngModel)]="postContent"></textarea>
+
+    <span class="editor-label">Media (Max 5 files)</span>
+    <input type="file" multiple accept="image/*,video/*" (change)="onFilesSelected($event)" [disabled]="selectedFiles.length >= 5">
+
+    <div class="file-preview-list" *ngIf="selectedFiles.length > 0">
+      <div class="file-badge" *ngFor="let file of selectedFiles; let i = index">
+        <mat-icon>insert_drive_file</mat-icon>
+        <span>{{ file.name | slice:0:15 }}...</span>
+        <button class="remove-file-btn" (click)="removeFile(i)"><mat-icon>cancel</mat-icon></button>
+      </div>
     </div>
 
     <div class="modal-divider"></div>
 
-    <!-- Actions -->
     <div class="modal-actions-bar">
       <button class="cancel-btn" (click)="closeModal()">Cancel</button>
-      <button
-        class="submit-post-btn"
-        [disabled]="!postTitle"
-        (click)="submitPost()">
+      <button class="submit-post-btn" [disabled]="!postTitle || !postContent" (click)="submitPost()">
         <mat-icon>{{ editingPost ? 'edit' : 'send' }}</mat-icon>
         {{ editingPost ? 'Update' : 'Publish' }}
       </button>
     </div>
-
   </div>
 </div>

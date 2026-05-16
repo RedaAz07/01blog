@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com._blog.demo.dto.Response;
-import com._blog.demo.dto.post.PostRequestDTO;
 import com._blog.demo.dto.post.PostResponseDTO;
 import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.services.NotificationService;

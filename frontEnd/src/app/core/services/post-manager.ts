@@ -30,41 +30,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     editingPost.set(null);
   };
 
-  const handlePostSave = (postData: any) => {
-    const requestPayload: PostRequestDTO = {
-      title: postData.title,
-      content: postData.content,
-    };
-
-    const currentEdit = editingPost();
-
-    if (currentEdit) {
-      const updatePayload: PostUpdateRequestDTO = {
-        id: currentEdit.id,
-        title: postData.title,
-        content: postData.content,
-      };
-
-      postService.updatePost(updatePayload).subscribe({
-        next: (updatedPostFromDB: PostResponseDTO) => {
-          postsSignal.update((currentPosts) =>
-            currentPosts.map((p) => (p.id === updatedPostFromDB.id ? updatedPostFromDB : p)),
-          );
-          snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
-          closePostModal();
-        },
-        error: () => {},
-      });
-    } else {
-      postService.createPost(requestPayload).subscribe({
-        next: (savedPostFromDB: PostResponseDTO) => {
-          postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
-          closePostModal();
-        },
-        error: () => {},
-      });
-    }
-  };
 
   const reportPost = (post: any) => {
     const dialogRef = dialog.open(ReportDialogComponent, {
@@ -90,6 +55,39 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         error: () => {},
       });
     });
+  };
+
+
+
+  const handlePostSave = (postData: any) => {
+    
+    const formData = new FormData();
+    formData.append('title', postData.title);
+    formData.append('content', postData.content);
+
+
+    if (postData.files && postData.files.length > 0) {
+      postData.files.forEach((file: File) => {
+        formData.append('files', file);
+      });
+    }
+
+    const currentEdit = editingPost();
+
+    if (currentEdit) {
+    } else {
+      postService.createPost(formData).subscribe({
+        next: (savedPostFromDB: PostResponseDTO) => {
+          postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
+          snackbar.open('Post published successfully!', 'Close', { duration: 3000 });
+          closePostModal();
+        },
+        error: (err) => {
+          console.error(err);
+          snackbar.open('Failed to publish post', 'Close', { duration: 3000 });
+        },
+      });
+    }
   };
 
   const deletePost = (post: any) => {

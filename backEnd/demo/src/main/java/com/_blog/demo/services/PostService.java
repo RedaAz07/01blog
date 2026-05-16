@@ -46,7 +46,7 @@ public class PostService {
     @Autowired
     private commentRepository commentRepository;
 
-   @Transactional
+    @Transactional
     public PostResponseDTO createPost(String title, String content, List<MultipartFile> files, String author) {
 
         User auth = UserRepository.findByUsername(author)
@@ -66,16 +66,16 @@ public class PostService {
         if (files != null && !files.isEmpty()) {
             for (MultipartFile f : files) {
                 PostImages images = new PostImages();
-                
-                images.setPost(savedPost); 
-                
+
+                images.setPost(savedPost);
+
                 String url;
                 try {
                     url = mediaUploadService.uploadFile(f);
                 } catch (Exception e) {
                     throw ApiException.badRequest("Invalid Media File");
                 }
-                
+
                 images.setImageUrl(url);
                 postImagesRepository.save(images);
                 uploadedImageUrls.add(url);
@@ -92,10 +92,11 @@ public class PostService {
                 likeRepository.existsByUserAndPost(auth, savedPost),
                 savedPost.isStatus(),
                 commentRepository.countByPost(savedPost),
-                likeRepository.countByPost(savedPost)
-                // 💡 PRO TIP: Add 'uploadedImageUrls' to your DTO constructor so Angular can show them!
+                likeRepository.countByPost(savedPost),
+                uploadedImageUrls
+
         );
-        
+
         return postDto;
     }
 
@@ -116,7 +117,8 @@ public class PostService {
                     likeRepository.existsByUserAndPost(auth, p),
                     p.isStatus(),
                     commentRepository.countByPost(p),
-                    likeRepository.countByPost(p));
+                    likeRepository.countByPost(p),
+                    p.getImages().stream().map(i -> i.getImageUrl()).toList());
             return postDto;
         });
     }
@@ -145,7 +147,8 @@ public class PostService {
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
-                likeRepository.countByPost(existingPost));
+                likeRepository.countByPost(existingPost),
+                existingPost.getImages().stream().map(i -> i.getImageUrl()).toList());
         return updatedPost;
     }
 
@@ -184,7 +187,8 @@ public class PostService {
                 likeRepository.existsByUserAndPost(auth, existingPost),
                 existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
-                likeRepository.countByPost(existingPost));
+                likeRepository.countByPost(existingPost),
+                existingPost.getImages().stream().map(i -> i.getImageUrl()).toList());
         return response;
     }
 
@@ -212,6 +216,7 @@ public class PostService {
                 likeRepository.existsByUserAndPost(currentUser, p),
                 p.isStatus(),
                 commentRepository.countByPost(p),
-                likeRepository.countByPost(p)));
+                likeRepository.countByPost(p),
+                p.getImages().stream().map(i -> i.getImageUrl()).toList()));
     }
 }

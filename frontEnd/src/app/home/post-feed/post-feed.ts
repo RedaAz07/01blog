@@ -1,27 +1,16 @@
 import {
-  Component,
-  Input,
-  OnInit,
-  Output,
-  EventEmitter,
-  inject,
-  signal,
-  OnDestroy,
-  ElementRef,
-  ViewChild,
+  Component, Input, OnInit, Output, EventEmitter, inject, signal, OnDestroy, ElementRef, ViewChild
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { PostResponseDTO } from '../../core/services/post';
 import { UserProfileDTO } from '../../core/services/auth';
 import { Like, LikeResponseDTO } from '../../core/services/like';
-import { Comment, CommentResponseDTO } from '../../core/services/comment';
+import { Comment, CommentResponseDTO, CommentRequestDTO } from '../../core/services/comment';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CommentRequestDTO } from '../../core/services/comment';
 import { TimeAgoPipe } from '../../time-ago-pipe';
-import { R } from '@angular/cdk/keycodes';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
@@ -39,25 +28,21 @@ export class PostFeed implements OnInit, OnDestroy {
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() report = new EventEmitter<any>();
+  
   currentCommentPage = 0;
   isCommentsLoading = false;
   Comments = signal<CommentResponseDTO[]>([]);
   private commentObserver!: IntersectionObserver;
+  
   @ViewChild('commentScrollAnchor') set setupCommentAnchor(element: ElementRef) {
     if (element) {
-      if (this.commentObserver) {
-        this.commentObserver.disconnect();
-      }
-
+      if (this.commentObserver) this.commentObserver.disconnect();
       this.commentObserver = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && !this.isCommentsLoading) {
-            this.loadComments();
-          }
+          if (entry.isIntersecting && !this.isCommentsLoading) this.loadComments();
         },
         { root: null, rootMargin: '0px', threshold: 0.1 },
       );
-
       this.commentObserver.observe(element.nativeElement);
     }
   }
@@ -67,53 +52,48 @@ export class PostFeed implements OnInit, OnDestroy {
     private commentService: Comment,
     private dialog: MatDialog,
   ) {}
+  
   snackbar = inject(MatSnackBar);
-  parsedBlocks: any[] = [];
   showComments = false;
   newCommentText = '';
-  mediaBlocks: any[] = [];
-  textBlocks: any[] = [];
+  
+  // 🟢 Keep the slider logic, but remove the Editor.js blocks!
   currentSlide = 0;
 
   ngOnInit() {
-    
     this.post.nbrComments = Number(this.post.nbrComments) || 0;
-
-    if (this.post && this.post.content) {
-      try {
-        const editorData = JSON.parse(this.post.content);
-        this.parsedBlocks = editorData.blocks || [];
-      } catch (e) {}
+    this.post.nbrLikes = Number(this.post.nbrLikes) || 0;
+    
+    // Safety check in case the backend sends null for images
+    if (!this.post.imageUrls) {
+      this.post.imageUrls = [];
     }
-    this.mediaBlocks = this.parsedBlocks.filter((b) => ['image', 'video'].includes(b.type));
-    this.textBlocks = this.parsedBlocks.filter((b) => !['image', 'video'].includes(b.type));
+  }
+
+  // 🟢 Helper to check if the Cloudinary URL is a video
+  isVideo(url: string): boolean {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.webm') || lowerUrl.endsWith('.ogg');
   }
 
   toggleLike() {
-   
     this.likeService.likePost(this.post.id).subscribe({
       next: (response: LikeResponseDTO) => {
         this.post.nbrLikes = response.nbLikes;
         this.post.isLiked = response.isLiked;
-        this.snackbar.open(`post ${response.isLiked? 'liked' : 'disliked'} succefully`,'close',{duration:3000})
       },
-      error: (error) => {
- 
-        this.snackbar.open(`faild to like this post `,'close',{duration:3000})
-
-      },
+      error: () => this.snackbar.open(`Failed to like this post`, 'Close', {duration: 3000}),
     });
   }
 
   toggleComments(post: any): void {
     this.showComments = !this.showComments;
-    if (this.showComments) {
-      this.loadComments();
-    }
+    if (this.showComments) this.loadComments();
   }
+
   loadComments() {
     if (this.isCommentsLoading) return;
-
     this.isCommentsLoading = true;
     this.commentService.fetchComments(this.currentCommentPage, 5, this.post.id).subscribe({
       next: (response) => {
@@ -121,73 +101,54 @@ export class PostFeed implements OnInit, OnDestroy {
         this.Comments.update((currentList) => [...currentList, ...response.content]);
         this.isCommentsLoading = false;
       },
-      error: (error) => {
-        this.isCommentsLoading = false;
-      },
+      error: () => this.isCommentsLoading = false,
     });
   }
+
   ngOnDestroy() {
-    if (this.commentObserver) {
-      this.commentObserver.disconnect();
-    }
+    if (this.commentObserver) this.commentObserver.disconnect();
   }
+
   addComment(post: any) {
-    const commentData: CommentRequestDTO = {
-      content: this.newCommentText,
-      postId: post.id,
-    };
+    const commentData: CommentRequestDTO = { content: this.newCommentText, postId: post.id };
     this.commentService.createComment(commentData).subscribe({
       next: (createdComment) => {
         this.newCommentText = '';
         this.Comments.update((currentList) => [createdComment, ...currentList]);
-
         this.post.nbrComments++;
-
-        this.snackbar.open('Comment added!', 'Close', { duration: 2000 });
       },
     });
   }
 
-  editPost(post: any) {
-    this.edit.emit(post);
-  }
-  deletePost(post: any) {
-    this.delete.emit(post);
-  }
-  reportPost(post: any) {
-    this.report.emit(post);
-  }
+  editPost(post: any) { this.edit.emit(post); }
+  deletePost(post: any) { this.delete.emit(post); }
+  reportPost(post: any) { this.report.emit(post); }
 
   OpenDeleteConfirmation(comment: CommentResponseDTO) {
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
-      data: {
-        title: 'Delete User',
-        message: `This action will permanently delete thid comment . Continue?`,
-      },
+      data: { title: 'Delete Comment', message: `Permanently delete this comment?` },
     });
     ref.afterClosed().subscribe((result) => {
-      if (result) {
-        this.deleteComment(comment);
-      }
+      if (result) this.deleteComment(comment);
     });
   }
+
   deleteComment(comment: CommentResponseDTO) {
     this.commentService.deleteComment(comment.id).subscribe({
       next: () => {
         this.Comments.update((currentList) => currentList.filter((c) => c.id !== comment.id));
         this.post.nbrComments--;
-
-        this.snackbar.open('Comment deleted!', 'Close', { duration: 2000 });
       },
     });
   }
 
+  // 🟢 Slider controls updated for imageUrls array
   prevSlide() {
     if (this.currentSlide > 0) this.currentSlide--;
   }
   nextSlide() {
-    if (this.currentSlide < this.mediaBlocks.length - 1) this.currentSlide++;
+    if (this.currentSlide < this.post.imageUrls.length - 1) this.currentSlide++;
   }
   goToSlide(i: number) {
     this.currentSlide = i;

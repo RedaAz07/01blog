@@ -30,6 +30,7 @@ export interface PostResponseDTO {
   isLiked: boolean;
   nbrLikes: number;
   nbrComments: number;
+  imageUrls: string[]; 
 }
 export interface PageResponse {
   content: PostResponseDTO[];
@@ -46,7 +47,7 @@ export class PostService {
   constructor(private http: HttpClient) {}
 
   // 3. The Create Method
-  createPost(data: PostRequestDTO): Observable<PostResponseDTO> {
+  createPost(data: FormData): Observable<PostResponseDTO> {
     return this.http.post<PostResponseDTO>(`${this.apiUrl}create`, data);
   }
 
