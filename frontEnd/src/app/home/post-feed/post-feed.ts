@@ -1,5 +1,14 @@
 import {
-  Component, Input, OnInit, Output, EventEmitter, inject, signal, OnDestroy, ElementRef, ViewChild
+  Component,
+  Input,
+  OnInit,
+  Output,
+  EventEmitter,
+  inject,
+  signal,
+  OnDestroy,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,17 +32,31 @@ import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
   styleUrls: ['./post-feed.css'],
 })
 export class PostFeed implements OnInit, OnDestroy {
-  @Input() post!: PostResponseDTO;
+  private _post!: PostResponseDTO;
+
+  @Input()
+  set post(p: PostResponseDTO) {
+    if (p) {
+      p.nbrLikes = Number(p.nbrLikes) || 0;
+      p.nbrComments = Number(p.nbrComments) || 0;
+      p.imageUrls = p.imageUrls || []; 
+      this._post = p;
+    }
+  }
+
+  get post(): PostResponseDTO {
+    return this._post;
+  }
   @Input() currentUser!: UserProfileDTO;
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() report = new EventEmitter<any>();
-  
+
   currentCommentPage = 0;
   isCommentsLoading = false;
   Comments = signal<CommentResponseDTO[]>([]);
   private commentObserver!: IntersectionObserver;
-  
+
   @ViewChild('commentScrollAnchor') set setupCommentAnchor(element: ElementRef) {
     if (element) {
       if (this.commentObserver) this.commentObserver.disconnect();
@@ -52,25 +75,19 @@ export class PostFeed implements OnInit, OnDestroy {
     private commentService: Comment,
     private dialog: MatDialog,
   ) {}
-  
+
   snackbar = inject(MatSnackBar);
   showComments = false;
   newCommentText = '';
-  
-  // 🟢 Keep the slider logic, but remove the Editor.js blocks!
+
   currentSlide = 0;
 
   ngOnInit() {
-    this.post.nbrComments = Number(this.post.nbrComments) || 0;
-    this.post.nbrLikes = Number(this.post.nbrLikes) || 0;
-    
-    // Safety check in case the backend sends null for images
     if (!this.post.imageUrls) {
       this.post.imageUrls = [];
     }
   }
 
-  // 🟢 Helper to check if the Cloudinary URL is a video
   isVideo(url: string): boolean {
     if (!url) return false;
     const lowerUrl = url.toLowerCase();
@@ -78,12 +95,29 @@ export class PostFeed implements OnInit, OnDestroy {
   }
 
   toggleLike() {
+    const wasLiked = this.post.isLiked;
+    const oldLikesCount = this.post.nbrLikes;
+
+    this.post.isLiked = !wasLiked;
+    this.post.nbrLikes += this.post.isLiked ? 1 : -1;
+
     this.likeService.likePost(this.post.id).subscribe({
       next: (response: LikeResponseDTO) => {
-        this.post.nbrLikes = response.nbLikes;
-        this.post.isLiked = response.isLiked;
+        if (response) {
+          const incomingLikes = response.nbLikes !== undefined ? response.nbLikes : response.nbLikes;
+          
+          this.post.isLiked = response.isLiked;
+          this.post.nbrLikes = Number(incomingLikes) || 0; 
+
+        }
+                this.snackbar.open(`this post ${response.isLiked ? 'Liked' : 'desliked seccefully'}`, 'Close', {duration: 3000});
+
       },
-      error: () => this.snackbar.open(`Failed to like this post`, 'Close', {duration: 3000}),
+      error: (error) => {
+        this.post.isLiked = wasLiked;
+        this.post.nbrLikes = oldLikesCount;
+        this.snackbar.open('Failed to like this post', 'Close', {duration: 3000});
+      },
     });
   }
 
@@ -101,7 +135,7 @@ export class PostFeed implements OnInit, OnDestroy {
         this.Comments.update((currentList) => [...currentList, ...response.content]);
         this.isCommentsLoading = false;
       },
-      error: () => this.isCommentsLoading = false,
+      error: () => (this.isCommentsLoading = false),
     });
   }
 
@@ -120,9 +154,15 @@ export class PostFeed implements OnInit, OnDestroy {
     });
   }
 
-  editPost(post: any) { this.edit.emit(post); }
-  deletePost(post: any) { this.delete.emit(post); }
-  reportPost(post: any) { this.report.emit(post); }
+  editPost(post: any) {
+    this.edit.emit(post);
+  }
+  deletePost(post: any) {
+    this.delete.emit(post);
+  }
+  reportPost(post: any) {
+    this.report.emit(post);
+  }
 
   OpenDeleteConfirmation(comment: CommentResponseDTO) {
     const ref = this.dialog.open(ConfirmDialog, {

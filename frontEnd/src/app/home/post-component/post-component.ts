@@ -1,9 +1,24 @@
-import { Component, EventEmitter, inject, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Filevalidator } from '../../core/services/filevalidator';
+
+interface SelectedMedia {
+  file: File;
+  previewUrl: string;
+}
 
 @Component({
   selector: 'app-post-component',
@@ -13,8 +28,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrl: './post-component.css',
 })
 export class PostComponent implements OnChanges {
+  cdr = inject(ChangeDetectorRef); 
   snackBar = inject(MatSnackBar);
   authService = inject(AuthService);
+  fileValidator = inject(Filevalidator);
 
   @Input() editingPost: any | null = null;
   @Input() isOpen = false;
@@ -22,41 +39,59 @@ export class PostComponent implements OnChanges {
   @Output() save = new EventEmitter<any>();
 
   postTitle = '';
-  postContent = ''; 
-  selectedFiles: File[] = []; //
+  postContent = '';
+  
+  selectedFiles: SelectedMedia[] = [];
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
       if (this.editingPost) {
         this.postTitle = this.editingPost.title;
         this.postContent = this.editingPost.content;
-        this.selectedFiles = []; // Editing files usually requires a different UX flow
       } else {
         this.postTitle = '';
         this.postContent = '';
-        this.selectedFiles = [];
       }
+      // Reset files
+      this.selectedFiles.forEach(media => URL.revokeObjectURL(media.previewUrl));
+      this.selectedFiles = [];
     }
   }
-
-  onFilesSelected(event: any) {
+async onFilesSelected(event: any) {
     const files: FileList = event.target.files;
-    
+
     if (this.selectedFiles.length + files.length > 5) {
       this.snackBar.open('You can only upload a maximum of 5 files!', 'Close', { duration: 3000 });
+      event.target.value = '';
       return;
     }
 
+    const newValidFiles: SelectedMedia[] = [];
+
     for (let i = 0; i < files.length; i++) {
-      this.selectedFiles.push(files[i]);
+      const file = files[i];
+      const realMimeType = await this.fileValidator.validateRealMimeType(file);
+      
+      if (!realMimeType) {
+        this.snackBar.open(`File "${file.name}" is corrupted or invalid!`, 'Close', { duration: 5000 });
+        continue; 
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      newValidFiles.push({ file, previewUrl });
     }
-    
-    // Clear the input so they can select the same file again if they delete it
-    event.target.value = ''; 
+
+    this.selectedFiles = [...this.selectedFiles, ...newValidFiles];
+
+    this.cdr.detectChanges();
+
+    event.target.value = '';
   }
 
+
   removeFile(index: number) {
-    this.selectedFiles.splice(index, 1);
+    const removedItem = this.selectedFiles.splice(index, 1)[0];
+    URL.revokeObjectURL(removedItem.previewUrl);
   }
 
   closeModal() {
@@ -72,7 +107,7 @@ export class PostComponent implements OnChanges {
     const postData = {
       title: this.postTitle,
       content: this.postContent,
-      files: this.selectedFiles // Pass the files to the manager!
+      files: this.selectedFiles.map(media => media.file), 
     };
 
     this.save.emit(postData);

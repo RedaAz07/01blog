@@ -75,6 +75,9 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     const currentEdit = editingPost();
 
     if (currentEdit) {
+
+
+      // Call your postService.updatePost(formData)...
     } else {
       postService.createPost(formData).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {

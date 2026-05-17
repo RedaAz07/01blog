@@ -52,7 +52,13 @@ public class PostService {
         User auth = UserRepository.findByUsername(author)
                 .orElseThrow(() -> ApiException.notFound("User not found"));
 
-        // 1. Save the Post first
+        if (title.length() < 3 || title.length() > 100) {
+            throw ApiException.badRequest("title must be between 3  and 100 charachter ");
+        }
+        if (files.size() > 5) {
+            throw ApiException.badRequest("you can only add 5 media for post ");
+        }
+
         Post newPost = new Post();
         newPost.setTitle(title);
         newPost.setContent(content);
@@ -62,17 +68,17 @@ public class PostService {
         Post savedPost = postRepository.save(newPost);
 
         List<String> uploadedImageUrls = new ArrayList<>();
-
         if (files != null && !files.isEmpty()) {
             for (MultipartFile f : files) {
                 PostImages images = new PostImages();
-
                 images.setPost(savedPost);
-
                 String url;
                 try {
                     url = mediaUploadService.uploadFile(f);
                 } catch (Exception e) {
+                         System.err.println("-----------------------------------------------------------------------------");
+            System.err.println(e);
+                    System.err.println("-----------------------------------------------------------------------------");
                     throw ApiException.badRequest("Invalid Media File");
                 }
 
