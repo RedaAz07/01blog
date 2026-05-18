@@ -1,20 +1,20 @@
 // src/app/core/services/post-manager.ts
 import { inject, signal, WritableSignal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { PostService, PostRequestDTO, PostUpdateRequestDTO, PostResponseDTO } from './post';
+import { PostService, PostResponseDTO } from './post';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportDialogComponent } from '../../components/report-dialog-component/report-dialog-component';
 import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
+import { finalize } from 'rxjs';
 
 export function usePostManager(postsSignal: WritableSignal<any[]>) {
   const dialog = inject(MatDialog);
-
   const postService = inject(PostService);
   const snackbar = inject(MatSnackBar);
 
   const postModalOpen = signal(false);
   const editingPost = signal<any | null>(null);
-
+  const isSubmitting = signal(false);
   const openCreatePost = () => {
     editingPost.set(null);
     postModalOpen.set(true);
@@ -25,11 +25,14 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     postModalOpen.set(true);
   };
 
-  const closePostModal = () => {
+  const closePostModal = (force = false) => {
+    if (!force && isSubmitting()) {
+      snackbar.open('Post is being submitted. Please wait...', 'Close', { duration: 2500 });
+      return;
+    }
     postModalOpen.set(false);
     editingPost.set(null);
   };
-
 
   const reportPost = (post: any) => {
     const dialogRef = dialog.open(ReportDialogComponent, {
@@ -57,33 +60,71 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     });
   };
 
-
-
   const handlePostSave = (postData: any) => {
-    
-    const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('content', postData.content);
-
-
-    if (postData.files && postData.files.length > 0) {
-      postData.files.forEach((file: File) => {
-        formData.append('files', file);
-      });
+    if (isSubmitting()) {
+      return;
     }
 
+    isSubmitting.set(true);
     const currentEdit = editingPost();
-
     if (currentEdit) {
+      // ══════════════════════════════
+      //  UPDATE POST LOGIC
+      // ══════════════════════════════
+      const formData = new FormData();
+      formData.append('id', currentEdit.id);
+      formData.append('title', postData.title);
+      formData.append('content', postData.content);
 
+      // Spring Boot expects "newFiles" for updates
+      if (postData.newFiles && postData.newFiles.length > 0) {
+        postData.newFiles.forEach((file: File) => {
+          formData.append('newFiles', file);
+        });
+      }
 
-      // Call your postService.updatePost(formData)...
+      if (postData.retainedUrls && postData.retainedUrls.length > 0) {
+        postData.retainedUrls.forEach((url: string) => {
+          formData.append('retainedUrls', url);
+        });
+      }
+
+      postService.updatePost(formData).pipe(
+        finalize(() => isSubmitting.set(false)),
+      ).subscribe({
+        next: (savedPost: PostResponseDTO) => {
+          postsSignal.update((currentPosts) =>
+            currentPosts.map((p) => (p.id === savedPost.id ? savedPost : p)),
+          );
+          snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
+          closePostModal(true);
+        },
+        error: (err) => {
+          console.error(err);
+          snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
+        },
+      });
     } else {
-      postService.createPost(formData).subscribe({
+      // ══════════════════════════════
+      //  CREATE POST LOGIC
+      // ══════════════════════════════
+      const formData = new FormData();
+      formData.append('title', postData.title);
+      formData.append('content', postData.content);
+
+      if (postData.newFiles && postData.newFiles.length > 0) {
+        postData.newFiles.forEach((file: File) => {
+          formData.append('files', file);
+        });
+      }
+
+      postService.createPost(formData).pipe(
+        finalize(() => isSubmitting.set(false)),
+      ).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
           postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
           snackbar.open('Post published successfully!', 'Close', { duration: 3000 });
-          closePostModal();
+          closePostModal(true);
         },
         error: (err) => {
           console.error(err);
@@ -91,8 +132,8 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         },
       });
     }
+    
   };
-
   const deletePost = (post: any) => {
     const ref = dialog.open(ConfirmDialog, {
       width: '350px',
@@ -121,6 +162,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     editPost,
     closePostModal,
     handlePostSave,
+    isSubmitting,
     reportPost,
     deletePost,
   };

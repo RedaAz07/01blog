@@ -1,3 +1,8 @@
+<div class="post-submit-indicator" *ngIf="postManager.isSubmitting()">
+  <mat-icon class="submit-spinner">sync</mat-icon>
+  <span>{{ postManager.editingPost() ? 'Updating post...' : 'Publishing post...' }}</span>
+</div>
+
 <main class="page-layout">
   <ng-container *ngIf="authservice.currentUser$ | async as cUser">
     <section class="feed-col">
@@ -49,6 +54,7 @@
 <app-post-component
   [isOpen]="postManager.postModalOpen()"
   [editingPost]="postManager.editingPost()"
+  [isSubmitting]="postManager.isSubmitting()"
   (save)="postManager.handlePostSave($event)"
   (close)="postManager.closePostModal()"
 >

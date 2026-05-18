@@ -89,6 +89,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllOtherExceptions(Exception ex) {
         // Log the exact error to your console so you can fix it later
+        System.err.println("---------------------------------------------------------");
+        System.err.println(ex);
+        System.err.println("---------------------------------------------------------");
 
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred on the server.");
     }
@@ -99,7 +102,6 @@ public class GlobalExceptionHandler {
                 "Your account has been banned or disabled. Please contact support.");
     }
 
-    
     @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
     public ResponseEntity<Object> handleLockedAccount(org.springframework.security.authentication.LockedException ex) {
         return buildErrorResponse(HttpStatus.FORBIDDEN,

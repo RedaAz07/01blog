@@ -1,3 +1,8 @@
+<div class="post-submit-indicator" *ngIf="postManager.isSubmitting()">
+  <mat-icon class="submit-spinner">sync</mat-icon>
+  <span>{{ postManager.editingPost() ? 'Updating post...' : 'Publishing post...' }}</span>
+</div>
+
 <div class="profile-page">
   <div class="profile-layout">
     <ng-container *ngIf="user() as u">
@@ -244,6 +249,7 @@
     <app-post-component
       [isOpen]="postManager.postModalOpen()"
       [editingPost]="postManager.editingPost()"
+      [isSubmitting]="postManager.isSubmitting()"
       (save)="postManager.handlePostSave($event)"
       (close)="postManager.closePostModal()"
     ></app-post-component>

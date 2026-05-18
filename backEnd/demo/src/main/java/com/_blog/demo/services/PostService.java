@@ -2,6 +2,7 @@ package com._blog.demo.services;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com._blog.demo.dto.post.PostResponseDTO;
-import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.entities.Post;
 import com._blog.demo.entities.PostImages;
 import com._blog.demo.entities.User;
@@ -55,7 +55,7 @@ public class PostService {
         if (title.length() < 3 || title.length() > 100) {
             throw ApiException.badRequest("title must be between 3  and 100 charachter ");
         }
-        if (files.size() > 5) {
+        if (files != null && files.size() > 5) {
             throw ApiException.badRequest("you can only add 5 media for post ");
         }
 
@@ -76,8 +76,8 @@ public class PostService {
                 try {
                     url = mediaUploadService.uploadFile(f);
                 } catch (Exception e) {
-                         System.err.println("-----------------------------------------------------------------------------");
-            System.err.println(e);
+                    System.err.println("-----------------------------------------------------------------------------");
+                    System.err.println(e);
                     System.err.println("-----------------------------------------------------------------------------");
                     throw ApiException.badRequest("Invalid Media File");
                 }
@@ -129,21 +129,60 @@ public class PostService {
         });
     }
 
-    public PostResponseDTO updatePost(PostUpdatReqDTO request, String author) {
-        User auth = UserRepository.findByUsername(author).orElseThrow(() -> ApiException.notFound("User not found"));
-        Post existingPost = postRepository.findById(request.getId())
+    @Transactional
+    public PostResponseDTO updatePost(Long id, String title, String content, List<MultipartFile> newFiles,
+            List<String> retainedUrls, String author) {
+
+        User auth = UserRepository.findByUsername(author)
+                .orElseThrow(() -> ApiException.notFound("User not found"));
+
+        Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Post not found"));
 
         if (!existingPost.isStatus()) {
-            throw ApiException.forbidden("this post is hidden, you can't do anything");
+            throw ApiException.forbidden("This post is hidden, you can't do anything");
         }
         if (!existingPost.getUser().getId().equals(auth.getId())) {
             throw ApiException.forbidden("You are not authorized to update this post");
         }
 
-        existingPost.setTitle(request.getTitle());
-        existingPost.setContent(request.getContent());
+        existingPost.setTitle(title);
+        existingPost.setContent(content);
+
+        if (retainedUrls == null) {
+            retainedUrls = new ArrayList<>();
+        }
+
+        Iterator<PostImages> iterator = existingPost.getImages().iterator();
+        while (iterator.hasNext()) {
+            PostImages image = iterator.next();
+            if (!retainedUrls.contains(image.getImageUrl())) {
+
+                iterator.remove();
+            }
+        }
+
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (MultipartFile f : newFiles) {
+                String url;
+                try {
+                    url = mediaUploadService.uploadFile(f);
+                } catch (Exception e) {
+                    throw ApiException.badRequest("Invalid Media File");
+                }
+
+                PostImages newImage = new PostImages();
+                newImage.setPost(existingPost);
+                newImage.setImageUrl(url);
+
+                existingPost.getImages().add(newImage);
+            }
+        }
+
+        // 5. Save the final state
         postRepository.save(existingPost);
+
+        // 6. Build the DTO to send back to Angular
         PostResponseDTO updatedPost = new PostResponseDTO(
                 existingPost.getId(),
                 existingPost.getTitle(),
@@ -154,7 +193,9 @@ public class PostService {
                 existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost),
-                existingPost.getImages().stream().map(i -> i.getImageUrl()).toList());
+                // Map the remaining/new images directly to a list of strings!
+                existingPost.getImages().stream().map(PostImages::getImageUrl).toList());
+
         return updatedPost;
     }
 

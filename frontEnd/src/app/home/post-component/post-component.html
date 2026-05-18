@@ -3,7 +3,7 @@
 <div class="post-modal" [class.open]="isOpen">
   <div class="modal-header">
     <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
-    <button class="modal-close" (click)="closeModal()"><mat-icon>close</mat-icon></button>
+    <button class="modal-close" (click)="closeModal()" [disabled]="isSubmitting"><mat-icon>close</mat-icon></button>
   </div>
 
   <div class="modal-body">
@@ -17,7 +17,7 @@
 
     <div class="modal-divider"></div>
 
-    <input type="text" class="modal-input" placeholder="Post title *" [(ngModel)]="postTitle" />
+    <input type="text" class="modal-input" placeholder="Post title *" [(ngModel)]="postTitle" [disabled]="isSubmitting" />
 
     <span class="editor-label">Content</span>
     <textarea
@@ -25,6 +25,7 @@
       rows="4"
       placeholder="What's on your mind, bro?"
       [(ngModel)]="postContent"
+      [disabled]="isSubmitting"
     ></textarea>
 
     <span class="editor-label">Media (Max 5 files)</span>
@@ -33,34 +34,28 @@
       multiple
       accept="image/*,video/*"
       (change)="onFilesSelected($event)"
-      [disabled]="selectedFiles.length >= 5"
+      [disabled]="isSubmitting || selectedFiles.length + existingImageUrls.length >= 5"
     />
 
-    <div class="file-preview-list" *ngIf="selectedFiles.length > 0">
+    <div class="file-preview-list" *ngIf="selectedFiles.length > 0 || existingImageUrls.length > 0">
+      <div class="file-badge" *ngFor="let url of existingImageUrls; let i = index">
+        <img *ngIf="!isVideo(url)" [src]="url" class="preview-image" />
+        <mat-icon *ngIf="isVideo(url)">videocam</mat-icon>
+
+        <button class="remove-file-btn" (click)="removeExistingFile(i)" [disabled]="isSubmitting">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </div>
+
       <div class="file-badge" *ngFor="let item of selectedFiles; let i = index">
-        <!-- IMAGE -->
         <img
           *ngIf="item.file.type.startsWith('image/')"
           [src]="item.previewUrl"
           class="preview-image"
         />
+        <mat-icon *ngIf="!item.file.type.startsWith('image/')"> insert_drive_file </mat-icon>
 
-        <!-- VIDEO -->
-        <video
-          *ngIf="item.file.type.startsWith('video/')"
-          [src]="item.previewUrl"
-          class="preview-video"
-          controls
-        ></video>
-
-        <!-- OTHER FILES -->
-        <mat-icon
-          *ngIf="!item.file.type.startsWith('image/') && !item.file.type.startsWith('video/')"
-        >
-          insert_drive_file
-        </mat-icon>
-
-        <button class="remove-file-btn" (click)="removeFile(i)">
+        <button class="remove-file-btn" (click)="removeNewFile(i)" [disabled]="isSubmitting">
           <mat-icon>cancel</mat-icon>
         </button>
       </div>
@@ -68,15 +63,19 @@
 
     <div class="modal-divider"></div>
 
-    <div class="modal-actions-bar">
-      <button class="cancel-btn" (click)="closeModal()">Cancel</button>
-      <button
-        class="submit-post-btn"
-        [disabled]="!postTitle || !postContent"
-        (click)="submitPost()"
-      >
-        <mat-icon>{{ editingPost ? 'edit' : 'send' }}</mat-icon>
-        {{ editingPost ? 'Update' : 'Publish' }}
+  <div class="modal-actions-bar">
+      <button class="cancel-btn" (click)="closeModal()" [disabled]="isSubmitting">Cancel</button>
+      
+      <button 
+        class="submit-post-btn" 
+        [disabled]="!postTitle || !postContent || isSubmitting" 
+        (click)="submitPost()">
+        
+        <mat-icon *ngIf="!isSubmitting">{{ editingPost ? 'edit' : 'send' }}</mat-icon>
+        
+        <mat-icon *ngIf="isSubmitting" class="spinner-icon">sync</mat-icon>
+        
+        {{ isSubmitting ? 'Saving...' : (editingPost ? 'Update' : 'Publish') }}
       </button>
     </div>
   </div>

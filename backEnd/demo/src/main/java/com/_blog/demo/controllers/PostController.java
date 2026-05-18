@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com._blog.demo.dto.Response;
 import com._blog.demo.dto.post.PostResponseDTO;
-import com._blog.demo.dto.post.PostUpdatReqDTO;
 import com._blog.demo.services.NotificationService;
 import com._blog.demo.services.PostService;
 
@@ -39,7 +37,7 @@ class PostController {
             @RequestParam("content") String content,
             @RequestParam(value = "files", required = false) List<MultipartFile> files, Principal principal) {
         String username = principal.getName();
-        PostResponseDTO result = PostService.createPost(title ,content, files, username);
+        PostResponseDTO result = PostService.createPost(title, content, files, username);
 
         NotificationService.createNotification(username, result);
         return ResponseEntity.ok(result);
@@ -58,10 +56,16 @@ class PostController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<PostResponseDTO> postMethodName(@Valid @RequestBody PostUpdatReqDTO request,
+    public ResponseEntity<PostResponseDTO> updatePost(
+            @RequestParam("id") Long id,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "newFiles", required = false) List<MultipartFile> newFiles,
+            @RequestParam(value = "retainedUrls", required = false) List<String> retainedUrls,
             Principal principal) {
+
         String username = principal.getName();
-        PostResponseDTO post = PostService.updatePost(request, username);
+        PostResponseDTO post = PostService.updatePost(id, title, content, newFiles, retainedUrls, username);
         return ResponseEntity.ok(post);
     }
 

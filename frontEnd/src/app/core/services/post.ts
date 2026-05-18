@@ -12,6 +12,7 @@ export interface PostUpdateRequestDTO {
   id: number;
   title: string;
   content: string;
+  imageUrls: [];
 }
 export interface PostReportRequestDTO {
   reported: string;
@@ -30,7 +31,7 @@ export interface PostResponseDTO {
   isLiked: boolean;
   nbrLikes: number;
   nbrComments: number;
-  imageUrls: string[]; 
+  imageUrls: string[];
 }
 export interface PageResponse {
   content: PostResponseDTO[];
@@ -85,7 +86,7 @@ export class PostService {
     );
   }
 
-  updatePost(data: PostUpdateRequestDTO): Observable<PostResponseDTO> {
+  updatePost(data: FormData): Observable<PostResponseDTO> {
     return this.http.put<PostResponseDTO>(`${this.apiUrl}update`, data);
   }
 
