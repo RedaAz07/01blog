@@ -221,6 +221,8 @@ public class AdminService {
                 r.getLikes().size(),
                 r.getReportsReceived().size(),
                 r.isStatus(),
-                r.getTimestamp()));
+                r.getTimestamp(),
+                r.getImages().stream().map(f -> f.getImageUrl()).toList(),
+            r.getComments().size()));
     }
 }

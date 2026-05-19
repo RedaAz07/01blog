@@ -34,6 +34,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { TimeAgoPipe } from '../time-ago-pipe';
 import { single } from 'rxjs';
+import { CommentResponseDTO, Comment } from '../core/services/comment';
 
 export interface StatCard {
   label: string;
@@ -59,7 +60,9 @@ export interface StatCard {
     TimeAgoPipe,
   ],
   templateUrl: './admin-dashboard-component.html',
-  styleUrls: ['./admin-dashboard-component.css'],
+  styleUrls: ['./admin-dashboard-component.css',
+    '../home/post-feed/post-feed.css'
+  ],
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   snackbar = inject(MatSnackBar);
@@ -172,6 +175,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private adminService: AdminDashboard,
+    private commentService: Comment,
     private dialog: MatDialog,
   ) {}
   ngOnInit() {
@@ -207,42 +211,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     this.adminService.getAllPosts(this.currentPostPage, 10, status).subscribe({
       next: (res: PageResponse1) => {
-        res.content.map((c) => {
-          try {
-            const editorData = JSON.parse(c.content);
-
-            const text = editorData.blocks
-              ?.filter((b: any) => !['image', 'video'].includes(b.type))
-              ?.map((b: any) => {
-                switch (b.type) {
-                  case 'paragraph':
-                    return b.data.text;
-
-                  case 'header':
-                    return b.data.text;
-
-                  case 'list':
-                    return b.data.items.join(' ');
-
-                  case 'quote':
-                    return b.data.text;
-
-                  default:
-                    return '';
-                }
-              })
-              .join(' ');
-
-            c.content = text;
-          } catch (e) {
-            c.content = c.content ? c.content.substring(0, 200) : '';
-          }
-        });
-
         this.currentPostPage++;
-
         this.Posts.update((current: PostDTO[]) => [...current, ...res.content]);
-
         this.isPostsLoading = false;
       },
     });
@@ -482,37 +452,85 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       error: () => {},
     });
   }
-  ngOnDestroy() {
-    if (this.userObserver) this.userObserver.disconnect();
-    if (this.PostObserver) this.PostObserver.disconnect();
-    if (this.ReportObserver) this.ReportObserver.disconnect();
-  }
-  post = signal<PostDTO | null>(null);
+
+  post = signal<PostDTO>({} as PostDTO);
   shouldOpen = false;
-  textBlocks: any[] = [];
-  mediaBlocks: any[] = [];
   currentSlide = 0;
+
+  // Comments state
+  showComments = false;
+  isCommentsLoading = false;
+  currentCommentPage = 0;
+  Comments = signal<CommentResponseDTO[]>([]);
 
   togglePost(post: PostDTO) {
     this.shouldOpen = true;
+    this.currentSlide = 0;
+    this.showComments = false;
+    this.currentCommentPage = 0;
+    this.Comments.set([]);
     this.post.set(post);
+  }
 
-    const editorData = JSON.parse(post.content);
-
-    const blocks = editorData.blocks || [];
-
-    this.textBlocks = blocks.filter((b: any) => b.type === 'paragraph' || b.type === 'header');
-
-    this.mediaBlocks = blocks.filter((b: any) => b.type === 'image' || b.type === 'video');
+  closePostPopup() {
+    this.shouldOpen = false;
+    this.showComments = false;
+  }
+  private commentObserver!: IntersectionObserver;
+  @ViewChild('commentScrollAnchor') set setupCommentAnchor(element: ElementRef) {
+    if (element) {
+      if (this.commentObserver) this.commentObserver.disconnect();
+      this.commentObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !this.isCommentsLoading) this.loadComments(this.post().id);
+        },
+        { root: null, rootMargin: '0px', threshold: 0.1 },
+      );
+      this.commentObserver.observe(element.nativeElement);
+    }
+  }
+  isVideo(url: string): boolean {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.webm') || lowerUrl.endsWith('.ogg');
+  }
+  toggleComments(post: PostDTO): void {
+    this.showComments = !this.showComments;
+    if (this.showComments && this.Comments().length === 0) {
+      this.loadComments(post.id);
+    }
+  }
+  loadComments(postId: number) {
+    if (this.isCommentsLoading) return;
+    this.isCommentsLoading = true;
+    this.commentService.fetchComments(this.currentCommentPage, 5, postId).subscribe({
+      next: (response) => {
+        this.currentCommentPage++;
+        this.Comments.update((currentList) => [...currentList, ...response.content]);
+        this.isCommentsLoading = false;
+      },
+      error: () => (this.isCommentsLoading = false),
+    });
   }
 
   prevSlide() {
     if (this.currentSlide > 0) this.currentSlide--;
   }
+
   nextSlide() {
-    if (this.currentSlide < this.mediaBlocks.length - 1) this.currentSlide++;
+    const images = this.post().imageUrl || [];
+    if (this.currentSlide < images.length - 1) {
+      this.currentSlide++;
+    }
   }
+
   goToSlide(i: number) {
     this.currentSlide = i;
+  }
+  ngOnDestroy() {
+    if (this.userObserver) this.userObserver.disconnect();
+    if (this.PostObserver) this.PostObserver.disconnect();
+    if (this.ReportObserver) this.ReportObserver.disconnect();
+    if (this.commentObserver) this.commentObserver.disconnect();
   }
 }

@@ -17,8 +17,11 @@ export interface PostDTO {
   content: string;
   likes: number;
   reports: number;
+  
   status: boolean;
   date: string;
+  imageUrl: [];
+  comments:number 
 }
 export interface ReportDTO {
   id: number;
@@ -129,24 +132,24 @@ export class AdminDashboard {
     );
   }
 
-
-
-getAllReports(page: number, size: number = 10, status?: boolean): Observable<PageReportResponse> {
+  getAllReports(page: number, size: number = 10, status?: boolean): Observable<PageReportResponse> {
     let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
     if (status !== undefined) {
       params = params.set('status', status);
     }
 
-    return this.http.get<PageReportResponse>(`http://localhost:8080/api/admin/reports`, { params }).pipe(
-      tap((res) => {
-        const currentReport = this.reportSubject.value;
-        const comninedList = [...currentReport, ...res.content];
-        this.reportSubject.next(comninedList);
-      }),
-    );
+    return this.http
+      .get<PageReportResponse>(`http://localhost:8080/api/admin/reports`, { params })
+      .pipe(
+        tap((res) => {
+          const currentReport = this.reportSubject.value;
+          const comninedList = [...currentReport, ...res.content];
+          this.reportSubject.next(comninedList);
+        }),
+      );
   }
 
- ResolveReport(id: number): Observable<any> {
+  ResolveReport(id: number): Observable<any> {
     return this.http.put<any>(`http://localhost:8080/api/admin/reports/${id}`, {});
   }
 
