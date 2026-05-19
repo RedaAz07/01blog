@@ -122,7 +122,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         finalize(() => isSubmitting.set(false)),
       ).subscribe({
         next: (savedPostFromDB: PostResponseDTO) => {
-          postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
           snackbar.open('Post published successfully!', 'Close', { duration: 3000 });
           closePostModal(true);
         },

@@ -39,7 +39,7 @@ export class PostFeed implements OnInit, OnDestroy {
     if (p) {
       p.nbrLikes = Number(p.nbrLikes) || 0;
       p.nbrComments = Number(p.nbrComments) || 0;
-      p.imageUrls = p.imageUrls || []; 
+      p.imageUrls = p.imageUrls || [];
       this._post = p;
     }
   }
@@ -104,19 +104,22 @@ export class PostFeed implements OnInit, OnDestroy {
     this.likeService.likePost(this.post.id).subscribe({
       next: (response: LikeResponseDTO) => {
         if (response) {
-          const incomingLikes = response.nbLikes !== undefined ? response.nbLikes : response.nbLikes;
-          
+          const incomingLikes =
+            response.nbLikes !== undefined ? response.nbLikes : response.nbLikes;
+
           this.post.isLiked = response.isLiked;
-          this.post.nbrLikes = Number(incomingLikes) || 0; 
-
+          this.post.nbrLikes = Number(incomingLikes) || 0;
         }
-                this.snackbar.open(`this post ${response.isLiked ? 'Liked' : 'desliked seccefully'}`, 'Close', {duration: 3000});
-
+        this.snackbar.open(
+          `this post ${response.isLiked ? 'Liked' : 'desliked seccefully'}`,
+          'Close',
+          { duration: 3000 },
+        );
       },
       error: (error) => {
         this.post.isLiked = wasLiked;
         this.post.nbrLikes = oldLikesCount;
-        this.snackbar.open('Failed to like this post', 'Close', {duration: 3000});
+        this.snackbar.open('Failed to like this post', 'Close', { duration: 3000 });
       },
     });
   }
@@ -144,6 +147,10 @@ export class PostFeed implements OnInit, OnDestroy {
   }
 
   addComment(post: any) {
+    if (this.newCommentText.length < 3 || this.newCommentText.length > 100) {
+      this.snackbar.open('must be between 3 and 100 comments ', 'close', { duration: 3000 });
+      return
+    }
     const commentData: CommentRequestDTO = { content: this.newCommentText, postId: post.id };
     this.commentService.createComment(commentData).subscribe({
       next: (createdComment) => {

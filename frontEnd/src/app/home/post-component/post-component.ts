@@ -26,7 +26,7 @@ interface SelectedMedia {
   standalone: true,
   imports: [MatIconModule, CommonModule, FormsModule],
   templateUrl: './post-component.html',
-  styleUrl: './post-component.css',
+  styleUrl: './post-component.scss',
 })
 export class PostComponent implements OnChanges {
   cdr = inject(ChangeDetectorRef);

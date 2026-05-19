@@ -1,82 +1,199 @@
 <div class="modal-overlay" [class.active]="isOpen" (click)="closeModal()"></div>
 
 <div class="post-modal" [class.open]="isOpen">
+
+  <!-- ── HEADER ── -->
   <div class="modal-header">
-    <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
-    <button class="modal-close" (click)="closeModal()" [disabled]="isSubmitting"><mat-icon>close</mat-icon></button>
+    <div class="modal-header-left">
+      <div class="modal-header-icon">
+        <svg *ngIf="!editingPost" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        <svg *ngIf="editingPost" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+      <h3>{{ editingPost ? 'Edit Post' : 'Create Post' }}</h3>
+    </div>
+    <button class="modal-close" (click)="closeModal()" [disabled]="isSubmitting">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 
   <div class="modal-body">
+
+    <!-- ── USER ROW ── -->
     <div class="modal-user" *ngIf="authService.currentUser$ | async as cUser">
       <div class="modal-avatar-circle">{{ cUser.username | slice: 0 : 1 | uppercase }}</div>
-      <div>
+      <div class="modal-user-info">
         <span class="modal-username">{{ cUser.username }}</span>
-        <span class="modal-user-sub">Publishing to your profile</span>
+        <span class="modal-user-sub">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+          </svg>
+          Publishing to your profile
+        </span>
+      </div>
+      <div class="modal-audience-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Everyone
       </div>
     </div>
 
     <div class="modal-divider"></div>
 
-    <input type="text" class="modal-input" placeholder="Post title *" [(ngModel)]="postTitle" [disabled]="isSubmitting" />
+    <!-- ── TITLE ── -->
+    <div class="field-group">
+      <label class="field-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h10M4 18h6"/>
+        </svg>
+        Title <span class="required-star">*</span>
+      </label>
+      <div class="input-wrap">
+        <input
+          type="text"
+          class="modal-input"
+          placeholder="Give your post a title…"
+          [(ngModel)]="postTitle"
+          [disabled]="isSubmitting"
+          [class.has-value]="postTitle"
+        />
+        <span class="input-glow"></span>
+      </div>
+    </div>
 
-    <span class="editor-label">Content</span>
-    <textarea
-      class="modal-input"
-      rows="4"
-      placeholder="What's on your mind, bro?"
-      [(ngModel)]="postContent"
-      [disabled]="isSubmitting"
-    ></textarea>
+    <!-- ── CONTENT ── -->
+    <div class="field-group">
+      <label class="field-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Content <span class="required-star">*</span>
+      </label>
+      <div class="input-wrap">
+        <textarea
+          class="modal-input modal-textarea"
+          rows="4"
+          placeholder="What's on your mind, bro?"
+          [(ngModel)]="postContent"
+          [disabled]="isSubmitting"
+          [class.has-value]="postContent"
+        ></textarea>
+        <span class="input-glow"></span>
+      </div>
+    </div>
 
-    <span class="editor-label">Media (Max 5 files)</span>
-    <input
-      type="file"
-      multiple
-      accept="image/*,video/*"
-      (change)="onFilesSelected($event)"
-      [disabled]="isSubmitting || selectedFiles.length + existingImageUrls.length >= 5"
-    />
+    <!-- ── MEDIA UPLOAD ── -->
+    <div class="field-group">
+      <label class="field-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        Media
+        <span class="field-hint">Max 5 files</span>
+      </label>
 
-    <div class="file-preview-list" *ngIf="selectedFiles.length > 0 || existingImageUrls.length > 0">
+      <label
+        class="dropzone"
+        [class.dropzone-disabled]="isSubmitting || selectedFiles.length + existingImageUrls.length >= 5"
+        for="file-input-hidden"
+      >
+        <div class="dropzone-inner">
+          <div class="dropzone-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="16 16 12 12 8 16"/>
+              <line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+          </div>
+          <span class="dropzone-text">Click to upload</span>
+          <span class="dropzone-sub">Images & Videos — PNG, JPG, MP4, MOV</span>
+          <span class="dropzone-counter" *ngIf="selectedFiles.length + existingImageUrls.length > 0">
+            {{ selectedFiles.length + existingImageUrls.length }} / 5 files added
+          </span>
+        </div>
+        <input
+          id="file-input-hidden"
+          type="file"
+          multiple
+          accept="image/*,video/*"
+          (change)="onFilesSelected($event)"
+          [disabled]="isSubmitting || selectedFiles.length + existingImageUrls.length >= 5"
+          style="display:none"
+        />
+      </label>
+    </div>
+
+    <!-- ── PREVIEW GRID ── -->
+    <div
+      class="file-preview-list"
+      *ngIf="selectedFiles.length > 0 || existingImageUrls.length > 0"
+    >
       <div class="file-badge" *ngFor="let url of existingImageUrls; let i = index">
         <img *ngIf="!isVideo(url)" [src]="url" class="preview-image" />
-        <mat-icon *ngIf="isVideo(url)">videocam</mat-icon>
-
+        <video *ngIf="isVideo(url)" [src]="url" class="preview-video" controls></video>
+        <div class="file-badge-overlay">
+          <span class="file-badge-tag">Existing</span>
+        </div>
         <button class="remove-file-btn" (click)="removeExistingFile(i)" [disabled]="isSubmitting">
-          <mat-icon>cancel</mat-icon>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
         </button>
       </div>
 
       <div class="file-badge" *ngFor="let item of selectedFiles; let i = index">
-        <img
-          *ngIf="item.file.type.startsWith('image/')"
-          [src]="item.previewUrl"
-          class="preview-image"
-        />
-        <mat-icon *ngIf="!item.file.type.startsWith('image/')"> insert_drive_file </mat-icon>
-
+        <img *ngIf="item.file.type.startsWith('image/')" [src]="item.previewUrl" class="preview-image"/>
+        <video *ngIf="item.file.type.startsWith('video/')" [src]="item.previewUrl" class="preview-video" controls></video>
+        <div class="file-badge-overlay" *ngIf="!item.file.type.startsWith('image/') && !item.file.type.startsWith('video/')">
+          <mat-icon>insert_drive_file</mat-icon>
+          <span class="file-badge-name">{{ item.file.name }}</span>
+        </div>
+        <div class="file-badge-overlay">
+          <span class="file-badge-tag new-tag">New</span>
+        </div>
         <button class="remove-file-btn" (click)="removeNewFile(i)" [disabled]="isSubmitting">
-          <mat-icon>cancel</mat-icon>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
         </button>
       </div>
     </div>
 
     <div class="modal-divider"></div>
 
-  <div class="modal-actions-bar">
-      <button class="cancel-btn" (click)="closeModal()" [disabled]="isSubmitting">Cancel</button>
-      
-      <button 
-        class="submit-post-btn" 
-        [disabled]="!postTitle || !postContent || isSubmitting" 
-        (click)="submitPost()">
-        
-        <mat-icon *ngIf="!isSubmitting">{{ editingPost ? 'edit' : 'send' }}</mat-icon>
-        
-        <mat-icon *ngIf="isSubmitting" class="spinner-icon">sync</mat-icon>
-        
-        {{ isSubmitting ? 'Saving...' : (editingPost ? 'Update' : 'Publish') }}
+    <!-- ── ACTIONS ── -->
+    <div class="modal-actions-bar">
+      <button class="cancel-btn" (click)="closeModal()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button
+        class="submit-post-btn"
+        [disabled]="!postTitle || !postContent || isSubmitting"
+        (click)="submitPost()"
+        [class.submitting]="isSubmitting"
+      >
+        <span class="submit-icon">
+          <mat-icon *ngIf="!isSubmitting">{{ editingPost ? 'edit' : 'send' }}</mat-icon>
+          <mat-icon *ngIf="isSubmitting" class="spinner-icon">sync</mat-icon>
+        </span>
+        <span>{{ isSubmitting ? 'Saving…' : editingPost ? 'Update' : 'Publish' }}</span>
       </button>
     </div>
-  </div>
-</div>
+
+  </div><!-- /modal-body -->
+</div><!-- /post-modal -->
