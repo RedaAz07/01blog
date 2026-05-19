@@ -15,6 +15,8 @@ import com._blog.demo.dto.auth.EditProfileRequestDTO;
 import com._blog.demo.dto.userDTO;
 import com._blog.demo.services.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController // Tells Spring this class listens for web traffic
 @RequestMapping("/api/users") // The base URL for all user stuff
 public class UserController {
@@ -56,8 +58,8 @@ public class UserController {
     }
 
     @PutMapping("edit/{username}")
-    public ResponseEntity<userDTO> putMethodName(@PathVariable String username,
-            @RequestBody EditProfileRequestDTO entity, Principal principal) {
+    public ResponseEntity<userDTO> putMethodName( @PathVariable String username,
+           @Valid @RequestBody EditProfileRequestDTO entity, Principal principal) {
         String param = principal.getName();
         userDTO response = userService.editProfile(username, entity, param);
         return ResponseEntity.ok(response);

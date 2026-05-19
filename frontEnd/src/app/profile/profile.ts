@@ -158,6 +158,38 @@ export class Profile implements OnInit {
   }
 
   saveEdit(): void {
+    if (this.editForm.bio && this.editForm.bio.length > 500) {
+      this.snackbar.open('bio must be less that 500 charachter', 'Close', { duration: 3000 });
+      return;
+    }
+    if (
+      this.editForm.firstName &&
+      (this.editForm.firstName.length < 5 || this.editForm.firstName.length > 15)
+    ) {
+      this.snackbar.open('first Name must between 5 and 15 charachter', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (
+      this.editForm.lastName &&
+      (this.editForm.lastName.length < 5 || this.editForm.lastName.length > 15)
+    ) {
+      this.snackbar.open('last Name must between 5 and 15 charachter', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (this.editForm.email && !emailRegex.test(this.editForm.email)) {
+      this.snackbar.open('unvalide email', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
     this.authService.editProfile(this.user()?.username ?? '', this.editForm).subscribe({
       next: (updatedProfile) => {
         this.user.set(updatedProfile);

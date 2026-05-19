@@ -31,7 +31,7 @@ export class ReportDialogComponent {
 
   isValid(): boolean {
     if (!this.reportReason) return false;
-    if (this.reportReason === 'Other' && this.otherReason.trim().length < 5) return false;
+    if (this.reportReason === 'Other' && this.otherReason.trim().length < 5 ||  this.otherReason.trim().length > 100) return false;
     return true;
   }
 

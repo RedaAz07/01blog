@@ -4,6 +4,13 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class Filevalidator {
+  
+  private readonly MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+  validateFileSize(file: File): boolean {
+    return file.size <= this.MAX_FILE_SIZE;
+  }
+
   async validateRealMimeType(file: File): Promise<string | null> {
     return new Promise((resolve) => {
       const blob = file.slice(0, 16);
@@ -17,6 +24,7 @@ export class Filevalidator {
 
         const arr = new Uint8Array(e.target.result as ArrayBuffer);
         let hex = '';
+
         for (let i = 0; i < arr.length; i++) {
           hex += arr[i].toString(16).padStart(2, '0');
         }
@@ -30,6 +38,7 @@ export class Filevalidator {
   }
 
   private detectMimeType(hex: string): string | null {
+
     if (hex.startsWith('ffd8ff')) {
       return 'image/jpeg';
     }
@@ -37,7 +46,11 @@ export class Filevalidator {
     if (hex.startsWith('89504e47')) {
       return 'image/png';
     }
-    if (hex.startsWith('52494646') && hex.substring(16, 24) === '57454250') {
+
+    if (
+      hex.startsWith('52494646') &&
+      hex.substring(16, 24) === '57454250'
+    ) {
       return 'image/webp';
     }
 

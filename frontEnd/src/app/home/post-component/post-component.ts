@@ -72,7 +72,9 @@ export class PostComponent implements OnChanges {
 
     const totalFiles = this.existingImageUrls.length + this.selectedFiles.length + files.length;
     if (totalFiles > 5) {
-      this.snackBar.open('You can only have a maximum of 5 files total!', 'Close', { duration: 3000 });
+      this.snackBar.open('You can only have a maximum of 5 files total!', 'Close', {
+        duration: 3000,
+      });
       event.target.value = '';
       return;
     }
@@ -81,10 +83,19 @@ export class PostComponent implements OnChanges {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const size = await this.fileValidator.validateFileSize(file);
+      size;
+
+      if (!size) {
+        this.snackBar.open(`file is to large`, 'Close', { duration: 5000 });
+        continue;
+      }
       const realMimeType = await this.fileValidator.validateRealMimeType(file);
 
       if (!realMimeType) {
-        this.snackBar.open(`File "${file.name}" is corrupted or invalid!`, 'Close', { duration: 5000 });
+        this.snackBar.open(`File "${file.name}" is corrupted or invalid!`, 'Close', {
+          duration: 5000,
+        });
         continue;
       }
 

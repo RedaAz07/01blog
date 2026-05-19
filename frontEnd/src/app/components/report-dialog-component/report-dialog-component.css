@@ -287,6 +287,7 @@
 
 .confirm-reason-box {
   width: 100%;
+
   background: var(--theme-bg);
   border: 1.5px solid var(--theme-border);
   border-left: 3px solid #e57373;
@@ -297,6 +298,7 @@
   align-items: flex-start;
   gap: 4px;
   text-align: left;
+  word-break: break-all;
 }
 
 .confirm-reason-label {

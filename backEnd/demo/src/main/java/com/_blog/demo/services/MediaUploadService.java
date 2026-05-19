@@ -20,6 +20,8 @@ public class MediaUploadService {
 
     private final Tika tika = new Tika();
 
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
     private static final List<String> ALLOWED_MIME_TYPES = List.of(
             "image/jpeg",
             "image/png",
@@ -33,13 +35,19 @@ public class MediaUploadService {
 
     public String uploadFile(MultipartFile file) throws IOException {
 
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw ApiException.badRequest(
+                    "File size exceeds 10MB limit");
+        }
+
         String realMimeType = tika.detect(
                 file.getInputStream(),
                 file.getOriginalFilename());
 
+        // check mime type
         if (!ALLOWED_MIME_TYPES.contains(realMimeType)) {
             throw ApiException.badRequest(
-                    "invalid media uploaded: " + realMimeType);
+                    "Invalid media uploaded: " + realMimeType);
         }
 
         File tempFile = File.createTempFile(

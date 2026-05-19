@@ -65,6 +65,15 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
       return;
     }
 
+    if (postData.content.length < 5 || postData.content.length > 500) {
+      snackbar.open('content must be between 5  and 500 chareachter ', 'Close', { duration: 3000 });
+      return;
+    }
+    if (postData.title.length < 5 || postData.title.length > 100) {
+      snackbar.open('title must be between 5  and 100 chareachter ', 'Close', { duration: 3000 });
+      return;
+    }
+
     isSubmitting.set(true);
     const currentEdit = editingPost();
     if (currentEdit) {
@@ -89,21 +98,22 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         });
       }
 
-      postService.updatePost(formData).pipe(
-        finalize(() => isSubmitting.set(false)),
-      ).subscribe({
-        next: (savedPost: PostResponseDTO) => {
-          postsSignal.update((currentPosts) =>
-            currentPosts.map((p) => (p.id === savedPost.id ? savedPost : p)),
-          );
-          snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
-          closePostModal(true);
-        },
-        error: (err) => {
-          console.error(err);
-          snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
-        },
-      });
+      postService
+        .updatePost(formData)
+        .pipe(finalize(() => isSubmitting.set(false)))
+        .subscribe({
+          next: (savedPost: PostResponseDTO) => {
+            postsSignal.update((currentPosts) =>
+              currentPosts.map((p) => (p.id === savedPost.id ? savedPost : p)),
+            );
+            snackbar.open('Post updated successfully.', 'Close', { duration: 3000 });
+            closePostModal(true);
+          },
+          error: (err) => {
+            console.error(err);
+            snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
+          },
+        });
     } else {
       // ══════════════════════════════
       //  CREATE POST LOGIC
@@ -118,21 +128,21 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
         });
       }
 
-      postService.createPost(formData).pipe(
-        finalize(() => isSubmitting.set(false)),
-      ).subscribe({
-        next: (savedPostFromDB: PostResponseDTO) => {
-          postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
-          snackbar.open('Post published successfully!', 'Close', { duration: 3000 });
-          closePostModal(true);
-        },
-        error: (err) => {
-          console.error(err);
-          snackbar.open('Failed to publish post', 'Close', { duration: 3000 });
-        },
-      });
+      postService
+        .createPost(formData)
+        .pipe(finalize(() => isSubmitting.set(false)))
+        .subscribe({
+          next: (savedPostFromDB: PostResponseDTO) => {
+            postsSignal.update((currentPosts) => [savedPostFromDB, ...currentPosts]);
+            snackbar.open('Post published successfully!', 'Close', { duration: 3000 });
+            closePostModal(true);
+          },
+          error: (err) => {
+            console.error(err);
+            snackbar.open('Failed to publish post', 'Close', { duration: 3000 });
+          },
+        });
     }
-    
   };
   const deletePost = (post: any) => {
     const ref = dialog.open(ConfirmDialog, {
