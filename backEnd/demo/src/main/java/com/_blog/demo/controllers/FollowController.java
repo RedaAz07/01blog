@@ -3,7 +3,6 @@ package com._blog.demo.controllers;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +17,11 @@ import com._blog.demo.services.FollowService;
 @RequestMapping("/api/users")
 public class FollowController {
 
-    @Autowired
-    private FollowService followService;
+    private final FollowService followService;
+
+    public FollowController(FollowService followService) {
+        this.followService = followService;
+    }
 
     @PostMapping("/follow/{targetUsername}")
     public ResponseEntity<Boolean> followUser(@PathVariable String targetUsername, Principal principal) {

@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.security.Principal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,8 +24,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/comment") // The base URL for all comment stuff
 public class CommentController {
 
-    @Autowired
-    private CommentService CommentService;
+    private final CommentService CommentService;
+
+    public CommentController(CommentService commentService) {
+        this.CommentService = commentService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<CommentResponseDTO> postMethodName(@Valid @RequestBody CommentRequestDTO request,

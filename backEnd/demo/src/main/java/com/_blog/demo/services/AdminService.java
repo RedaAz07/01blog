@@ -3,7 +3,6 @@ package com._blog.demo.services;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,17 +28,24 @@ import com._blog.demo.repositories.postRepository;
 @Service
 public class AdminService {
 
-    @Autowired
-    private commentRepository commentRepository;
+    private final commentRepository commentRepository;
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
+    private final postRepository postRepository;
+    private final likeRepository likeRepository;
 
-    @Autowired
-    private ReportRepository reportRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private postRepository postRepository;
-    @Autowired
-    private likeRepository likeRepository;
+    public AdminService(
+            commentRepository commentRepository,
+            ReportRepository reportRepository,
+            UserRepository userRepository,
+            postRepository postRepository,
+            likeRepository likeRepository) {
+        this.commentRepository = commentRepository;
+        this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.likeRepository = likeRepository;
+    }
 
     public Page<ReportsDTO> getReports(int page, int size, Boolean status) {
 

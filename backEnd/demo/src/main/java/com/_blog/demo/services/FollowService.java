@@ -2,7 +2,6 @@ package com._blog.demo.services;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,8 +13,11 @@ import com._blog.demo.repositories.UserRepository;
 @Service
 public class FollowService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public FollowService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Transactional
     public boolean toggleFollow(String myUsername, String targetUsername) {

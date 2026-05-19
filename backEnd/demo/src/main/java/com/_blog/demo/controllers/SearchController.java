@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +17,11 @@ import com._blog.demo.repositories.UserRepository;
 @RequestMapping("/api/search")
 public class SearchController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public SearchController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
    
 
     @GetMapping

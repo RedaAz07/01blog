@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.security.Principal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +16,11 @@ import com._blog.demo.services.LikeService;
 @RequestMapping("/api/likes") // The base URL for all like stuff
 public class LikeController {
 
-    @Autowired
-    private LikeService LikeService;
+    private final LikeService LikeService;
+
+    public LikeController(LikeService likeService) {
+        this.LikeService = likeService;
+    }
 
   @PostMapping("/{postId}/like")
     public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId, Principal principal) {

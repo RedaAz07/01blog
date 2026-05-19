@@ -2,7 +2,6 @@ package com._blog.demo.services;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +23,24 @@ import com._blog.demo.repositories.postRepository;
 @Service
 public class NotificationService {
 
-    @Autowired
-    private UserRepository UserRepository;
-    @Autowired
-    private notificationRepository notificationRepository;
-    @Autowired
-    private likeRepository likeRepository;
-    @Autowired
-    private commentRepository commentRepository;
+    private final UserRepository UserRepository;
+    private final notificationRepository notificationRepository;
+    private final likeRepository likeRepository;
+    private final commentRepository commentRepository;
+    private final postRepository postRepository;
+
+    public NotificationService(
+            UserRepository userRepository,
+            notificationRepository notificationRepository,
+            likeRepository likeRepository,
+            commentRepository commentRepository,
+            postRepository postRepository) {
+        this.UserRepository = userRepository;
+        this.notificationRepository = notificationRepository;
+        this.likeRepository = likeRepository;
+        this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
+    }
 
     public Page<NotificationResponseDTO> getNotifications(String username, int page, int size) {
         
@@ -47,10 +56,6 @@ public class NotificationService {
                 notif.getTimestamp().toString()
         ));
     }
-
-    @Autowired
-    private postRepository postRepository;
-
     public void createNotification(String senderUsername, PostResponseDTO post) {
         Post currPost = postRepository.findById(post.id()).orElseThrow(() -> ApiException.notFound("Post not found with id: " + post.id()));
 

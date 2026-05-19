@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.security.Principal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,8 +18,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/reports")
 public class ReportController {
 
-    @Autowired
-    private ReportService ReportService;
+    private final ReportService ReportService;
+
+    public ReportController(ReportService reportService) {
+        this.ReportService = reportService;
+    }
 
     @PostMapping("/")
 

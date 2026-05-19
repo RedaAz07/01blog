@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.security.Principal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,8 +23,11 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
-    @Autowired
-    private NotificationService NotificationService;
+    private final NotificationService NotificationService;
+
+    public NotificationController(NotificationService notificationService) {
+        this.NotificationService = notificationService;
+    }
 
     @GetMapping("/")
     public ResponseEntity<Page<NotificationResponseDTO>> getNotifications(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, Principal principal) {

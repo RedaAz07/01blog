@@ -1,6 +1,5 @@
 package com._blog.demo.controllers.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,19 +24,24 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            CustomUserDetailsService userDetailsService,
+            JwtUtil jwtUtil,
+            UserService userService,
+            UserRepository userRepository) {
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.jwtUtil = jwtUtil;
+        this.userService = userService;
+        this.userRepository = userRepository;
+    }
 
     // 1. REGISTER ENDPOINT
     @PostMapping("/register")

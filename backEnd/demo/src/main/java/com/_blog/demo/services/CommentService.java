@@ -2,7 +2,6 @@ package com._blog.demo.services;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +21,18 @@ import com._blog.demo.repositories.postRepository;
 @Service
 public class CommentService {
 
-    @Autowired
-    private UserRepository UserRepository;
-    @Autowired
-    private postRepository postRepository;
-    @Autowired
-    private commentRepository commentRepository;
+    private final UserRepository UserRepository;
+    private final postRepository postRepository;
+    private final commentRepository commentRepository;
+
+    public CommentService(
+            UserRepository userRepository,
+            postRepository postRepository,
+            commentRepository commentRepository) {
+        this.UserRepository = userRepository;
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
+    }
 
     public CommentResponseDTO createComment(CommentRequestDTO request, String username) {
         User auth = UserRepository.findByUsername(username).orElseThrow(() -> ApiException.notFound("User not found"));

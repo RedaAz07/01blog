@@ -3,7 +3,6 @@ package com._blog.demo.controllers;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +19,11 @@ import com._blog.demo.services.UserService;
 @RequestMapping("/api/users") // The base URL for all user stuff
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/allUsers") // This method will handle GET requests to /api/users/allUsers
     public List<userDTO> getMethodName() {

@@ -3,7 +3,6 @@ package com._blog.demo.controllers;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,8 +27,13 @@ import jakarta.validation.Valid;
 
 class PostController {
 
-    @Autowired
-    private NotificationService NotificationService;
+    private final NotificationService NotificationService;
+    private final PostService PostService;
+
+    public PostController(NotificationService notificationService, PostService postService) {
+        this.NotificationService = notificationService;
+        this.PostService = postService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<PostResponseDTO> createPost(
@@ -42,9 +46,6 @@ class PostController {
         NotificationService.createNotification(username, result);
         return ResponseEntity.ok(result);
     }
-
-    @Autowired
-    private PostService PostService;
 
     @GetMapping("/all")
     public ResponseEntity<Page<PostResponseDTO>> getAllPosts(

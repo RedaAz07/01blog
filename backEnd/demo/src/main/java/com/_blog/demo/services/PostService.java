@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,22 +28,27 @@ import jakarta.transaction.Transactional;
 @Service
 public class PostService {
 
-    @Autowired
-    private MediaUploadService mediaUploadService;
+    private final MediaUploadService mediaUploadService;
+    private final PostImagesRepository postImagesRepository;
+    private final postRepository postRepository;
+    private final likeRepository likeRepository;
+    private final UserRepository UserRepository;
+    private final commentRepository commentRepository;
 
-    @Autowired
-    private PostImagesRepository postImagesRepository;
-
-    @Autowired
-    private postRepository postRepository;
-
-    @Autowired
-    private likeRepository likeRepository;
-    @Autowired
-    private UserRepository UserRepository;
-
-    @Autowired
-    private commentRepository commentRepository;
+    public PostService(
+            MediaUploadService mediaUploadService,
+            PostImagesRepository postImagesRepository,
+            postRepository postRepository,
+            likeRepository likeRepository,
+            UserRepository userRepository,
+            commentRepository commentRepository) {
+        this.mediaUploadService = mediaUploadService;
+        this.postImagesRepository = postImagesRepository;
+        this.postRepository = postRepository;
+        this.likeRepository = likeRepository;
+        this.UserRepository = userRepository;
+        this.commentRepository = commentRepository;
+    }
 
     @Transactional
     public PostResponseDTO createPost(String title, String content, List<MultipartFile> files, String author) {

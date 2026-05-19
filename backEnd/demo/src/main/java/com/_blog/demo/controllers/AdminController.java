@@ -2,7 +2,6 @@ package com._blog.demo.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,8 +25,11 @@ import com._blog.demo.services.AdminService;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    @Autowired
-    private AdminService AdminService;
+    private final AdminService AdminService;
+
+    public AdminController(AdminService adminService) {
+        this.AdminService = adminService;
+    }
 
     @GetMapping("/reports")
     public ResponseEntity<Page<ReportsDTO>> getPostReported(

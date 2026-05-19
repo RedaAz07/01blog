@@ -2,7 +2,6 @@ package com._blog.demo.services;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com._blog.demo.dto.report.ReportRequestDTO;
@@ -17,12 +16,18 @@ import com._blog.demo.repositories.postRepository;
 @Service
 public class ReportService {
 
-    @Autowired
-    private UserRepository UserRepository;
-    @Autowired
-    private postRepository postRepository;
-    @Autowired
-    private ReportRepository reportRepository;
+    private final UserRepository UserRepository;
+    private final postRepository postRepository;
+    private final ReportRepository reportRepository;
+
+    public ReportService(
+            UserRepository userRepository,
+            postRepository postRepository,
+            ReportRepository reportRepository) {
+        this.UserRepository = userRepository;
+        this.postRepository = postRepository;
+        this.reportRepository = reportRepository;
+    }
 
     public String createReport(ReportRequestDTO entity, String username) {
 
