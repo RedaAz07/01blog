@@ -66,6 +66,7 @@ export interface StatCard {
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   snackbar = inject(MatSnackBar);
+  isSidebarOpen = false;
 
   currentFilter: 'all' | 'active' | 'banned' = 'all';
   currentPostFilter: 'all' | 'visible' | 'hidden' = 'all';
@@ -142,6 +143,26 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   activeTab = 0;
   today = '';
   reportFilter: 'all' | 'pending' | 'resolved' = 'all';
+  get activeTabLabel(): string {
+    if (this.activeTab === 1) return 'Users';
+    if (this.activeTab === 2) return 'Posts';
+    if (this.activeTab === 3) return 'Reports';
+    return 'Overview';
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
+  }
+
+  selectTab(tab: number) {
+    this.activeTab = tab;
+    if (window.innerWidth <= 768) this.closeSidebar();
+  }
+
   statCards = computed<StatCard[]>(() => [
     {
       label: 'Total Users',

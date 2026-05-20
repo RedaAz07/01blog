@@ -15,7 +15,7 @@ import { ThemeService } from '../../services/theme';
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './navbar.html',
-  styleUrls: ['./navbar.css']
+  styleUrls: ['./navbar.scss']
 })
 export class Navbar implements OnInit {
   searchQuery = '';
@@ -115,7 +115,6 @@ export class Navbar implements OnInit {
     this.searchQuery = '';
     this.searchSubject.next('');
   }
-
 
   logout(): void {
     this.authService.logout();

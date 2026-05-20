@@ -1,19 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth';
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    RouterModule,
+  ],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register {
-  registerForm!: FormGroup;
+  registerForm: FormGroup;
   errorMessage: string = '';
   showPassword: boolean = false;
   snackbar = inject(MatSnackBar);
@@ -21,20 +36,57 @@ export class Register {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,   
+    private router: Router,
   ) {
     this.registerForm = this.fb.group({
-      username: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      firstName: new FormControl('', [Validators.required]),
-      lastName: new FormControl('', [Validators.required]),
-      birthDate: new FormControl('', [Validators.required]),
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^[a-zA-Z]+$'),
+          Validators.minLength(3),
+          Validators.maxLength(15),
+        ],
+      ],
+
+      email: ['', [Validators.required, Validators.email]],
+
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(20)]],
+
+      firstName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(15)]],
+
+      lastName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(15)]],
+
+      birthDate: ['', Validators.required],
     });
+  }
+  get username(): AbstractControl | null {
+    return this.registerForm.get('username');
+  }
+  get email(): AbstractControl | null {
+    return this.registerForm.get('email');
+  }
+  get password(): AbstractControl | null {
+    return this.registerForm.get('password');
+  }
+  get firstName(): AbstractControl | null {
+    return this.registerForm.get('firstName');
+  }
+  get lastName(): AbstractControl | null {
+    return this.registerForm.get('lastName');
+  }
+  get birthDate(): AbstractControl | null {
+    return this.registerForm.get('birthDate');
+  }
+
+  hasError(controlName: string, errorName: string): boolean {
+    const control = this.registerForm.get(controlName);
+    return !!control && control.hasError(errorName) && (control.touched || control.dirty);
   }
 
   onSubmit() {
     if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       return;
     }
 

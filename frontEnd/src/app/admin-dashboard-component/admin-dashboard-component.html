@@ -1,6 +1,18 @@
+<div class="mobile-topbar">
+  <button class="mobile-menu-btn" (click)="toggleSidebar()" [attr.aria-expanded]="isSidebarOpen">
+    <mat-icon>{{ isSidebarOpen ? 'close' : 'menu' }}</mat-icon>
+  </button>
+  <div>
+    <p class="mobile-topbar-kicker">Admin Panel</p>
+    <p class="mobile-topbar-title">{{ activeTabLabel }}</p>
+  </div>
+</div>
+
+<div class="drawer-overlay" [class.show]="isSidebarOpen" (click)="closeSidebar()"></div>
+
 <div class="admin-shell">
   <!-- ═══ SIDEBAR ═══ -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.open]="isSidebarOpen">
     <div class="sidebar-brand">
       <div class="sidebar-footer">
         <div class="admin-profile">
@@ -14,19 +26,19 @@
     </div>
 
     <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeTab === 0" (click)="activeTab = 0">
+      <button class="nav-item" [class.active]="activeTab === 0" (click)="selectTab(0)">
         <mat-icon>dashboard</mat-icon>
         <span>Overview</span>
       </button>
-      <button class="nav-item" [class.active]="activeTab === 1" (click)="activeTab = 1">
+      <button class="nav-item" [class.active]="activeTab === 1" (click)="selectTab(1)">
         <mat-icon>group</mat-icon>
         <span>Users</span>
       </button>
-      <button class="nav-item" [class.active]="activeTab === 2" (click)="activeTab = 2">
+      <button class="nav-item" [class.active]="activeTab === 2" (click)="selectTab(2)">
         <mat-icon>article</mat-icon>
         <span>Posts</span>
       </button>
-      <button class="nav-item" [class.active]="activeTab === 3" (click)="activeTab = 3">
+      <button class="nav-item" [class.active]="activeTab === 3" (click)="selectTab(3)">
         <mat-icon>flag</mat-icon>
         <span>Reports</span>
         <span class="nav-badge" *ngIf="totals().reports > 0">{{ totals().reports }}</span>

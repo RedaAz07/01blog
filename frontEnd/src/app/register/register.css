@@ -1,45 +1,39 @@
-/* ─────────────────────────────────────────
-   Register Component — matches Login design
-   ───────────────────────────────────────── */
-
-.login-container {
-  min-height: 100vh;
+/* Register Component */
+.register-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #eef0f2;
+  min-height: 100vh;
 }
 
-.login-card {
-  width: 530px;
+.register-card {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   background: #fff;
 }
 
-/* ── Header ── */
-.login-header {
+.register-header {
   background-color: #2d5a45;
-  padding: 32px 24px 28px;
+  padding: 10px;
   text-align: center;
   color: #fff;
-
-  h2 {
-    margin: 12px 0 4px;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-    opacity: 0.75;
-  }
 }
 
-.login-avatar {
+.register-header h2 {
+  margin: 2px 0 2px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.register-header p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.register-avatar {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -49,29 +43,26 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-
-  mat-icon {
-    font-size: 28px;
-    height: 28px;
-    width: 28px;
-  }
 }
 
-/* ── Body ── */
-.login-body {
-  padding: 24px 28px 28px;
+.register-avatar mat-icon {
+  font-size: 28px;
+  height: 28px;
+  width: 28px;
 }
 
-/* Two fields side-by-side */
+.register-body {
+  padding: 10px 28px 10px;
+}
+
 .fields-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 12px;
+  gap: 0 8px;
 }
 
-/* ── Field wrapper ── */
 .field-wrapper {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .field-label {
@@ -84,108 +75,49 @@
   text-transform: uppercase;
   color: #374151;
   margin-bottom: 6px;
-
-  mat-icon {
-    color: #2d5a45;
-  }
 }
 
-/* ── Input ── */
-.input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  transition: border-color 0.2s;
-
-  &:focus-within {
-    border-color: #2d5a45;
-    background: #f0f7f4;
-  }
+.field-label mat-icon {
+  color: #2d5a45;
 }
 
-.input-icon {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-
-  mat-icon {
-    color: #2d5a45;
-    opacity: 0.7;
-  }
+.register-field {
+  width: 100%;
+  --mdc-outlined-text-field-container-shape: 8px;
+  --mdc-outlined-text-field-outline-color: #d1d5db;
+  --mdc-outlined-text-field-hover-outline-color: #2d5a45;
+  --mdc-outlined-text-field-focus-outline-color: #2d5a45;
+  --mat-form-field-focus-state-layer-opacity: 0;
 }
 
-.login-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 10px 10px 10px 0;
+.register-field mat-icon[matprefix],
+.register-field mat-icon[matPrefix] {
+  color: #2d5a45;
+  opacity: 0.7;
+  margin-right: 8px;
+}
+
+.register-field input[matinput],
+.register-field input[matInput] {
   font-size: 14px;
   color: #111827;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  &[type='date'] {
-    padding-right: 10px;
-    color-scheme: light;
-  }
 }
 
-/* ── Password toggle ── */
 .pwd-toggle {
   background: none;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0 10px;
   color: #2d5a45;
   opacity: 0.7;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 1;
-  }
+  padding: 0;
 }
 
-/* ── Validation error ── */
-.field-error {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 12px;
-  color: #dc2626;
-
-  mat-icon {
-    color: #dc2626;
-  }
+.pwd-toggle:hover {
+  opacity: 1;
 }
 
-/* ── Error banner ── */
-.error-banner {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 13px;
-  color: #dc2626;
-  margin-bottom: 16px;
-
-  mat-icon {
-    color: #dc2626;
-  }
-}
-
-/* ── Submit button ── */
 button[type='submit'] {
   width: 100%;
   padding: 12px;
@@ -198,36 +130,41 @@ button[type='submit'] {
   cursor: pointer;
   letter-spacing: 0.3px;
   transition: background 0.2s, opacity 0.2s;
-
-  &:hover:not(:disabled) {
-    background: #52b788;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 }
 
-/* ── "Already have an account?" ── */
-.login-redirect {
+button[type='submit']:hover:not(:disabled) {
+  background: #52b788;
+}
+
+button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-redirect {
   text-align: center;
   margin-top: 14px;
   font-size: 13px;
   color: #6b7280;
-
-  a {
-    color: #2d5a45;
-    font-weight: 600;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
+
+.register-redirect a {
+  color: #2d5a45;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-redirect a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
+  .register-card {
+    width: min(100%, 530px);
+    margin: 0 12px;
+  }
+
   .fields-row {
-    grid-template-columns: 1fr; /* Changes from 2 columns to 1 column */
+    grid-template-columns: 1fr;
   }
 }

@@ -1,6 +1,8 @@
 <header class="navbar" *ngIf="authService.currentUser$ | async as user">
   <div class="nav-left">
-   <a class="homeRoute"   [routerLink]="['home']"><span class="brand">01<span class="brand-accent">blog</span></span></a> 
+    <a class="homeRoute" [routerLink]="['home']"
+      ><span class="brand">01<span class="brand-accent">blog</span></span></a
+    >
   </div>
 
   <div class="nav-center">
@@ -17,19 +19,26 @@
   </div>
 
   <!-- Search Results Dropdown -->
-  <div class="nav-center search-results" *ngIf="searchResults$ | async as results">
-    <div class="search-result-item" *ngFor="let user of results.users">
-      <a [routerLink]="['/profile', user.username]" (click)="closeSearch()">
-        <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
+    <div class="nav-center search-results" *ngIf="searchResults$ | async as results">
+      <div class="search-result-item" *ngIf="results.users.length === 0">
+        <p>No Search Results Found for "{{ searchQuery }}"</p>
+      </div>
+      <div class="search-result-item" *ngFor="let user of results.users">
+        <a [routerLink]="['/profile', user.username]" (click)="closeSearch()">
+          <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
 
-        {{ user.username }}</a
-      >
+          {{ user.username }}</a
+        >
+      </div>
     </div>
-  </div>
 
   <div class="nav-right">
     <!-- Dashboard — admin only -->
-    <a *ngIf="user?.role === 'ROLE_ADMIN' " class="nav-link dashboard-link"     [routerLink]="['/dashboard']">
+    <a
+      *ngIf="user?.role === 'ROLE_ADMIN'"
+      class="nav-link dashboard-link"
+      [routerLink]="['/dashboard']"
+    >
       <mat-icon>dashboard</mat-icon>
       <span>Dashboard</span>
     </a>
@@ -75,10 +84,12 @@
             <div class="notif-icon-wrap">
               <mat-icon>article</mat-icon>
             </div>
-           <a class="href" [routerLink]="['/profile/', n.senderUsername]"><div class="notif-content">
-              <p class="notif-text">{{ n.senderUsername }} posted a new article</p>
-              <span class="notif-time">{{ n.timestamp }}</span>
-            </div></a> 
+            <a class="href" [routerLink]="['/profile/', n.senderUsername]"
+              ><div class="notif-content">
+                <p class="notif-text">{{ n.senderUsername }} posted a new article</p>
+                <span class="notif-time">{{ n.timestamp }}</span>
+              </div></a
+            >
             <span class="notif-dot" *ngIf="!n.isRead"></span>
           </div>
         </div>
@@ -126,7 +137,9 @@
             <span class="ps-stat-lbl">Following</span>
           </div>
         </div>
-        <a class="pp-btn" [routerLink]="['/profile/', user.username]"> <mat-icon>person</mat-icon> View Profile </a>
+        <a class="pp-btn" [routerLink]="['/profile/', user.username]">
+          <mat-icon>person</mat-icon> View Profile
+        </a>
         <button class="pp-btn" (click)="logout()"><mat-icon>logout</mat-icon> Logout</button>
       </div>
     </button>
