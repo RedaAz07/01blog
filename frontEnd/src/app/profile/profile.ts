@@ -57,10 +57,12 @@ export class Profile implements OnInit {
 
       this.postObserver = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting && !this.isPostLoading) {
-          this.route.params.subscribe((params) => {
-            const username = params['username'];
-            this.loadPosts(username);
-          });
+          
+          const currentUserProfile = this.user();
+          if (currentUserProfile && currentUserProfile.username) {
+            this.loadPosts(currentUserProfile.username);
+          }
+          
         }
       }, options);
 
@@ -102,6 +104,8 @@ export class Profile implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       const username = params['username'];
+      this.resetState();
+
       this.loadUserProfile(username);
       this.loadPosts(username);
     });
@@ -272,5 +276,11 @@ export class Profile implements OnInit {
         this.showFollowingModal = true;
       });
     }
+  }
+  resetState() {
+    this.currentPostPage = 0; // Reset pagination!
+    this.isPostLoading = false;
+    this.Posts.set([]); // Clear previous user's posts
+    this.user.set(null); // Clear previous user's profile
   }
 }
