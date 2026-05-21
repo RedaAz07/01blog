@@ -31,8 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         // 1. Look at the HTTP Header to see if they brought a wristband
         final String authHeader = request.getHeader("Authorization");
@@ -40,13 +39,15 @@ public class JwtFilter extends OncePerRequestFilter {
         final String username;
 
         // 2. If there is no header, or it doesn't start with "Bearer ", reject them!
-        // (We let the filter continue so the SecurityConfig can block them or allow them if it's a public route like /login)
+        // (We let the filter continue so the SecurityConfig can block them or allow
+        // them if it's a public route like /login)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Extract the wristband string (Remove the "Bearer " part which is 7 characters)
+        // 3. Extract the wristband string (Remove the "Bearer " part which is 7
+        // characters)
         jwt = authHeader.substring(7);
         // 4. Ask the JwtUtil machine to read the name on the wristband
         try {
@@ -58,18 +59,21 @@ public class JwtFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
                 if (!userDetails.isEnabled()) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Your account is blocked");
+                  
+                    response.setStatus(423);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\": \"Your account has been banned\"}");
                     return;
                 }
                 // 6. Ask the JwtUtil machine if the wristband is valid and not expired
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
 
-                    // 7. If valid, formally introduce the user to Spring Security so they are allowed inside!
+                    // 7. If valid, formally introduce the user to Spring Security so they are
+                    // allowed inside!
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     // Update the security context (The Bouncer opens the door)

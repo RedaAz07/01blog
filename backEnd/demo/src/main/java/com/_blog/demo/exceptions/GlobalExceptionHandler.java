@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -71,6 +72,15 @@ public class GlobalExceptionHandler {
     }
 
     // ────────────────────────────────────────────────────────
+    // 5. 423 FORBIDDEN (Logged in, but not allowed to do this)
+    // ────────────────────────────────────────────────────────
+@ExceptionHandler(LockedException.class)
+public ResponseEntity<Object> handleBanned(LockedException ex) {
+    return buildErrorResponse(HttpStatus.LOCKED, "you are banned");
+}
+// Method 2 (You probably have something like this right next to it)
+
+    // ────────────────────────────────────────────────────────
     // 6. 400 BAD REQUEST (For your custom RuntimeExceptions)
     // ────────────────────────────────────────────────────────
     @ExceptionHandler(IllegalArgumentException.class)
@@ -98,16 +108,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<Object> handleDisabledAccount(DisabledException ex) {
-        return buildErrorResponse(HttpStatus.FORBIDDEN,
+        return buildErrorResponse(HttpStatus.LOCKED,
                 "Your account has been banned or disabled. Please contact support.");
     }
 
-    @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
-    public ResponseEntity<Object> handleLockedAccount(org.springframework.security.authentication.LockedException ex) {
-        return buildErrorResponse(HttpStatus.FORBIDDEN,
-                "Your account has been temporarily locked due to too many failed attempts.");
-    }
-
+   
     private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());

@@ -33,4 +33,9 @@ public class ApiException extends RuntimeException {
     public static ApiException conflict(String message) {
         return new ApiException(HttpStatus.CONFLICT, message);
     }
+
+
+      public static ApiException banned(String message) {
+        return new ApiException(HttpStatus.LOCKED, message);
+    }
 }
