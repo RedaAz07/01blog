@@ -107,7 +107,6 @@ export class Home implements OnInit, OnDestroy {
         );
       },
       error: (err) => {
-        console.error('Failed to toggle follow', err);
 
         user.followingBYMe = !user.followingBYMe;
       },

@@ -110,7 +110,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
             closePostModal(true);
           },
           error: (err) => {
-            console.error(err);
             snackbar.open('Failed to update post.', 'Close', { duration: 3000 });
           },
         });
@@ -138,7 +137,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
             closePostModal(true);
           },
           error: (err) => {
-            console.error(err);
             snackbar.open('Failed to publish post', 'Close', { duration: 3000 });
           },
         });

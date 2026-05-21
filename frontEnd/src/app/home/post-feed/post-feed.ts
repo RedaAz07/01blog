@@ -117,6 +117,7 @@ export class PostFeed implements OnInit, OnDestroy {
         );
       },
       error: (error) => {
+        
         this.post.isLiked = wasLiked;
         this.post.nbrLikes = oldLikesCount;
         this.snackbar.open('Failed to like this post', 'Close', { duration: 3000 });

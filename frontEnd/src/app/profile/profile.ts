@@ -207,14 +207,13 @@ export class Profile implements OnInit {
   toggleFollow(): void {
     this.followService.toggleFollow(this.user()?.username ?? '').subscribe({
       next: (res) => {
-        console.log(res);
 
         this.isFollowing.set(res);
         const userData = this.user();
         if (userData) {
           userData.followers += res ? 1 : -1;
           this.user.set({ ...userData });
-          this.snackbar.open(res ? 'Unfollowed successfully!' : 'Followed successfully!', 'Close', {
+          this.snackbar.open(res ? 'followed successfully!' : 'UnFollowed successfully!', 'Close', {
             duration: 3000,
           });
         }

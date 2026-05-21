@@ -201,7 +201,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   ) {}
   ngOnInit() {
     this.adminService.getTotals().subscribe((totals) => {
-      console.log(totals);
 
       this.totals.set(totals);
     });

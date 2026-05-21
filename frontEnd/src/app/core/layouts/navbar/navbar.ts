@@ -70,7 +70,6 @@ export class Navbar implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error fetching notifications', err);
         this.isLoading = false;
       }
     });
