@@ -10,6 +10,7 @@ import {
   ElementRef,
   ViewChild,
 } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +24,7 @@ import { TimeAgoPipe } from '../../time-ago-pipe';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
+import { debounce, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-post-feed',
@@ -32,6 +34,7 @@ import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
   styleUrls: ['./post-feed.css'],
 })
 export class PostFeed implements OnInit, OnDestroy {
+  cdr = inject(ChangeDetectorRef);
   private _post!: PostResponseDTO;
 
   @Input()
@@ -98,6 +101,7 @@ export class PostFeed implements OnInit, OnDestroy {
     const wasLiked = this.post.isLiked;
     const oldLikesCount = this.post.nbrLikes;
 
+    // Optimistic Update
     this.post.isLiked = !wasLiked;
     this.post.nbrLikes += this.post.isLiked ? 1 : -1;
 
@@ -105,26 +109,29 @@ export class PostFeed implements OnInit, OnDestroy {
       next: (response: LikeResponseDTO) => {
         if (response) {
           const incomingLikes =
-            response.nbLikes !== undefined ? response.nbLikes : response.nbLikes;
+            response.nbLikes!== undefined ? response.nbLikes : response.nbLikes;
 
           this.post.isLiked = response.isLiked;
           this.post.nbrLikes = Number(incomingLikes) || 0;
+          
+          this.cdr.detectChanges(); // Safely apply backend source of truth
         }
         this.snackbar.open(
-          `this post ${response.isLiked ? 'Liked' : 'desliked seccefully'}`,
+          `Post ${response.isLiked ? 'liked' : 'disliked'} successfully`,
           'Close',
           { duration: 3000 },
         );
       },
       error: (error) => {
-        
         this.post.isLiked = wasLiked;
         this.post.nbrLikes = oldLikesCount;
+        
+        this.cdr.detectChanges();
+
         this.snackbar.open('Failed to like this post', 'Close', { duration: 3000 });
       },
     });
   }
-
   toggleComments(post: any): void {
     this.showComments = !this.showComments;
     if (this.showComments) this.loadComments();
@@ -150,8 +157,9 @@ export class PostFeed implements OnInit, OnDestroy {
   addComment(post: any) {
     if (this.newCommentText.length < 3 || this.newCommentText.length > 100) {
       this.snackbar.open('must be between 3 and 100 comments ', 'close', { duration: 3000 });
-      return
+      return;
     }
+    debounceTime(10000000);
     const commentData: CommentRequestDTO = { content: this.newCommentText, postId: post.id };
     this.commentService.createComment(commentData).subscribe({
       next: (createdComment) => {
