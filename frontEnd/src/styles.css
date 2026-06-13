@@ -1,37 +1,37 @@
-  :root,
-  html[data-theme='light'] {
-    --theme-white: #ffffff;
-    --theme-ink: #091413;
-    --theme-forest: #285a48;
-    --theme-teal: #408a71;
-    --theme-mint: #b0e4cc;
-    --theme-mint10: rgba(176, 228, 204, 0.1);
-    --theme-mint20: rgba(176, 228, 204, 0.2);
-    --theme-mint40: rgba(176, 228, 204, 0.4);
-    --theme-bg: #f0f5f3;
-    --theme-card: #ffffff;
-    --theme-border: rgba(40, 90, 72, 0.15);
-    --theme-muted: #6b8f82;
-    --theme-text-soft: #2d3a35;
-    --theme-shadow: 0 2px 16px rgba(9, 20, 19, 0.08);
-  }
+:root,
+html[data-theme='light'] {
+  --theme-white: #ffffff;
+  --theme-ink: #091413;
+  --theme-forest: #285a48;
+  --theme-teal: #408a71;
+  --theme-mint: #b0e4cc;
+  --theme-mint10: rgba(176, 228, 204, 0.1);
+  --theme-mint20: rgba(176, 228, 204, 0.2);
+  --theme-mint40: rgba(176, 228, 204, 0.4);
+  --theme-bg: #f0f5f3;
+  --theme-card: #ffffff;
+  --theme-border: rgba(40, 90, 72, 0.15);
+  --theme-muted: #6b8f82;
+  --theme-text-soft: #2d3a35;
+  --theme-shadow: 0 2px 16px rgba(9, 20, 19, 0.08);
+}
 
-  html[data-theme='dark'] {
-    --theme-white: #162320;
-    --theme-ink: #e7f1ec;
-    --theme-forest: #234b3e;
-    --theme-teal: #62b89a;
-    --theme-mint: #9dddc1;
-    --theme-mint10: rgba(157, 221, 193, 0.1);
-    --theme-mint20: rgba(157, 221, 193, 0.18);
-    --theme-mint40: rgba(157, 221, 193, 0.32);
-    --theme-bg: #0b1311;
-    --theme-card: #13201d;
-    --theme-border: rgba(157, 221, 193, 0.16);
-    --theme-muted: #98b4aa;
-    --theme-text-soft: #d3dfda;
-    --theme-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
-  }
+html[data-theme='dark'] {
+  --theme-white: #162320;
+  --theme-ink: #e7f1ec;
+  --theme-forest: #234b3e;
+  --theme-teal: #62b89a;
+  --theme-mint: #9dddc1;
+  --theme-mint10: rgba(157, 221, 193, 0.1);
+  --theme-mint20: rgba(157, 221, 193, 0.18);
+  --theme-mint40: rgba(157, 221, 193, 0.32);
+  --theme-bg: #0b1311;
+  --theme-card: #13201d;
+  --theme-border: rgba(157, 221, 193, 0.16);
+  --theme-muted: #98b4aa;
+  --theme-text-soft: #d3dfda;
+  --theme-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
+}
 
 * {
   box-sizing: border-box;
@@ -45,7 +45,9 @@ body {
 body {
   background: var(--theme-bg);
   color: var(--theme-ink);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 app-root {
@@ -67,3 +69,4 @@ app-root {
 .mat-mdc-snack-bar-container .mat-mdc-button {
   color: var(--theme-teal) !important;
 }
+

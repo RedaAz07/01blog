@@ -322,6 +322,7 @@
   line-height: 1.7;
   color: var(--text-soft);
   margin: 0;
+  word-break: break-word;
 }
 
 .blog-text b,

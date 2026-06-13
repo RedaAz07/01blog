@@ -43,7 +43,7 @@ export class Register {
         '',
         [
           Validators.required,
-          Validators.pattern('^[a-zA-Z]+$'),
+        Validators.pattern('^[a-zA-Z]+$'),
           Validators.minLength(3),
           Validators.maxLength(15),
         ],

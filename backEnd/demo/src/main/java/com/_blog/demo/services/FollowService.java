@@ -46,9 +46,7 @@ public class FollowService {
     public List<FollowResponseDTO> getFollowing(String username, String myUsername) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> ApiException.notFound("User not found"));
-        if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
-            throw ApiException.forbidden("You can only see the following list of users you follow");
-        }
+      
 
         List<User> following = user.getFollowing();
         return following.stream()
@@ -64,9 +62,7 @@ public class FollowService {
     public List<FollowResponseDTO> getFollowers(String username, String myUsername) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> ApiException.notFound("User not found"));
-        if (!username.equals(myUsername) || user.getFollowers().stream().anyMatch(follower -> follower.getUsername().equals(myUsername))) {
-            throw ApiException.forbidden("You can only see the followers list of users you follow");
-        }
+      
         List<User> followers = user.getFollowers();
         return followers.stream()
                 .map(follower -> {

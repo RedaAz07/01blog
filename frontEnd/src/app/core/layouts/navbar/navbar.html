@@ -58,8 +58,8 @@
     <div>
       <button class="notif-btn" (click)="toggleNotifications()">
         <mat-icon>notifications</mat-icon>
-        <span class="notif-count" *ngIf="authService.currentUser$ | async as currentUser">
-          {{ currentUser.notifications }}
+        <span class="notif-count" *ngIf="currentUser()?.notifications">
+          {{ currentUser()?.notifications || 0 }}
         </span>
       </button>
     </div>
