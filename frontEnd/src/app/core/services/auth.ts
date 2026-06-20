@@ -43,18 +43,18 @@ export class AuthService {
   private loggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.loggedInSubject.asObservable();
   private currentUserSubject = new BehaviorSubject<UserProfileDTO | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-  ) {
-    // Look how simple this is now! Just grab the token.
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-      this.loggedInSubject.next(true);
-      this.loadCurrentUser().subscribe({});
+    public currentUser$ = this.currentUserSubject.asObservable();
+    constructor(
+      private http: HttpClient,
+      private router: Router,
+    ) {
+      // Look how simple this is now! Just grab the token.
+      const token = localStorage.getItem('jwt_token');
+      if (token) {
+        this.loggedInSubject.next(true);
+        this.loadCurrentUser().subscribe({});
+      }
     }
-  }
 
   login(credentials: any): Observable<AuthResponseDTO> {
     return this.http.post<AuthResponseDTO>(`${this.apiUrl}/login`, credentials).pipe(

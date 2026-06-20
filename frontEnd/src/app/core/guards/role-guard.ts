@@ -14,14 +14,13 @@ export const roleGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  const expectedRole = route.data['role'];
 
   return authService.currentUser$.pipe(
     
     filter(user => user !== null), 
     take(1), 
     map(user => {
-      if (user!.role === expectedRole || user!.role === 'ROLE_ADMIN') {
+      if ( user!.role === 'ROLE_ADMIN') {
         return true; 
       } else {
         snackbar.open('Access Denied: You do not have permission!', 'Close', { duration: 3000 });

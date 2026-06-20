@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core'; // 👈 Add OnInit
+import { Component, inject, OnInit, signal } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +12,7 @@ import {
   map,
   of,
   switchMap,
-} from 'rxjs'; // 👈 Import RxJS tools
+} from 'rxjs'; 
 import { AuthService, UserProfileDTO } from '../../services/auth';
 import { NotificationDTO, NotificationService } from '../../services/notification';
 import { GlobalSearchDTO, SearchService } from '../../services/search';
@@ -32,13 +32,13 @@ export class Navbar implements OnInit {
   isLastPage = false;
   isLoading = false;
   currentUser = signal<UserProfileDTO | null>(null);
-  constructor(
-    public authService: AuthService,
-    public notificationService: NotificationService,
-    private searchService: SearchService,
-    public themeService: ThemeService,
-  ) {}
 
+
+  authService =  inject(AuthService);
+  notificationService = inject(NotificationService);
+  searchService = inject(SearchService);
+  themeService = inject(ThemeService);  
+  
   ngOnInit() {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser.set(user);
@@ -94,7 +94,6 @@ export class Navbar implements OnInit {
         notifications: u.notifications - 1,
       };
     });
-    console.log("ùùùùùùùùùùùùùùùù",this.currentUser);
     
   }
 
