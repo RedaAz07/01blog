@@ -71,24 +71,27 @@ public class PostService {
         newPost.setTimestamp(new Date());
         Post savedPost = postRepository.save(newPost);
 
-        List<String> uploadedImageUrls = new ArrayList<>();
+       List<String> uploadedImageUrls = new ArrayList<>();
+        
         if (files != null && !files.isEmpty()) {
-            for (MultipartFile f : files) {
-                PostImages images = new PostImages();
-                images.setPost(savedPost);
-                String url;
-                try {
-                    url = mediaUploadService.uploadFile(f);
-                } catch (Exception e) {
-                    System.err.println("-----------------------------------------------------------------------------");
-                    System.err.println(e);
-                    System.err.println("-----------------------------------------------------------------------------");
-                    throw ApiException.badRequest("Invalid Media File");
-                }
+            try {
+                for (MultipartFile f : files) {
+                    String url = mediaUploadService.uploadFile(f);
+                    
+                    uploadedImageUrls.add(url);
 
-                images.setImageUrl(url);
-                postImagesRepository.save(images);
-                uploadedImageUrls.add(url);
+                    PostImages images = new PostImages();
+                    images.setPost(savedPost);
+                    images.setImageUrl(url);
+                    postImagesRepository.save(images);
+                }
+            } catch (Exception e) {
+                
+                if (!uploadedImageUrls.isEmpty()) {
+                    mediaUploadService.deleteOrphanedFiles(uploadedImageUrls);
+                }
+                
+                throw ApiException.badRequest("Media upload failed. Post creation cancelled.");
             }
         }
 
@@ -157,36 +160,45 @@ public class PostService {
             retainedUrls = new ArrayList<>();
         }
 
+        List<String> urlsToDeleteFromCloudinary = new ArrayList<>();
         Iterator<PostImages> iterator = existingPost.getImages().iterator();
+        
         while (iterator.hasNext()) {
             PostImages image = iterator.next();
             if (!retainedUrls.contains(image.getImageUrl())) {
-
-                iterator.remove();
+                urlsToDeleteFromCloudinary.add(image.getImageUrl());
+                iterator.remove(); 
             }
         }
 
+        List<String> newlyUploadedUrls = new ArrayList<>();
         if (newFiles != null && !newFiles.isEmpty()) {
-            for (MultipartFile f : newFiles) {
-                String url;
-                try {
-                    url = mediaUploadService.uploadFile(f);
-                } catch (Exception e) {
-                    throw ApiException.badRequest("Invalid Media File");
+            try {
+                for (MultipartFile f : newFiles) {
+                    String url = mediaUploadService.uploadFile(f);
+                    newlyUploadedUrls.add(url); // Track successes
+
+                    PostImages newImage = new PostImages();
+                    newImage.setPost(existingPost);
+                    newImage.setImageUrl(url);
+
+                    existingPost.getImages().add(newImage);
                 }
-
-                PostImages newImage = new PostImages();
-                newImage.setPost(existingPost);
-                newImage.setImageUrl(url);
-
-                existingPost.getImages().add(newImage);
+            } catch (Exception e) {
+                
+                if (!newlyUploadedUrls.isEmpty()) {
+                    mediaUploadService.deleteOrphanedFiles(newlyUploadedUrls);
+                }
+                throw ApiException.badRequest("Invalid Media File. Update cancelled.");
             }
         }
 
-        // 5. Save the final state
         postRepository.save(existingPost);
 
-        // 6. Build the DTO to send back to Angular
+        if (!urlsToDeleteFromCloudinary.isEmpty()) {
+            mediaUploadService.deleteOrphanedFiles(urlsToDeleteFromCloudinary);
+        }
+
         PostResponseDTO updatedPost = new PostResponseDTO(
                 existingPost.getId(),
                 existingPost.getTitle(),
@@ -197,8 +209,8 @@ public class PostService {
                 existingPost.isStatus(),
                 commentRepository.countByPost(existingPost),
                 likeRepository.countByPost(existingPost),
-                // Map the remaining/new images directly to a list of strings!
-                existingPost.getImages().stream().map(PostImages::getImageUrl).toList());
+                existingPost.getImages().stream().map(PostImages::getImageUrl).toList()
+        );
 
         return updatedPost;
     }

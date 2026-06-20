@@ -17,8 +17,6 @@ import com._blog.demo.dto.Response;
 import com._blog.demo.dto.notification.NotificationResponseDTO;
 import com._blog.demo.services.NotificationService;
 
-import jakarta.transaction.Transactional;
-
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
@@ -45,7 +43,6 @@ public class NotificationController {
         return ResponseEntity.ok(new Response("Notification marked as read"));
     }
 
-    @Transactional
     @DeleteMapping("/clear")
     public ResponseEntity<Response> clearNotifications(Principal principal) {
         String username = principal.getName();

@@ -69,4 +69,24 @@ public class MediaUploadService {
             tempFile.delete();
         }
     }
+
+    // Add this to MediaUploadService.java
+    public void deleteOrphanedFiles(List<String> urls) {
+        for (String url : urls) {
+            try {
+                // Extract the public ID from the end of the URL
+                // Example URL: https://res.cloudinary.com/demo/image/upload/v1234/my_image.jpg
+                // Public ID: my_image
+                String[] parts = url.split("/");
+                String fileWithExt = parts[parts.length - 1];
+                String publicId = fileWithExt.substring(0, fileWithExt.lastIndexOf("."));
+
+                // Tell Cloudinary to destroy it
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                System.out.println("Cleaned up orphaned file: " + publicId);
+            } catch (Exception e) {
+                System.err.println("Failed to clean up Cloudinary file: " + url);
+            }
+        }
+    }
 }
