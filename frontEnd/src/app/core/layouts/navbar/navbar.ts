@@ -107,10 +107,7 @@ export class Navbar implements OnInit {
 
   toggleProfileSidebar(): void {}
 
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.notifOpen = false;
-  }
+  
 
   //searchh
 

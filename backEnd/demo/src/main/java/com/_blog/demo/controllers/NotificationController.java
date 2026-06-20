@@ -30,20 +30,22 @@ public class NotificationController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Page<NotificationResponseDTO>> getNotifications(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, Principal principal) {
+    public ResponseEntity<Page<NotificationResponseDTO>> getNotifications(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size, Principal principal) {
         String username = principal.getName();
         Page<NotificationResponseDTO> notifications = NotificationService.getNotifications(username, page, size);
         return ResponseEntity.ok(notifications);
     }
 
     @PutMapping("read/{id}")
-    public ResponseEntity<Response> markAsRead(@PathVariable String id, @RequestBody String entity, Principal principal) {
+    public ResponseEntity<Response> markAsRead(@PathVariable String id, @RequestBody String entity,
+            Principal principal) {
         String username = principal.getName();
         NotificationService.markAsRead(id, username);
         return ResponseEntity.ok(new Response("Notification marked as read"));
     }
 
-            @Transactional
+    @Transactional
     @DeleteMapping("/clear")
     public ResponseEntity<Response> clearNotifications(Principal principal) {
         String username = principal.getName();
