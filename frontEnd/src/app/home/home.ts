@@ -88,11 +88,10 @@ export class Home implements OnInit, OnDestroy {
   private observer!: IntersectionObserver;
   currentPage = 0;
   isLoading = false;
-  constructor(
-    public authservice: AuthService,
-    public postService: PostService,
-    public followService: Follow,
-  ) {}
+
+  authservice = inject(AuthService);
+  postService = inject(PostService);
+  followService = inject(Follow);
 
   toggleFollow(user: any): void {
     user.followingBYMe = !user.followingBYMe;

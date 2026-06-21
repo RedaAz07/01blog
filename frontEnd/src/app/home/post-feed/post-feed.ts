@@ -24,7 +24,6 @@ import { TimeAgoPipe } from '../../time-ago-pipe';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialog } from '../../components/confirm-dialog/confirm-dialog';
-import { debounce, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-post-feed',
@@ -108,9 +107,7 @@ export class PostFeed implements OnInit, OnDestroy {
     this.likeService.likePost(this.post.id).subscribe({
       next: (response: LikeResponseDTO) => {
         if (response) {
-          const incomingLikes =
-            response.nbLikes!== undefined ? response.nbLikes : response.nbLikes;
-
+       const incomingLikes = response.nbLikes !== undefined ? response.nbLikes : this.post.nbrLikes;
           this.post.isLiked = response.isLiked;
           this.post.nbrLikes = Number(incomingLikes) || 0;
           
@@ -154,21 +151,29 @@ export class PostFeed implements OnInit, OnDestroy {
     if (this.commentObserver) this.commentObserver.disconnect();
   }
 
-  addComment(post: any) {
-    if (this.newCommentText.length < 3 || this.newCommentText.length > 100) {
-      this.snackbar.open('must be between 3 and 100 comments ', 'close', { duration: 3000 });
-      return;
-    }
-    debounceTime(10000000);
-    const commentData: CommentRequestDTO = { content: this.newCommentText, postId: post.id };
-    this.commentService.createComment(commentData).subscribe({
-      next: (createdComment) => {
-        this.newCommentText = '';
-        this.Comments.update((currentList) => [createdComment, ...currentList]);
-        this.post.nbrComments++;
-      },
-    });
+  isSubmittingComment = false;
+
+addComment(post: any) {
+  if (this.newCommentText.length < 3 || this.newCommentText.length > 100) {
+    this.snackbar.open('must be between 3 and 100 comments ', 'close', { duration: 3000 });
+    return;
   }
+  
+  this.isSubmittingComment = true; 
+  
+  const commentData: CommentRequestDTO = { content: this.newCommentText, postId: post.id };
+  this.commentService.createComment(commentData).subscribe({
+    next: (createdComment) => {
+      this.newCommentText = '';
+      this.Comments.update((currentList) => [createdComment, ...currentList]);
+      this.post.nbrComments++;
+      this.isSubmittingComment = false; 
+    },
+    error: () => {
+      this.isSubmittingComment = false;
+    }
+  });
+}
 
   editPost(post: any) {
     this.edit.emit(post);
@@ -199,7 +204,6 @@ export class PostFeed implements OnInit, OnDestroy {
     });
   }
 
-  // 🟢 Slider controls updated for imageUrls array
   prevSlide() {
     if (this.currentSlide > 0) this.currentSlide--;
   }

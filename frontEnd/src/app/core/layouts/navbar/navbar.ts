@@ -101,7 +101,20 @@ export class Navbar implements OnInit {
     this.isLastPage = true;
     this.currentPage = 0;
     this.isLoading = false;
-    this.notificationService.clearAll().subscribe();
+    this.notificationService.clearAll().subscribe(
+      {
+      next: () => {
+      this.currentUser.update((u) => {
+        if (!u) return u;
+        return {
+          ...u,
+          notifications: 0,
+        };
+      });
+
+    },
+    
+  });
   }
 
   toggleProfileSidebar(): void {}

@@ -130,7 +130,7 @@
           [(ngModel)]="newCommentText"
           (keyup.enter)="addComment(post)"
         />
-        <button class="comment-send" (click)="addComment(post)">
+        <button class="comment-send" (click)="addComment(post)" [disabled]="isSubmittingComment">
           <mat-icon>send</mat-icon>
         </button>
       </div>
