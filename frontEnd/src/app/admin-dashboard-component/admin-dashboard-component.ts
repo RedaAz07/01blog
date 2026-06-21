@@ -16,6 +16,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import {
   AdminDashboard,
   PageReportResponse,
@@ -56,8 +58,11 @@ export interface StatCard {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
+    MatInputModule,
+    FormsModule,
     RouterLink,
     TimeAgoPipe,
+  
   ],
   templateUrl: './admin-dashboard-component.html',
   styleUrls: ['./admin-dashboard-component.css',
@@ -136,6 +141,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   totals = signal<TotalsDto>({ users: 0, posts: 0, banned: 0, reports: 0 });
   users = signal<UsersDTO[]>([]);
   reports = signal<ReportDTO[]>([]);
+  searchTerm = signal<string>('');
+
+  filteredUsers = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.users();
+    return this.users().filter((user) =>
+      user.username.toLowerCase().includes(term) ||
+      user.firstName.toLowerCase().includes(term) ||
+      user.lastName.toLowerCase().includes(term)
+    );
+  });
 
   weeklyPosts = signal<WeeklyPosts[]>([]);
   topReportedUsers = signal<TopReportedDto[]>([]);
@@ -287,6 +303,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
   FilterUsers(filter: 'all' | 'active' | 'banned') {
     this.currentFilter = filter;
+    this.searchTerm.set('');
 
     this.currentUserPage = 0;
     this.isUsersLoading = false;
@@ -552,5 +569,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     if (this.PostObserver) this.PostObserver.disconnect();
     if (this.ReportObserver) this.ReportObserver.disconnect();
     if (this.commentObserver) this.commentObserver.disconnect();
+  }
+  userSearchTerm(){
+    return signal('');
   }
 }

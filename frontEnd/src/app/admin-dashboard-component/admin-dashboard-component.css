@@ -604,6 +604,69 @@ overflow-x: auto;
   &.active { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 4px 12px rgba(64,138,113,0.3); }
 }
 
+/* ═══════════════════════════════════ SEARCH BAR ═══════════════════════════════════ */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(64, 138, 113, 0.1);
+  }
+}
+
+.search-icon {
+  color: var(--muted);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+
+  &::placeholder {
+    color: var(--text-soft);
+  }
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: var(--muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
 /* ═══════════════════════════════════ POSTS GRID ═══════════════════════════════════ */
 .posts-grid {
   display: grid;

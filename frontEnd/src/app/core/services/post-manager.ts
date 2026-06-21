@@ -11,7 +11,6 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
   const dialog = inject(MatDialog);
   const postService = inject(PostService);
   const snackbar = inject(MatSnackBar);
-
   const postModalOpen = signal(false);
   const editingPost = signal<any | null>(null);
   const isSubmitting = signal(false);

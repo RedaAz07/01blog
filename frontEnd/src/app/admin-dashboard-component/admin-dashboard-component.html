@@ -203,6 +203,25 @@
         </div>
       </header>
 
+      <div class="search-bar-container">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by username, first name, or last name..."
+          [(ngModel)]="searchTerm"
+          (keyup.escape)="searchTerm.set('')"
+        />
+        <button
+          *ngIf="searchTerm()"
+          class="clear-btn"
+          (click)="searchTerm.set('')"
+          [attr.aria-label]="'Clear search'"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
       <div class="card table-card">
         <table class="data-table">
           <thead>
@@ -217,7 +236,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of users()" [class]="u.status ? 'row-active' : 'row-banned'">
+            <tr *ngFor="let u of filteredUsers()" [class]="u.status ? 'row-active' : 'row-banned'">
               <td>
                 <div class="user-cell">
                   <div class="avatar avatar-sm" [class]="u.status ? 'active' : 'banned'">

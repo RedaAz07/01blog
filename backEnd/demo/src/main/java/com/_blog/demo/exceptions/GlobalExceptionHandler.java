@@ -98,10 +98,7 @@ public ResponseEntity<Object> handleBanned(LockedException ex) {
     // ────────────────────────────────────────────────────────
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllOtherExceptions(Exception ex) {
-        // Log the exact error to your console so you can fix it later
-        System.err.println("---------------------------------------------------------");
-        System.err.println(ex);
-        System.err.println("---------------------------------------------------------");
+
 
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred on the server.");
     }
