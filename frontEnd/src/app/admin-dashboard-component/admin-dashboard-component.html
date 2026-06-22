@@ -416,8 +416,8 @@
             <div class="avatar avatar-sm">{{ r.reported.charAt(0) }}</div>
             <div class="report-info">
               <div class="report-title-row">
-                <span class="report-target">{{ r.reported }}</span>
-                <span class="report-type-badge" [class]="r.type">{{ r.type }}</span>
+                <span class="report-target">{{ reportTargetLabel(r) }}</span>
+                <span class="report-type-badge" [class]="r.type.toLowerCase()">{{ r.type }}</span>
               </div>
               <p class="report-reason">{{ r.reasen }}</p>
               <p class="report-by">
@@ -430,13 +430,38 @@
               r.status ? 'resolved' : 'pending'
             }}</span>
             <div class="action-btns" *ngIf="!r.status">
-              <button
-                class="icon-btn resolve"
-                [matTooltip]="'Resolve'"
-                (click)="openResolveConfermation(r)"
-              >
-                <mat-icon>check_circle_outline</mat-icon>
-              </button>
+              <ng-container *ngIf="isPostReport(r); else userReportActions">
+                <button
+                  class="icon-btn warn"
+                  [matTooltip]="'Hide post'"
+                  (click)="openReportActionConfirm(r, 'hide')"
+                >
+                  <mat-icon>visibility_off</mat-icon>
+                </button>
+                <button
+                  class="icon-btn delete"
+                  [matTooltip]="'Delete post'"
+                  (click)="openReportActionConfirm(r, 'delete')"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </ng-container>
+              <ng-template #userReportActions>
+                <button
+                  class="icon-btn ban"
+                  [matTooltip]="'Ban user'"
+                  (click)="openReportActionConfirm(r, 'ban')"
+                >
+                  <mat-icon>block</mat-icon>
+                </button>
+                <button
+                  class="icon-btn delete"
+                  [matTooltip]="'Delete user'"
+                  (click)="openReportActionConfirm(r, 'delete')"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </ng-template>
             </div>
           </div>
         </div>

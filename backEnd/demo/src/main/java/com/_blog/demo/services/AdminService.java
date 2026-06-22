@@ -65,12 +65,15 @@ public class AdminService {
 
         return reports.map(p -> new ReportsDTO(
                 p.getId(),
+                p.getReported().getId(),
+                p.getReportedPost() != null ? p.getReportedPost().getId() : null,
                 p.getReported().getUsername(),
                 p.getReporter().getUsername(),
                 p.getReason(),
                 p.getTimestamp(),
                 p.isStatus(),
-                p.getReportedPost() != null ? "POST" : "USER"));
+                p.getReportedPost() != null ? "POST" : "USER",
+                p.getReportedPost() != null ? p.getReportedPost().getId() : null));
     }
 
     public String ResolveReports(Long id) {

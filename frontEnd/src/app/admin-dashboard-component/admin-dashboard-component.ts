@@ -449,44 +449,223 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  openResolveConfermation(report: ReportDTO) {
+  isPostReport(report: ReportDTO): boolean {
+    return report.type?.toUpperCase() === 'POST';
+  }
+
+  reportTargetLabel(report: ReportDTO): string {
+    if (this.isPostReport(report)) {
+      return report.reportedPostId != null
+        ? `Post #${report.reportedPostId} by @${report.reported}`
+        : `Reported post by @${report.reported}`;
+    }
+
+    return `@${report.reportedUserId}`;
+  }
+
+  reportActionLabel(report: ReportDTO, action: 'hide' | 'delete' | 'ban'): string {
+    if (this.isPostReport(report)) {
+      return action === 'hide' ? 'Hide post' : 'Delete post';
+    }
+
+    return action === 'ban' ? 'Ban user' : 'Delete user';
+  }
+
+  openReportActionConfirm(report: ReportDTO, action: 'hide' | 'delete' | 'ban') {
+    const actionLabel = this.reportActionLabel(report, action);
+    const targetLabel = this.reportTargetLabel(report);
+
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
       data: {
-        title: 'Delete User',
-        message: `This action will permanently resolve this Reports. Continue?`,
+        title: actionLabel,
+        message: `This will ${action === 'hide' ? 'hide' : action === 'delete' ? 'delete' : 'ban'} ${targetLabel} and mark the report as solved. Continue?`,
       },
     });
 
     ref.afterClosed().subscribe((result) => {
       if (result) {
-        this.resolveReport(report);
+        this.executeReportAction(report, action);
       }
     });
   }
 
-  resolveReport(report: ReportDTO) {
+  private executeReportAction(report: ReportDTO, action: 'hide' | 'delete' | 'ban') {
+    if (this.isPostReport(report)) {
+      const postId = report.reportedPostId;
+      if (postId == null) {
+        this.snackbar.open('This report does not include a post id.', 'Close', { duration: 3000 });
+        return;
+      }
+
+      if (action === 'delete' && !report.status) {
+        this.adminService.ResolveReport(report.id).subscribe({
+          next: () => {
+            this.setReportResolvedLocally(report);
+            this.deleteReportedPost(report, postId, true);
+          },
+          error: () => {},
+        });
+        return;
+      }
+
+      const request = action === 'delete' ? this.adminService.deletePost(postId) : this.adminService.hidePost(postId);
+
+      request.subscribe({
+        next: () => {
+          this.updatePostAfterReportAction(postId, action);
+          this.finishResolvedReport(report, `${this.reportActionLabel(report, action)} completed`);
+        },
+        error: () => {},
+      });
+      return;
+    }
+
+    const username = report.reported;
+    if (action === 'delete' && !report.status) {
+      this.adminService.ResolveReport(report.id).subscribe({
+        next: () => {
+          this.setReportResolvedLocally(report);
+          this.deleteReportedUser(report, username, true);
+        },
+        error: () => {},
+      });
+      return;
+    }
+
+    const request = action === 'delete' ? this.adminService.deleteUser(username) : this.adminService.banUser(username);
+
+    request.subscribe({
+      next: () => {
+        this.updateUserAfterReportAction(username, action);
+        this.finishResolvedReport(report, `${this.reportActionLabel(report, action)} completed`);
+      },
+      error: () => {},
+    });
+  }
+
+  private deleteReportedPost(report: ReportDTO, postId: number, reportWasResolved = false) {
+    this.adminService.deletePost(postId).subscribe({
+      next: () => {
+        this.updatePostAfterReportAction(postId, 'delete');
+        if (reportWasResolved) {
+          this.snackbar.open(`${this.reportActionLabel(report, 'delete')} completed and report solved`, 'Close', {
+            duration: 3000,
+          });
+          return;
+        }
+
+        this.finishResolvedReport(report, `${this.reportActionLabel(report, 'delete')} completed`);
+      },
+      error: () => {},
+    });
+  }
+
+  private deleteReportedUser(report: ReportDTO, username: string, reportWasResolved = false) {
+    this.adminService.deleteUser(username).subscribe({
+      next: () => {
+        this.updateUserAfterReportAction(username, 'delete');
+        if (reportWasResolved) {
+          this.snackbar.open(`${this.reportActionLabel(report, 'delete')} completed and report solved`, 'Close', {
+            duration: 3000,
+          });
+          return;
+        }
+
+        this.finishResolvedReport(report, `${this.reportActionLabel(report, 'delete')} completed`);
+      },
+      error: () => {},
+    });
+  }
+
+  private setReportResolvedLocally(report: ReportDTO) {
+    this.reports.update((list) => {
+      const updated = list.map((item) => (item.id === report.id ? { ...item, status: true } : item));
+
+      return updated.filter((item) => {
+        if (this.reportFilter === 'resolved') return item.status === true;
+        if (this.reportFilter === 'pending') return item.status === false;
+        return true;
+      });
+    });
+  }
+
+  private updatePostAfterReportAction(postId: number, action: 'hide' | 'delete' | 'ban') {
+    if (action === 'delete') {
+      this.Posts.update((list) => list.filter((post) => post.id !== postId));
+      return;
+    }
+
+    this.Posts.update((list) =>
+      list.map((post) => (post.id === postId ? { ...post, status: !post.status } : post)),
+    );
+    this.Posts.update((list) => {
+      if (this.currentPostFilter === 'visible') return list.filter((post) => post.status === true);
+      if (this.currentPostFilter === 'hidden') return list.filter((post) => post.status === false);
+      return list;
+    });
+  }
+
+  private updateUserAfterReportAction(username: string, action: 'hide' | 'delete' | 'ban') {
+    if (action === 'delete') {
+      this.users.update((list) => list.filter((user) => user.username !== username));
+      this.topReportedUsers.update((list) => list.filter((user) => user.username !== username));
+      return;
+    }
+
+    this.users.update((list) =>
+      list.map((user) => (user.username === username ? { ...user, status: !user.status } : user)),
+    );
+    this.topReportedUsers.update((list) =>
+      list.map((user) => (user.username === username ? { ...user, status: !user.status } : user)),
+    );
+    this.users.update((list) => {
+      if (this.currentFilter === 'active') return list.filter((user) => user.status === true);
+      if (this.currentFilter === 'banned') return list.filter((user) => user.status === false);
+      return list;
+    });
+  }
+
+  private finishResolvedReport(report: ReportDTO, successMessage: string) {
+    if (report.status) {
+      this.snackbar.open(successMessage, 'Close', { duration: 3000 });
+      return;
+    }
+
     this.adminService.ResolveReport(report.id).subscribe({
       next: () => {
         this.reports.update((list) => {
-          const updated = list.map((p) => (p.id === report.id ? { ...p, status: !p.status } : p));
+          const updated = list.map((item) => (item.id === report.id ? { ...item, status: true } : item));
 
-          return updated.filter((p) => {
-            if (this.reportFilter === 'resolved') return p.status === true;
-            if (this.reportFilter === 'pending') return p.status === false;
+          return updated.filter((item) => {
+            if (this.reportFilter === 'resolved') return item.status === true;
+            if (this.reportFilter === 'pending') return item.status === false;
             return true;
           });
         });
 
-        this.snackbar.open(
-          `Report ${report.status ? 'Resolved' : 'Unresolved'}  succefully`,
-          'close',
-          {
-            duration: 3000,
-          },
-        );
+        this.snackbar.open(`${successMessage} and report solved`, 'Close', { duration: 3000 });
       },
-      error: () => {},
+      error: () => {
+        
+        this.snackbar.open(`${successMessage}, but report solving failed`, 'Close', { duration: 4000 });
+      },
+    });
+  }
+
+  openResolveConfermation(report: ReportDTO) {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '350px',
+      data: {
+        title: 'Resolve Report',
+        message: `This action will permanently resolve this report. Continue?`,
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        this.finishResolvedReport(report, 'Report resolved');
+      }
     });
   }
 

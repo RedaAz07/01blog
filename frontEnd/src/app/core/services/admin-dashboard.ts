@@ -25,12 +25,15 @@ export interface PostDTO {
 }
 export interface ReportDTO {
   id: number;
+  reportedUserId: number;
+  reportedPostId?: number | null;
   reported: string;
   reporter: string;
   reasen: string;
   date: string;
   status: boolean;
   type: string;
+  reportedPost?: number | null;
 }
 
 export interface PageReportResponse {
