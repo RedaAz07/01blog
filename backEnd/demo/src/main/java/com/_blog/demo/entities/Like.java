@@ -2,6 +2,7 @@ package com._blog.demo.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,11 +23,11 @@ public class Like {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // <-- You need this line!
     @Column(name = "id", nullable = false)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 }

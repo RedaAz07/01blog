@@ -31,7 +31,6 @@ public class AdminSeeder {
                 admin.setStatus(true); 
                 
                 userRepository.save(admin);
-                System.out.println("✅ SYSTEM: Admin account automatically generated!");
             }
         };
     }

@@ -23,19 +23,6 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<userDTO> findAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map(user -> {
-            userDTO dto = new userDTO();
-            dto.setUsername(user.getUsername());
-            dto.setEmail(user.getEmail());
-            dto.setFirstName(user.getFirstName());
-            dto.setLastName(user.getLastName());
-            dto.setBirthDate(user.getBirthDate());
-            dto.setProfilePictureUrl(user.getProfilePictureUrl());
-            return dto;
-        }).toList();
-    }
 
     public String registerNewUser(RegisterRequestDTO request) {
         if (userRepository.existsByUsername(request.getUsername())) {

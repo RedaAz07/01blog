@@ -4,6 +4,7 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,22 +30,18 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     private boolean isRead;
 
-    // It is very important to know exactly WHEN the notification was sent!
     @Column(name = "timestamp", nullable = false)
     private Date timestamp;
 
-    // The person who made the post
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    // The specific follower receiving this copy of the notification
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
 
-    // THE MISSING PIECE: Which post is this notification about?
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 }

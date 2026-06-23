@@ -27,11 +27,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/allUsers") // This method will handle GET requests to /api/users/allUsers
-    public List<userDTO> getMethodName() {
-
-        return userService.findAllUsers();
-    }
+   
 
     @GetMapping("/me")
     public userDTO getCurrentUser(Principal principal) {
