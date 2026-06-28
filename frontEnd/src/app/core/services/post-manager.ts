@@ -73,8 +73,14 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
       return;
     }
 
-    isSubmitting.set(true);
+    // Capture the currently editing post before closing the modal
     const currentEdit = editingPost();
+
+    // Close modal immediately so user returns to home, but keep the captured edit
+    postModalOpen.set(false);
+    editingPost.set(null);
+
+    isSubmitting.set(true);
     if (currentEdit) {
       // ══════════════════════════════
       //  UPDATE POST LOGIC

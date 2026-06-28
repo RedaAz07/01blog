@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { NotFound } from './not-found/not-found';
 import { Login } from './login/login';
 import { Home } from './home/home';
 import { Register } from './register/register';
@@ -24,6 +23,5 @@ export const routes: Routes = [
       { path: 'dashboard', canActivate: [roleGuard], component: AdminDashboardComponent },
     ],
   },
-  { path: 'not-found', component: NotFound },
-  { path: '**', redirectTo: 'not-found' },
+  { path: '**', redirectTo: 'home' },
 ];
