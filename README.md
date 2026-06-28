@@ -23,7 +23,6 @@ This project can grow into a modern content platform with features such as:
 ## Technologies Used
 ### DataBase
 - PostgreSQL
-
 ### Backend
 - Java 17
 - Spring Boot 4
@@ -40,7 +39,6 @@ This project can grow into a modern content platform with features such as:
 - Angular 21
 - Angular Material
 - RxJS
-- Editor.js rich text editor
 - TypeScript
 - Vitest for unit testing
 
@@ -68,12 +66,7 @@ docker compose up -d
 
 5. The backend will start on the configured port (usually `http://localhost:8080`).
 
-> The backend uses PostgreSQL with the following default settings configured in `src/main/resources/application.properties`:
->
-> - `spring.datasource.url=jdbc:postgresql://localhost:5432/blog_db`
-> - `spring.datasource.username=bloguser`
-> - `spring.datasource.password=blogpassword`
->
+
 > The Docker Compose service is defined in `backEnd/demo/docker-compose.yml`.
 
 ## Running the Frontend
@@ -102,8 +95,4 @@ npm start
 http://localhost:4200
 ```
 
-## Notes
 
-- The backend and frontend can run simultaneously in development.
-- Configure API endpoints in the Angular app if the backend is not running on the default host and port.
-- For production deployment, build the frontend (`npm run build`) and serve the generated `dist/` content through a web server or integrate it with the backend.
