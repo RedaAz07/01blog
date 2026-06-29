@@ -94,5 +94,24 @@ npm start
 ```text
 http://localhost:4200
 ```
+> If you don't have the Angular CLI installed, you should install it first.
 
+Run the following command:
 
+```bash
+npm install -g @angular/cli
+```
+> If it doesn't work because it requires elevated permissions (sudo), you can use NVM (Node Version Manager) instead:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+
+source ~/.zshrc
+
+nvm install --lts
+
+nvm use --lts
+
+npm install -g @angular/cli
+
+```
