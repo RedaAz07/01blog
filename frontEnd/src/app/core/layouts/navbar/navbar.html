@@ -43,17 +43,6 @@
       <span>Dashboard</span>
     </a>
 
-    <button
-      class="theme-btn"
-      type="button"
-      (click)="toggleTheme()"
-      [attr.aria-label]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
-      [attr.title]="themeService.isDark() ? 'Light mode' : 'Dark mode'"
-    >
-      <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-      <span>{{ themeService.isDark() ? 'Light' : 'Dark' }}</span>
-    </button>
-
     <!-- Notifications Bell -->
     <div>
       <button class="notif-btn" (click)="toggleNotifications()">

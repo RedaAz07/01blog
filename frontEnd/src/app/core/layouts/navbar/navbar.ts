@@ -16,7 +16,7 @@ import {
 import { AuthService, UserProfileDTO } from '../../services/auth';
 import { NotificationDTO, NotificationService } from '../../services/notification';
 import { GlobalSearchDTO, SearchService } from '../../services/search';
-import { ThemeService } from '../../services/theme';
+
 
 @Component({
   selector: 'app-navbar',
@@ -37,7 +37,7 @@ export class Navbar implements OnInit {
   authService =  inject(AuthService);
   notificationService = inject(NotificationService);
   searchService = inject(SearchService);
-  themeService = inject(ThemeService);  
+
   
   ngOnInit() {
     this.authService.currentUser$.subscribe((user) => {
@@ -64,9 +64,6 @@ export class Navbar implements OnInit {
   }
   closeNotifications(): void {
     this.notifOpen = false;
-  }
-  toggleTheme(): void {
-    this.themeService.toggleTheme();
   }
 
   loadMore(): void {
