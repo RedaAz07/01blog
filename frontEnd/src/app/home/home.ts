@@ -94,11 +94,14 @@ export class Home implements OnInit, OnDestroy {
   followService = inject(Follow);
 
   toggleFollow(user: any): void {
+    const previousState = user.followingBYMe;
     user.followingBYMe = !user.followingBYMe;
     this.followService.toggleFollow(user.username).subscribe({
-      next: () => {
+      next: (res) => {
+        user.followingBYMe = res.isFollowing;
+        user.followers = res.followersCount;
         this.snackbar.open(
-          user.followingBYMe
+          res.isFollowing
             ? `You are now following ${user.username}`
             : `You have unfollowed ${user.username}`,
           'Close',
@@ -106,8 +109,7 @@ export class Home implements OnInit, OnDestroy {
         );
       },
       error: (err) => {
-
-        user.followingBYMe = !user.followingBYMe;
+        user.followingBYMe = previousState;
       },
     });
   }

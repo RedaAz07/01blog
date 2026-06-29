@@ -78,12 +78,7 @@ export class PostService {
       .set('page', pageNumber.toString())
       .set('size', pageSize.toString());
 
-    return this.http.get<PageResponse>(`${this.apiUrl}owner/${username}`, { params }).pipe(
-      tap((response) => {
-        const currentPosts = this.postSubject.value;
-        this.postSubject.next([...currentPosts, ...response.content]);
-      }),
-    );
+    return this.http.get<PageResponse>(`${this.apiUrl}owner/${username}`, { params });
   }
 
   updatePost(data: FormData): Observable<PostResponseDTO> {

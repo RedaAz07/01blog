@@ -262,7 +262,7 @@ export class Profile implements OnInit {
     this.showReportModal = false;
   }
 
-  freindsList(type: 'followers' | 'following'): void {
+  friendsList(type: 'followers' | 'following'): void {
     if (type === 'followers') {
       this.showFollowersModal = true;
       this.authService.followers(this.user()?.username ?? '').subscribe((list) => {

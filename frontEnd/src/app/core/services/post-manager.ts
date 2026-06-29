@@ -36,7 +36,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
   const reportPost = (post: any) => {
     const dialogRef = dialog.open(ReportDialogComponent, {
       width: '400px',
-      data: { targetName: '@' + post.id }, // Passes the username to the dialog UI
+      data: { targetName: '@' + post.authorUsername }, // Passes the username to the dialog UI
     });
     dialogRef.afterClosed().subscribe((finalReason: string) => {
       if (!finalReason) return;
@@ -151,7 +151,7 @@ export function usePostManager(postsSignal: WritableSignal<any[]>) {
     const ref = dialog.open(ConfirmDialog, {
       width: '350px',
       data: {
-        title: 'Delete User',
+        title: 'Delete Post',
         message: `This action will permanently remove  this post. Continue?`,
       },
     });

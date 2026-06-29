@@ -52,7 +52,12 @@ export class AuthService {
       const token = localStorage.getItem('jwt_token');
       if (token) {
         this.loggedInSubject.next(true);
-        this.loadCurrentUser().subscribe({});
+        this.loadCurrentUser().subscribe({
+          error: () => {
+            localStorage.removeItem('jwt_token');
+            this.loggedInSubject.next(false);
+          },
+        });
       }
     }
 
@@ -61,7 +66,12 @@ export class AuthService {
       tap((response) => {
         localStorage.setItem('jwt_token', response.token); // No more SSR checks!
         this.loggedInSubject.next(true);
-        this.loadCurrentUser().subscribe();
+        this.loadCurrentUser().subscribe({
+          error: () => {
+            localStorage.removeItem('jwt_token');
+            this.loggedInSubject.next(false);
+          },
+        });
       }),
     );
   }
@@ -69,6 +79,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('jwt_token'); // Trash it
     this.loggedInSubject.next(false);
+    this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
 
@@ -101,5 +112,10 @@ export class AuthService {
   editProfile(username: string, data: Partial<UserProfileDTO>): Observable<UserProfileDTO> {
     return this.http
       .put<UserProfileDTO>(`http://localhost:8080/api/users/edit/${username}`, data)
+      .pipe(
+        tap((updatedProfile) => {
+          this.currentUserSubject.next(updatedProfile);
+        }),
+      );
   }
 }

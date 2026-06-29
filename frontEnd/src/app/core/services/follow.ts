@@ -3,7 +3,7 @@ import { UserProfileDTO } from './auth';
 import { Observable } from 'rxjs/internal/Observable';
 import { HttpClient } from '@angular/common/http';
 
-interface ToggleFollowResponse {
+export interface ToggleFollowResponse {
   isFollowing: boolean;
   followersCount: number;
 }
