@@ -84,10 +84,10 @@ public class UserService {
             dto.setLastName(user.getLastName());
             dto.setBirthDate(user.getBirthDate());
             dto.setProfilePictureUrl(user.getProfilePictureUrl());
-            dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
-                    userRepository.findByUsername(username)
-                            .orElseThrow(() -> ApiException.notFound("User not found with username: " + username))
-                            .getId())));
+            User currentUserForSuggestion = userRepository.findByUsername(username)
+                    .orElseThrow(() -> ApiException.notFound("User not found with username: " + username));
+            dto.setFollowingBYMe(currentUserForSuggestion.getFollowing().stream()
+                    .anyMatch(followed -> followed.getId().equals(user.getId())));
             return dto;
         }).toList();
 
@@ -108,10 +108,10 @@ public class UserService {
         dto.setFollowing(user.getFollowing().size());
         dto.setBio(user.getBio());
         dto.setStatus(user.isStatus());
-        dto.setFollowingBYMe(user.getFollowers().stream().anyMatch(follower -> follower.getId().equals(
-                userRepository.findByUsername(currentUsername)
-                        .orElseThrow(() -> ApiException.notFound("User not found with username: " + currentUsername))
-                        .getId())));
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> ApiException.notFound("User not found with username: " + currentUsername));
+        dto.setFollowingBYMe(currentUser.getFollowing().stream()
+                .anyMatch(followed -> followed.getId().equals(user.getId())));
         dto.setProfilePictureUrl(user.getProfilePictureUrl());
         return dto;
     }

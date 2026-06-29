@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com._blog.demo.dto.follow.FollowResponseDTO;
+import com._blog.demo.dto.follow.ToggleFollowDTO;
 import com._blog.demo.entities.User;
 import com._blog.demo.exceptions.ApiException;
 import com._blog.demo.repositories.UserRepository;
@@ -20,7 +21,7 @@ public class FollowService {
     }
 
     @Transactional
-    public boolean toggleFollow(String myUsername, String targetUsername) {
+    public ToggleFollowDTO toggleFollow(String myUsername, String targetUsername) {
 
         if (myUsername.equals(targetUsername)) {
             throw ApiException.badRequest("You cannot follow yourself.");
@@ -34,12 +35,14 @@ public class FollowService {
 
         if (me.getFollowing().contains(targetUser)) {
             me.getFollowing().remove(targetUser);
+            targetUser.getFollowers().remove(me);
             userRepository.save(me);
-            return false;
+            return new ToggleFollowDTO(false, targetUser.getFollowers().size());
         } else {
             me.getFollowing().add(targetUser);
+            targetUser.getFollowers().add(me);
             userRepository.save(me);
-            return true;
+            return new ToggleFollowDTO(true, targetUser.getFollowers().size());
         }
     }
 

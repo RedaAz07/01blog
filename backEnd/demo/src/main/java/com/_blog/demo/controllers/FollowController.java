@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com._blog.demo.dto.follow.FollowResponseDTO;
+import com._blog.demo.dto.follow.ToggleFollowDTO;
 import com._blog.demo.services.FollowService;
 
 @RestController
@@ -24,10 +25,11 @@ public class FollowController {
     }
 
     @PostMapping("/follow/{targetUsername}")
-    public ResponseEntity<Boolean> followUser(@PathVariable String targetUsername, Principal principal) {
+    public ResponseEntity<ToggleFollowDTO> followUser(@PathVariable String targetUsername, Principal principal) {
         String myUsername = principal.getName();
 
-        boolean response = followService.toggleFollow(myUsername, targetUsername);
+        ToggleFollowDTO response = followService.toggleFollow(myUsername, targetUsername);
+
 
         return ResponseEntity.ok(response);
     }

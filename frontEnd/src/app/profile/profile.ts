@@ -140,7 +140,7 @@ export class Profile implements OnInit {
     this.authService.profile(username).subscribe({
       next: (profile: any) => {
         this.user.set(profile);
-        this.isFollowing.set(profile.FollowingBYMe);
+        this.isFollowing.set(profile.followingBYMe);
       },
       error: (err) => {
         this.router.navigate(['/home']);
@@ -208,12 +208,13 @@ export class Profile implements OnInit {
     this.followService.toggleFollow(this.user()?.username ?? '').subscribe({
       next: (res) => {
 
-        this.isFollowing.set(res);
+        this.isFollowing.set(res.isFollowing);
         const userData = this.user();
         if (userData) {
-          userData.followers += res ? 1 : -1;
+          userData.followers = res.followersCount;
+          userData.followingBYMe = res.isFollowing;
           this.user.set({ ...userData });
-          this.snackbar.open(res ? 'followed successfully!' : 'UnFollowed successfully!', 'Close', {
+          this.snackbar.open(res.isFollowing ? 'followed successfully!' : 'UnFollowed successfully!', 'Close', {
             duration: 3000,
           });
         }

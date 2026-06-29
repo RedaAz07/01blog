@@ -2,6 +2,8 @@ package com._blog.demo.dto;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +22,7 @@ public class userDTO {
     int followers;
     int following;
     int notifications;
+    @JsonProperty("followingBYMe")
     boolean FollowingBYMe;
     String bio;
     boolean status;
