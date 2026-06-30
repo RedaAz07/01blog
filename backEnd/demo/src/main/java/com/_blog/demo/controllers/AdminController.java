@@ -66,7 +66,7 @@ public class AdminController {
     }
 
     @PutMapping("/hidePost/{id}")
-    public ResponseEntity<Response> banPost(@PathVariable String id) {
+    public ResponseEntity<Response> hidePost(@PathVariable String id) {
 
         String res = AdminService.hidePost(id);
         return ResponseEntity.ok(new Response(res));

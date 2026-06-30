@@ -35,7 +35,6 @@ import { ConfirmDialog } from '../components/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { TimeAgoPipe } from '../time-ago-pipe';
-import { single } from 'rxjs';
 import { CommentResponseDTO, Comment } from '../core/services/comment';
 
 export interface StatCard {
@@ -216,6 +215,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
   ) {}
   ngOnInit() {
+    this.today = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
     this.adminService.getTotals().subscribe((totals) => {
 
       this.totals.set(totals);
@@ -251,6 +257,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.Posts.update((current: PostDTO[]) => [...current, ...res.content]);
         this.isPostsLoading = false;
       },
+      error: () => {
+        this.isPostsLoading = false;
+      },
     });
   }
 
@@ -271,6 +280,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.users.update((current: UsersDTO[]) => [...current, ...res.content]);
         this.isUsersLoading = false;
       },
+      error: () => {
+        this.isUsersLoading = false;
+      },
     });
   }
   loadReports() {
@@ -288,6 +300,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       next: (res: PageReportResponse) => {
         this.currentReportPage++;
         this.reports.update((current: ReportDTO[]) => [...current, ...res.content]);
+        this.isReportsLoading = false;
+      },
+      error: () => {
         this.isReportsLoading = false;
       },
     });
@@ -353,11 +368,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             return true;
           });
         });
-        this.snackbar.open(`user ${user.status ? 'banned' : 'unbanned'} seccefelly`, 'Close', {
+        this.snackbar.open(`user ${user.status ? 'banned' : 'unbanned'} successfully`, 'Close', {
           duration: 3000,
         });
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to update user status. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
   openDeleteConfirm(user: UsersDTO) {
@@ -379,18 +396,20 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminService.deleteUser(user.username).subscribe({
       next: () => {
         this.users.update((list) => list.filter((u) => u.username !== user.username));
-        this.snackbar.open('user Delleted  seccefelly', 'Close', { duration: 3000 });
+        this.snackbar.open('User deleted successfully', 'Close', { duration: 3000 });
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to delete user. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
 
-  openHideConfermation(Post: PostDTO) {
+  openHideConfirmation(Post: PostDTO) {
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
       data: {
-        title: 'Delete User',
-        message: `This action will permanently hide this post. Continue?`,
+        title: 'Hide Post',
+        message: `This action will ${Post.status ? 'hide' : 'unhide'} this post. Continue?`,
       },
     });
 
@@ -400,11 +419,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
-  openDeleteConfermation(Post: PostDTO) {
+  openDeleteConfirmation(Post: PostDTO) {
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
       data: {
-        title: 'Delete User',
+        title: 'Delete Post',
         message: `This action will permanently delete this post. Continue?`,
       },
     });
@@ -420,11 +439,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.adminService.deletePost(Post.id).subscribe({
       next: () => {
         this.Posts.update((list) => list.filter((p) => p.id != Post.id));
-        this.snackbar.open(`Post deleted succefully`, 'close', {
+        this.snackbar.open(`Post deleted successfully`, 'Close', {
           duration: 3000,
         });
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to delete post. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
 
@@ -441,11 +462,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           });
         });
 
-        this.snackbar.open(`Post ${Post.status ? 'hide' : 'unhide '}  succefully`, 'close', {
+        this.snackbar.open(`Post ${Post.status ? 'hidden' : 'shown'} successfully`, 'Close', {
           duration: 3000,
         });
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to update post visibility. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
 
@@ -504,7 +527,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             this.setReportResolvedLocally(report);
             this.deleteReportedPost(report, postId, true);
           },
-          error: () => {},
+          error: () => {
+            this.snackbar.open('Failed to resolve report. Please try again.', 'Close', { duration: 4000 });
+          },
         });
         return;
       }
@@ -516,7 +541,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.updatePostAfterReportAction(postId, action);
           this.finishResolvedReport(report, `${this.reportActionLabel(report, action)} completed`);
         },
-        error: () => {},
+        error: () => {
+          this.snackbar.open(`Failed to ${action} post. Please try again.`, 'Close', { duration: 4000 });
+        },
       });
       return;
     }
@@ -528,7 +555,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.setReportResolvedLocally(report);
           this.deleteReportedUser(report, username, true);
         },
-        error: () => {},
+        error: () => {
+          this.snackbar.open('Failed to resolve report. Please try again.', 'Close', { duration: 4000 });
+        },
       });
       return;
     }
@@ -540,7 +569,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.updateUserAfterReportAction(username, action);
         this.finishResolvedReport(report, `${this.reportActionLabel(report, action)} completed`);
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open(`Failed to ${action} user. Please try again.`, 'Close', { duration: 4000 });
+      },
     });
   }
 
@@ -557,7 +588,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
         this.finishResolvedReport(report, `${this.reportActionLabel(report, 'delete')} completed`);
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to delete post. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
 
@@ -574,7 +607,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
         this.finishResolvedReport(report, `${this.reportActionLabel(report, 'delete')} completed`);
       },
-      error: () => {},
+      error: () => {
+        this.snackbar.open('Failed to delete user. Please try again.', 'Close', { duration: 4000 });
+      },
     });
   }
 
@@ -653,7 +688,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  openResolveConfermation(report: ReportDTO) {
+  openResolveConfirmation(report: ReportDTO) {
     const ref = this.dialog.open(ConfirmDialog, {
       width: '350px',
       data: {
@@ -748,8 +783,5 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     if (this.PostObserver) this.PostObserver.disconnect();
     if (this.ReportObserver) this.ReportObserver.disconnect();
     if (this.commentObserver) this.commentObserver.disconnect();
-  }
-  userSearchTerm(){
-    return signal('');
   }
 }

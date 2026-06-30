@@ -113,11 +113,7 @@ export class PostFeed implements OnInit, OnDestroy {
           
           this.cdr.detectChanges(); // Safely apply backend source of truth
         }
-        this.snackbar.open(
-          `Post ${response.isLiked ? 'liked' : 'disliked'} successfully`,
-          'Close',
-          { duration: 3000 },
-        );
+       
       },
       error: (error) => {
         this.post.isLiked = wasLiked;
@@ -125,7 +121,6 @@ export class PostFeed implements OnInit, OnDestroy {
         
         this.cdr.detectChanges();
 
-        this.snackbar.open('Failed to like this post', 'Close', { duration: 3000 });
       },
     });
   }

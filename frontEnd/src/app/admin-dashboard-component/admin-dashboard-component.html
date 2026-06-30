@@ -358,14 +358,14 @@
               <button
                 class="icon-btn warn"
                 [matTooltip]="p.status ? 'Hide post' : 'Unhide post'"
-                (click)="openHideConfermation(p)"
+                (click)="openHideConfirmation(p)"
               >
                 <mat-icon>{{ p.status ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
               <button
                 class="icon-btn delete"
                 [matTooltip]="'Remove post'"
-                (click)="openDeleteConfermation(p)"
+                (click)="openDeleteConfirmation(p)"
               >
                 <mat-icon>delete_outline</mat-icon>
               </button>
@@ -383,7 +383,7 @@
       <header class="page-header">
         <div>
           <h1 class="page-title">Report Queue</h1>
-          <p class="page-sub">{{ totals().reports }} reports awaiting review</p>
+          <p class="page-sub">{{ totals().reports }} total reports in queue</p>
         </div>
         <div class="filter-pills">
           <button
