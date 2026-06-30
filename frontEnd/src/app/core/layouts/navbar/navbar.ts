@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core'; 
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,10 +9,10 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  map,
   of,
   switchMap,
-} from 'rxjs'; 
+  takeUntil,
+} from 'rxjs';
 import { AuthService, UserProfileDTO } from '../../services/auth';
 import { NotificationDTO, NotificationService } from '../../services/notification';
 import { GlobalSearchDTO, SearchService } from '../../services/search';
@@ -25,24 +25,30 @@ import { GlobalSearchDTO, SearchService } from '../../services/search';
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.scss'],
 })
-export class Navbar implements OnInit {
+export class Navbar implements OnInit, OnDestroy {
   searchQuery = '';
   notifOpen = false;
   currentPage = 0;
   isLastPage = false;
   isLoading = false;
   currentUser = signal<UserProfileDTO | null>(null);
-
-
-  authService =  inject(AuthService);
+  authService = inject(AuthService);
   notificationService = inject(NotificationService);
   searchService = inject(SearchService);
 
-  
+  isSearchOpen = false;
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  searchResults$!: Observable<GlobalSearchDTO | null>;
+
   ngOnInit() {
-    this.authService.currentUser$.subscribe((user) => {
-      this.currentUser.set(user);
-    });
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.currentUser.set(user);
+      });
 
     this.loadMore();
     this.searchResults$ = this.searchSubject.pipe(
@@ -56,12 +62,24 @@ export class Navbar implements OnInit {
         this.isSearchOpen = true;
         return this.searchService.search(query).pipe(catchError(() => of(null)));
       }),
+      takeUntil(this.destroy$),
     );
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.searchSubject.complete();
   }
 
   toggleNotifications(): void {
     this.notifOpen = !this.notifOpen;
+    // Close search when opening notifications to avoid overlapping popups
+    if (this.notifOpen) {
+      this.closeSearch();
+    }
   }
+
   closeNotifications(): void {
     this.notifOpen = false;
   }
@@ -69,62 +87,74 @@ export class Navbar implements OnInit {
   loadMore(): void {
     if (this.isLoading || this.isLastPage) return;
     this.isLoading = true;
-    this.notificationService.fetchNotifications(this.currentPage, 5).subscribe({
-      next: (response) => {
-        this.isLastPage = response.last;
-        this.currentPage++;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.isLoading = false;
-      },
-    });
+    this.notificationService
+      .fetchNotifications(this.currentPage, 5)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isLastPage = response.last;
+          this.currentPage++;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
   }
 
   markRead(n: NotificationDTO): void {
     if (n.isRead) return;
-    this.notificationService.markAsRead(n.id).subscribe();
+
+    // Optimistic update
     this.currentUser.update((u) => {
       if (!u) return u;
       return {
         ...u,
-        notifications: u.notifications - 1,
+        notifications: Math.max(0, u.notifications - 1),
       };
     });
-    
+
+    this.notificationService.markAsRead(n.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        error: () => {
+          // Rollback on failure
+          this.currentUser.update((u) => {
+            if (!u) return u;
+            return {
+              ...u,
+              notifications: u.notifications + 1,
+            };
+          });
+        },
+      });
   }
 
   clearAll(): void {
-    this.isLastPage = true;
-    this.currentPage = 0;
-    this.isLoading = false;
-    this.notificationService.clearAll().subscribe(
-      {
-      next: () => {
-      this.currentUser.update((u) => {
-        if (!u) return u;
-        return {
-          ...u,
-          notifications: 0,
-        };
+    this.notificationService.clearAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.currentUser.update((u) => {
+            if (!u) return u;
+            return {
+              ...u,
+              notifications: 0,
+            };
+          });
+          // Reset pagination state since the list is now empty
+          this.isLastPage = false;
+          this.currentPage = 0;
+        },
+        error: () => {
+          // Clear failed silently — user can retry
+        },
       });
-
-    },
-    
-  });
   }
 
   toggleProfileSidebar(): void {}
 
-  
-
-  //searchh
-
-  isSearchOpen = false;
-
-  private searchSubject = new Subject<string>();
-
-  searchResults$!: Observable<GlobalSearchDTO | null>;
+  // ---- Search ----
 
   onSearch(): void {
     this.searchSubject.next(this.searchQuery);
@@ -138,5 +168,15 @@ export class Navbar implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  // ---- trackBy helpers for *ngFor performance ----
+
+  trackByUserId(_index: number, user: { id: number }): number {
+    return user.id;
+  }
+
+  trackByNotificationId(_index: number, n: NotificationDTO): number {
+    return n.id;
   }
 }

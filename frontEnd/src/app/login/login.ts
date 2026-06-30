@@ -23,11 +23,11 @@ export class Login {
   showPassword: boolean = false; 
   
   snackbar = inject(MatSnackBar);
-
+ fb =  inject(FormBuilder);
+  authService = inject(AuthService);
+  router = inject(Router);
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
+  
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -49,7 +49,10 @@ export class Login {
         this.router.navigate(['/home']);
         this.snackbar.open('Login successful!', 'Close', { duration: 3000 });
       },
-      error: () => {},
+      error: () => {
+        const ErrorMessage = 'Login failed. Please try again.';
+        this.snackbar.open(ErrorMessage, 'Close', { duration: 3000 });
+      },
     });
   }
 }

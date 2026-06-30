@@ -777,5 +777,12 @@
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 150;
+  /* sits behind popups (z-index 200+) but above page content */
+}
+
+.search-overlay {
+  z-index: 250;
+  /* sits behind search results (z-index 300) */
 }
 

@@ -14,23 +14,26 @@
         placeholder="Search people…"
         [(ngModel)]="searchQuery"
         (input)="onSearch()"
+        (focus)="searchQuery.trim() && onSearch()"
       />
     </div>
   </div>
 
   <!-- Search Results Dropdown -->
-    <div class="nav-center search-results" *ngIf="searchResults$ | async as results">
-      <div class="search-result-item" *ngIf="results.users.length === 0">
-        <p>No Search Results Found for "{{ searchQuery }}"</p>
-      </div>
-      <div class="search-result-item" *ngFor="let user of results.users">
-        <a [routerLink]="['/profile', user.username]" (click)="closeSearch()">
-          <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
-
-          {{ user.username }}</a
-        >
-      </div>
+  <div class="nav-center search-results" *ngIf="(searchResults$ | async) as results">
+    <div class="search-result-item" *ngIf="results.users.length === 0">
+      <p>No Search Results Found for "{{ searchQuery }}"</p>
     </div>
+    <div
+      class="search-result-item"
+      *ngFor="let user of results.users; trackBy: trackByUserId"
+    >
+      <a [routerLink]="['/profile', user.username]" (click)="closeSearch()">
+        <div class="pp-circle1">{{ user.username.charAt(0) | uppercase }}</div>
+        {{ user.username }}
+      </a>
+    </div>
+  </div>
 
   <div class="nav-right">
     <!-- Dashboard — admin only -->
@@ -66,7 +69,7 @@
         <div class="notif-list" *ngIf="notifs.length > 0; else emptyNotif">
           <div
             class="notif-item"
-            *ngFor="let n of notifs"
+            *ngFor="let n of notifs; trackBy: trackByNotificationId"
             [class.unread]="!n.isRead"
             (click)="markRead(n)"
           >
@@ -112,17 +115,17 @@
         <span class="pp-name">{{ user.firstName }} {{ user.lastName }}</span>
         <span class="pp-username">@{{ user.username | titlecase }}</span>
 
-        <div class="ps-stats" *ngIf="authService.currentUser$ | async as currentUser">
+        <div class="ps-stats">
           <div class="ps-stat">
-            <span class="ps-stat-val">{{ currentUser.posts }}</span>
+            <span class="ps-stat-val">{{ user.posts }}</span>
             <span class="ps-stat-lbl">Posts</span>
           </div>
           <div class="ps-stat">
-            <span class="ps-stat-val">{{ currentUser.followers }}</span>
+            <span class="ps-stat-val">{{ user.followers }}</span>
             <span class="ps-stat-lbl">Followers</span>
           </div>
           <div class="ps-stat">
-            <span class="ps-stat-val">{{ currentUser.following }}</span>
+            <span class="ps-stat-val">{{ user.following }}</span>
             <span class="ps-stat-lbl">Following</span>
           </div>
         </div>
@@ -136,4 +139,7 @@
 </header>
 
 <!-- Overlay to close notification popup -->
- <div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div> 
+<div class="notif-overlay" *ngIf="notifOpen" (click)="closeNotifications()"></div>
+
+<!-- Overlay to close search results popup -->
+<div class="notif-overlay search-overlay" *ngIf="isSearchOpen" (click)="closeSearch()"></div>

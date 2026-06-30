@@ -32,11 +32,11 @@ export class Register {
   errorMessage: string = '';
   showPassword: boolean = false;
   snackbar = inject(MatSnackBar);
+  fb =  inject(FormBuilder);
+  authService = inject(AuthService);
+  router = inject(Router);
 
   constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
   ) {
     this.registerForm = this.fb.group({
       username: [
@@ -93,11 +93,14 @@ export class Register {
     const userData = this.registerForm.value;
 
     this.authService.register(userData).subscribe({
-      next: (response) => {
+      next: () => {
         this.router.navigate(['/login']);
         this.snackbar.open('Registration successful! Please log in.', 'Close', { duration: 3000 });
       },
-      error: () => {},
+      error: (err) => {
+        const ErrorMessage = 'Registration failed. Please try again.';
+        this.snackbar.open(ErrorMessage, 'Close', { duration: 3000 });
+      },
     });
   }
 }
